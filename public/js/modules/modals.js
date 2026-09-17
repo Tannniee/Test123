@@ -1,8 +1,10 @@
 /**
  * Modals Management Module (Calculator, Compare, Price Alerts, API Diagnostics, Settings)
+ * 100% Sanitized & XSS-Protected
  */
 
 import { Clipboard } from './clipboard.js';
+import { Render } from './render.js';
 
 export const Modals = {
   // -----------------------------------------------------------------
@@ -12,7 +14,7 @@ export const Modals = {
     state.activeModalItem = item;
     const isPoe2 = state.currentGame === 'poe2';
 
-    // Populate Item Header
+    // Populate Item Header safely
     elements.calcModalIcon.src = item.icon || '';
     elements.calcModalName.textContent = item.name;
     elements.calcModalCategory.textContent = item.category;
@@ -50,7 +52,7 @@ export const Modals = {
       return match ? parseInt(match[0], 10) : 8;
     }
     if (item.category === 'Currency') {
-      const name = item.name.toLowerCase();
+      const name = (item.name || '').toLowerCase();
       if (name.includes('mirror') || name.includes('divine')) return 10;
       if (name.includes('chaos') || name.includes('exalted')) return 20;
       if (name.includes('chromatic') || name.includes('jeweller') || name.includes('alteration')) return 20;
@@ -103,7 +105,7 @@ export const Modals = {
   },
 
   // -----------------------------------------------------------------
-  // 2. Compare Modal
+  // 2. Compare Modal (Escaped & Sanitized)
   // -----------------------------------------------------------------
   openCompare(state, elements) {
     const items = Array.from(state.compareList.values());
@@ -123,9 +125,9 @@ export const Modals = {
             ${items.map(item => `
               <th class="compare-item-header">
                 <div class="compare-th-content">
-                  <img src="${item.icon}" alt="" class="compare-th-icon">
-                  <span class="compare-th-name">${item.name}</span>
-                  <button class="compare-remove-btn" data-action="remove-compare" data-id="${item.id}" title="Xóa">✕</button>
+                  <img src="${Render.escapeHtml(item.icon)}" alt="" class="compare-th-icon">
+                  <span class="compare-th-name">${Render.escapeHtml(item.name)}</span>
+                  <button class="compare-remove-btn" data-action="remove-compare" data-id="${Render.escapeHtml(item.id)}" title="Xóa">✕</button>
                 </div>
               </th>
             `).join('')}
@@ -134,7 +136,7 @@ export const Modals = {
         <tbody>
           <tr>
             <td class="compare-label-cell">Danh mục</td>
-            ${items.map(item => `<td><span class="item-category-tag">${item.category}</span></td>`).join('')}
+            ${items.map(item => `<td><span class="item-category-tag">${Render.escapeHtml(item.category)}</span></td>`).join('')}
           </tr>
           <tr>
             <td class="compare-label-cell">Giá quy đổi</td>
@@ -160,12 +162,7 @@ export const Modals = {
           </tr>
           <tr>
             <td class="compare-label-cell">Thanh khoản</td>
-            ${items.map(item => {
-              const vol = item.volume || 0;
-              if (vol >= 10000) return `<td><span class="liquidity-badge badge-high">High</span></td>`;
-              if (vol >= 1000) return `<td><span class="liquidity-badge badge-med">Med</span></td>`;
-              return `<td><span class="liquidity-badge badge-low">Low</span></td>`;
-            }).join('')}
+            ${items.map(item => `<td>${Render.renderLiquidityBadge(item.volume)}</td>`).join('')}
           </tr>
         </tbody>
       </table>
@@ -181,7 +178,7 @@ export const Modals = {
   },
 
   // -----------------------------------------------------------------
-  // 3. Price Alerts Modal
+  // 3. Price Alerts Modal (Escaped & Sanitized)
   // -----------------------------------------------------------------
   openAlerts(state) {
     const modal = document.getElementById('alertsModalOverlay');
@@ -211,15 +208,15 @@ export const Modals = {
     }
 
     listContainer.innerHTML = state.alerts.map(a => `
-      <div class="alert-item-card" data-id="${a.id}">
+      <div class="alert-item-card" data-id="${Render.escapeHtml(a.id)}">
         <div class="alert-info">
-          <span class="alert-item-name font-bold">${a.itemName}</span>
+          <span class="alert-item-name font-bold">${Render.escapeHtml(a.itemName)}</span>
           <span class="alert-rule">
             ${a.condition === 'above' ? 'Giá tăng vượt quá' : 'Giá giảm xuống dưới'}
-            <strong>${a.threshold} ${a.currency.toUpperCase()}</strong>
+            <strong>${Number(a.threshold).toLocaleString()} ${Render.escapeHtml(a.currency.toUpperCase())}</strong>
           </span>
         </div>
-        <button class="alert-delete-btn" data-action="delete-alert" data-id="${a.id}" title="Xóa cảnh báo">
+        <button class="alert-delete-btn" data-action="delete-alert" data-id="${Render.escapeHtml(a.id)}" title="Xóa cảnh báo">
           <i class="fa-solid fa-trash-can"></i>
         </button>
       </div>
@@ -227,7 +224,7 @@ export const Modals = {
   },
 
   checkPriceAlerts(items, state) {
-    if (!state.alerts || state.alerts.length === 0) return;
+    if (!state.alerts || state.alerts.length === 0 || !items || items.length === 0) return;
 
     for (const alert of state.alerts) {
       const match = items.find(i => i.name.toLowerCase() === alert.itemName.toLowerCase());
@@ -251,7 +248,7 @@ export const Modals = {
   },
 
   // -----------------------------------------------------------------
-  // 4. API Diagnostics Modal
+  // 4. API Diagnostics Modal (Sanitized & Multi-League)
   // -----------------------------------------------------------------
   openDiagnostics(statusData) {
     const modal = document.getElementById('diagnosticsModalOverlay');
@@ -261,8 +258,13 @@ export const Modals = {
     if (!content) return;
 
     const diag = statusData.diagnostics || {};
-    const p1Diag = Object.values(diag.poe1 || {});
-    const p2Diag = Object.values(diag.poe2 || {});
+    const activeLeagues = statusData.activeLeagues || {};
+
+    const p1League = activeLeagues.poe1 || 'Allflame';
+    const p2League = activeLeagues.poe2 || 'Forbidden Rites';
+
+    const p1Diag = Object.values(diag.poe1?.[p1League] || {});
+    const p2Diag = Object.values(diag.poe2?.[p2League] || {});
 
     let html = `
       <div class="diag-overview-cards">
@@ -272,15 +274,15 @@ export const Modals = {
         </div>
         <div class="diag-card">
           <div class="diag-card-title">Active Leagues</div>
-          <div class="diag-card-val">PoE1: ${statusData.activeLeagues?.poe1 || 'Allflame'} | PoE2: ${statusData.activeLeagues?.poe2 || 'Forbidden Rites'}</div>
+          <div class="diag-card-val">PoE1: ${Render.escapeHtml(p1League)} | PoE2: ${Render.escapeHtml(p2League)}</div>
         </div>
         <div class="diag-card">
           <div class="diag-card-title">Cơ chế tải ngầm</div>
-          <div class="diag-card-val">Priority: 30 phút | Rotation: 5 phút</div>
+          <div class="diag-card-val">Priority: 30 phút | Rotation: 5 phút | Leagues: 1 giờ</div>
         </div>
       </div>
 
-      <h4 class="diag-section-heading">PoE 1 Exchange Endpoints (${p1Diag.length})</h4>
+      <h4 class="diag-section-heading">PoE 1 Exchange Endpoints (${Render.escapeHtml(p1League)} - ${p1Diag.length})</h4>
       <table class="diag-table">
         <thead>
           <tr>
@@ -292,9 +294,10 @@ export const Modals = {
           </tr>
         </thead>
         <tbody>
+          ${p1Diag.length === 0 ? '<tr><td colspan="5" class="text-muted">Đang nạp dữ liệu...</td></tr>' : ''}
           ${p1Diag.map(d => `
             <tr>
-              <td><strong>${d.type}</strong></td>
+              <td><strong>${Render.escapeHtml(d.type)}</strong></td>
               <td><span class="status-pill ${d.httpCode === 200 ? 'pill-success' : 'pill-error'}">${d.httpCode}</span></td>
               <td>${d.latencyMs} ms</td>
               <td>${d.itemsCount}</td>
@@ -304,7 +307,7 @@ export const Modals = {
         </tbody>
       </table>
 
-      <h4 class="diag-section-heading mt-4">PoE 2 Exchange Endpoints (${p2Diag.length})</h4>
+      <h4 class="diag-section-heading mt-4">PoE 2 Exchange Endpoints (${Render.escapeHtml(p2League)} - ${p2Diag.length})</h4>
       <table class="diag-table">
         <thead>
           <tr>
@@ -316,9 +319,10 @@ export const Modals = {
           </tr>
         </thead>
         <tbody>
+          ${p2Diag.length === 0 ? '<tr><td colspan="5" class="text-muted">Đang nạp dữ liệu...</td></tr>' : ''}
           ${p2Diag.map(d => `
             <tr>
-              <td><strong>${d.type}</strong></td>
+              <td><strong>${Render.escapeHtml(d.type)}</strong></td>
               <td><span class="status-pill ${d.httpCode === 200 ? 'pill-success' : 'pill-error'}">${d.httpCode}</span></td>
               <td>${d.latencyMs} ms</td>
               <td>${d.itemsCount}</td>

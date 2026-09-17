@@ -9,6 +9,13 @@ export const Api = {
     return await res.json();
   },
 
+  async fetchCategories(game, league) {
+    const url = `/api/categories?game=${encodeURIComponent(game)}&league=${encodeURIComponent(league)}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  },
+
   async fetchItems(game, league) {
     const url = `/api/items?game=${encodeURIComponent(game)}&league=${encodeURIComponent(league)}`;
     const res = await fetch(url);
@@ -34,7 +41,10 @@ export const Api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ game, league, category })
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok) {
+      const errJson = await res.json().catch(() => ({}));
+      throw new Error(errJson.error || `HTTP ${res.status}`);
+    }
     return await res.json();
   }
 };

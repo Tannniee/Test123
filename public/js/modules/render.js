@@ -7,7 +7,7 @@ export const Render = {
    * Escape HTML to prevent injection
    */
   escapeHtml(str) {
-    if (!str) return '';
+    if (str === null || str === undefined) return '';
     return String(str)
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
@@ -53,12 +53,12 @@ export const Render = {
       return '<span class="liquidity-badge badge-zero" title="Ít dữ liệu giao dịch">No Vol</span>';
     }
     if (volume >= 10000) {
-      return '<span class="liquidity-badge badge-high" title="Thanh khoản cao (Volume 24h: ' + volume.toLocaleString() + ')">High</span>';
+      return `<span class="liquidity-badge badge-high" title="Thanh khoản cao (Volume 24h: ${volume.toLocaleString()})">High</span>`;
     }
     if (volume >= 1000) {
-      return '<span class="liquidity-badge badge-med" title="Thanh khoản trung bình (Volume 24h: ' + volume.toLocaleString() + ')">Med</span>';
+      return `<span class="liquidity-badge badge-med" title="Thanh khoản trung bình (Volume 24h: ${volume.toLocaleString()})">Med</span>`;
     }
-    return '<span class="liquidity-badge badge-low" title="Thanh khoản thấp (Volume 24h: ' + volume.toLocaleString() + ')">Low</span>';
+    return `<span class="liquidity-badge badge-low" title="Thanh khoản thấp (Volume 24h: ${volume.toLocaleString()})">Low</span>`;
   },
 
   /**
@@ -92,7 +92,7 @@ export const Render = {
   },
 
   /**
-   * Render Table Rows (Zero inline handlers)
+   * Render Table Rows (Zero inline handlers, Zero inline onerror)
    */
   renderTableRows(items, state) {
     if (!items || items.length === 0) {
@@ -116,6 +116,7 @@ export const Render = {
       const changeClass = change > 0 ? 'trend-up' : change < 0 ? 'trend-down' : 'trend-flat';
       const changeText = change > 0 ? `+${change.toFixed(1)}%` : `${change.toFixed(1)}%`;
       const volumeText = item.volume ? Number(item.volume).toLocaleString() : '-';
+      const iconUrl = item.icon || 'https://web.poecdn.com/image/Art/2DItems/Currency/CurrencyRerollRare.png';
 
       return `
         <tr class="item-table-row ${isComparing ? 'row-comparing' : ''}" data-id="${this.escapeHtml(item.id)}">
@@ -125,7 +126,7 @@ export const Render = {
           <td class="col-item" data-action="open-calc" data-id="${this.escapeHtml(item.id)}">
             <div class="item-identity-cell">
               <div class="item-thumb-wrapper">
-                <img src="${this.escapeHtml(item.icon)}" alt="" class="item-thumb" loading="lazy" onerror="this.src='https://web.poecdn.com/image/Art/2DItems/Currency/CurrencyRerollRare.png'">
+                <img src="${this.escapeHtml(iconUrl)}" alt="" class="item-thumb" loading="lazy">
               </div>
               <div class="item-meta-col">
                 <span class="item-name-link">${this.escapeHtml(item.name)}</span>
@@ -167,7 +168,7 @@ export const Render = {
   },
 
   /**
-   * Render Grid Cards (Zero inline handlers)
+   * Render Grid Cards (Zero inline handlers, Zero inline onerror)
    */
   renderGridCards(items, state) {
     if (!items || items.length === 0) {
@@ -186,6 +187,7 @@ export const Render = {
       const change = typeof item.change7d === 'number' ? item.change7d : 0;
       const changeClass = change > 0 ? 'trend-up' : change < 0 ? 'trend-down' : 'trend-flat';
       const changeText = change > 0 ? `+${change.toFixed(1)}%` : `${change.toFixed(1)}%`;
+      const iconUrl = item.icon || 'https://web.poecdn.com/image/Art/2DItems/Currency/CurrencyRerollRare.png';
 
       return `
         <div class="item-grid-card ${isComparing ? 'card-comparing' : ''}" data-id="${this.escapeHtml(item.id)}">
@@ -196,7 +198,7 @@ export const Render = {
           </div>
           <div class="card-body" data-action="open-calc" data-id="${this.escapeHtml(item.id)}">
             <div class="grid-item-thumb-wrapper">
-              <img src="${this.escapeHtml(item.icon)}" alt="" class="grid-item-thumb" loading="lazy" onerror="this.src='https://web.poecdn.com/image/Art/2DItems/Currency/CurrencyRerollRare.png'">
+              <img src="${this.escapeHtml(iconUrl)}" alt="" class="grid-item-thumb" loading="lazy">
             </div>
             <div class="grid-item-name">${this.escapeHtml(item.name)}</div>
             <div class="grid-item-price">

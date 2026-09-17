@@ -8,11 +8,18 @@
 
 - 🔄 **100% Faustus Currency Exchange Data**:
   - Chỉ lọc lấy tỷ giá giao dịch thực tế từ Faustus Exchange, loại bỏ hoàn toàn nhiễu từ Stash Tabs truyền thống.
-  - Phân loại tự động 11 vật phẩm **Catalysts** và 16 vật phẩm **Vaal** từ dữ liệu `Currency` gốc của API.
-  - Tự động nhận diện league hiện hành động qua API `https://poe.ninja/${game}/api/economy/leagues` (ví dụ: *Forbidden Rites* cho PoE 2).
+  - Phân loại tự động 11 vật phẩm **Catalysts** và 16 vật phẩm **Vaal** vào nhóm `Currency` gốc của API với metadata `sourceType` chuẩn xác, loại bỏ nguy cơ trùng lặp dữ liệu.
+  - Tự động nhận diện league hiện hành qua API `https://poe.ninja/${game}/api/economy/leagues` (ví dụ: *Forbidden Rites* cho PoE 2).
+  - **Non-Silent League Warming**: Chuyển sang league chưa có cache sẽ tự động kích hoạt nạp ngầm và hiển thị trạng thái `warming`, tuyệt đối không bao giờ âm thầm trả về Standard.
 
-- 🛡️ **Rate Validation & Anomaly Guard**:
+- 🗂️ **Data-Driven Category Registry & Seasonal Auto-Hiding**:
+  - Hệ thống Registry nhận diện toàn bộ các type hỗ trợ của PoE 1 (Djinn Coins, Astrolabes, Resonators, Ducats,...) và PoE 2 (Fragments, Uncut Gems, Essences, Soul Cores, Idols, Runes, Verisium, Omens, Catalysts, Liquid Emotions, Abyssal Bones).
+  - **Tự động ẩn/hiện danh mục theo mùa**: Danh mục theo mùa như *Ducats* tự động xuất hiện khi league hỗ trợ (Allflame) và tự động ẩn khỏi sidebar khi league không hỗ trợ (Standard).
+  - **Scheduler tự thích ứng**: Hàng đợi luân phiên Round-Robin tự động co giãn từ các categories thực sự khả dụng mà không phụ thuộc vào mảng batch tĩnh.
+
+- 🛡️ **Rate Validation & Anomaly Guard xuyên suốt Pipeline**:
   - Nếu tỷ giá từ API trả về `0`, `null`, `NaN` hoặc biến động bất thường (> 3x hoặc < 0.3x so với cache hiện tại), hệ thống tự động giữ lại tỷ giá tốt nhất đã biết (*last-known-good rate*) và gắn cờ cảnh báo `stale`.
+  - Tỷ giá đã qua Rate Guard được truyền trực tiếp vào quá trình tính toán giá trị của từng item (`item.divineValue`, `exaltedValue`, `chaosValue`), bảo đảm giá item, header và calculator luôn nhất quán 100%.
   - Tự động trích xuất tỷ giá Exalted / Divine động từ `core.rates.exalted` hoặc `exaltedLine.primaryValue`, tuyệt đối không dùng số cố định (*hardcoded*).
 
 - ⏱️ **Cơ chế Cache quay vòng & Retry với Exponential Backoff**:

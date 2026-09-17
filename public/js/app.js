@@ -1,6 +1,6 @@
 /**
- * PoE Quick Price Checker - Modular Orchestrator
- * Pure Event Delegation, Zero Inline Handlers
+ * PoE Quick Price Checker v1.0.0 - Modular Orchestrator
+ * Data-Driven Categories, Pure Event Delegation, Zero Inline Handlers
  */
 
 import { state } from './modules/state.js';
@@ -10,38 +10,7 @@ import { Render } from './modules/render.js';
 import { Modals } from './modules/modals.js';
 import { Clipboard } from './modules/clipboard.js';
 
-// Category Definitions
-const CATEGORY_CONFIG = {
-  poe1: [
-    { id: 'Currency', label: 'Currency', iconClass: 'currency-ico' },
-    { id: 'Fragments', label: 'Fragments', iconClass: 'fragment-ico' },
-    { id: 'Divination Cards', label: 'Divination Cards', iconClass: 'card-ico' },
-    { id: 'Scarabs', label: 'Scarabs', iconClass: 'scarab-ico' },
-    { id: 'Essences', label: 'Essences', iconClass: 'essence-ico' },
-    { id: 'Fossils', label: 'Fossils', iconClass: 'fossil-ico' },
-    { id: 'Oils', label: 'Oils', iconClass: 'oil-ico' },
-    { id: 'Catalysts', label: 'Catalysts', iconClass: 'catalyst-ico' },
-    { id: 'Delirium Orbs', label: 'Delirium Orbs', iconClass: 'delirium-ico' },
-    { id: 'Tattoos', label: 'Tattoos', iconClass: 'tattoo-ico' },
-    { id: 'Omens', label: 'Omens', iconClass: 'omen-ico' },
-    { id: 'Artifacts', label: 'Artifacts', iconClass: 'artifact-ico' },
-    { id: 'Allflame Embers', label: 'Allflame Embers', iconClass: 'allflame-ico' },
-    { id: 'Runegrafts', label: 'Runegrafts', iconClass: 'runegraft-ico' },
-    { id: 'Ducats', label: 'Ducats', iconClass: 'ducat-ico' },
-    { id: 'Enshrouding Crystals', label: 'Enshrouding Crystals', iconClass: 'crystal-ico' }
-  ],
-  poe2: [
-    { id: 'Currency', label: 'Currency', iconClass: 'poe2-currency-ico' },
-    { id: 'Ritual', label: 'Ritual', iconClass: 'poe2-ritual-ico' },
-    { id: 'Breach', label: 'Breach', iconClass: 'poe2-breach-ico' },
-    { id: 'Delirium', label: 'Delirium', iconClass: 'poe2-delirium-ico' },
-    { id: 'Abyss', label: 'Abyss', iconClass: 'poe2-abyss-ico' },
-    { id: 'Expedition', label: 'Expedition', iconClass: 'poe2-expedition-ico' },
-    { id: 'Vaal', label: 'Vaal Infusers', iconClass: 'poe2-vaal-ico' }
-  ]
-};
-
-// DOM Cache
+// DOM Elements Cache
 const dom = {};
 
 function initDom() {
@@ -105,28 +74,26 @@ function initDom() {
   dom.convChaosInput = document.getElementById('convChaosInput');
   dom.convDivineInput = document.getElementById('convDivineInput');
   dom.convPrimarySym = document.getElementById('convPrimarySym');
-
-  // In-game Tooltip
-  dom.itemTooltip = document.getElementById('itemTooltip');
 }
 
+// Current categories available for the active game+league
+let currentAvailableCategories = [];
+let warmingPollTimer = null;
+
 // ==========================================================================
-// Data Initialization & Leagues
+// Initialization & League Boot
 // ==========================================================================
 async function init() {
   initDom();
   bindEvents();
 
-  // Load dynamic leagues
+  // 1. Fetch dynamic leagues list
   await loadLeagues();
 
-  // Load initial data
-  await loadData();
+  // 2. Fetch data-driven categories and items
+  await loadCategoriesAndData();
 
-  // Check Price Alerts
-  Modals.checkPriceAlerts(state.items, state);
-
-  // Setup In-game Paste scanner
+  // 3. Setup In-Game Paste scanner
   Clipboard.initPasteListener((parsed) => {
     dom.searchInput.value = parsed.searchQuery;
     dom.clearSearchBtn.classList.remove('hidden');
@@ -142,7 +109,7 @@ async function init() {
     }
   });
 
-  // Background status poll every 60s
+  // 4. Background status poll
   setInterval(updateStatusUI, 60000);
 }
 
@@ -180,29 +147,85 @@ function populateLeagueSelect() {
 }
 
 // ==========================================================================
-// Data Loading & Filtering
+// Data-Driven Categories & League Data Loading
 // ==========================================================================
-async function loadData() {
-  dom.resultsCount.textContent = 'Đang tải dữ liệu cache...';
+async function loadCategoriesAndData() {
+  if (warmingPollTimer) {
+    clearInterval(warmingPollTimer);
+    warmingPollTimer = null;
+  }
+
+  await loadCategories();
+  await loadData();
+}
+
+async function loadCategories() {
   try {
-    const data = await Api.fetchItems(state.currentGame, state.currentLeague);
-    state.items = data.items || [];
-    state.rates = {
-      divinePriceInChaos: data.divinePriceInChaos || 0,
-      mirrorPriceInChaos: data.mirrorPriceInChaos || 0,
-      rawRates: data.rates || {}
-    };
-    state.updatedAt = data.updatedAt;
+    const res = await Api.fetchCategories(state.currentGame, state.currentLeague);
+    currentAvailableCategories = res.categories || [];
+
+    // Check if activeCategory is still available in this league
+    const stillValid = currentAvailableCategories.some(c => c.label === state.activeCategory || c.type === state.activeCategory);
+    if (!stillValid && currentAvailableCategories.length > 0) {
+      state.activeCategory = currentAvailableCategories[0].label;
+    }
 
     renderSidebar();
-    updateHeaderRates();
-    updateStatusUI();
-    filterAndRender();
+    dom.breadcrumbCategory.textContent = state.activeCategory;
+    dom.currentCategoryTitle.textContent = state.activeCategory;
   } catch (err) {
-    console.error('Failed to load data:', err);
+    console.warn('Failed to fetch categories:', err);
+  }
+}
+
+async function loadData() {
+  dom.resultsCount.textContent = `Đang nạp dữ liệu ${state.currentLeague}...`;
+  try {
+    const data = await Api.fetchItems(state.currentGame, state.currentLeague);
+
+    if (data.status === 'warming') {
+      dom.resultsCount.textContent = data.message || `Đang tải dữ liệu cache cho league "${state.currentLeague}"...`;
+      state.items = [];
+      filterAndRender();
+
+      // Poll every 2.5s until cache is warm
+      if (!warmingPollTimer) {
+        warmingPollTimer = setInterval(async () => {
+          const pollData = await Api.fetchItems(state.currentGame, state.currentLeague);
+          if (pollData.status === 'ready') {
+            clearInterval(warmingPollTimer);
+            warmingPollTimer = null;
+            applyLoadedData(pollData);
+          }
+        }, 2500);
+      }
+      return;
+    }
+
+    applyLoadedData(data);
+  } catch (err) {
+    console.error('Failed to load items:', err);
     Clipboard.showToast('Lỗi tải dữ liệu cache', 'error');
     dom.resultsCount.textContent = 'Không thể tải cache.';
   }
+}
+
+function applyLoadedData(data) {
+  state.items = data.items || [];
+  state.rates = {
+    divinePriceInChaos: data.divinePriceInChaos || 0,
+    mirrorPriceInChaos: data.mirrorPriceInChaos || 0,
+    rawRates: data.rates || {}
+  };
+  state.updatedAt = data.updatedAt;
+
+  renderSidebar();
+  updateHeaderRates();
+  updateStatusUI();
+  filterAndRender();
+
+  // Check Price Alerts after cache loaded
+  Modals.checkPriceAlerts(state.items, state);
 }
 
 function filterAndRender() {
@@ -216,7 +239,7 @@ function filterAndRender() {
     game: state.currentGame
   });
 
-  // Apply column sorting (if not searching by score)
+  // Apply column sorting (if not searching with relevance score)
   if (!state.searchQuery.trim()) {
     applySort(state.filteredItems);
   }
@@ -272,17 +295,16 @@ function renderCurrentView() {
 }
 
 // ==========================================================================
-// UI Updates & Sidebar
+// UI Updates & Dynamic Sidebar
 // ==========================================================================
 function renderSidebar() {
-  const cats = CATEGORY_CONFIG[state.currentGame] || [];
   dom.sidebarNav.innerHTML = '';
 
-  for (const cat of cats) {
-    const count = state.items.filter(i => i.category === cat.id).length;
+  for (const cat of currentAvailableCategories) {
+    const count = state.items.filter(i => i.category === cat.label || i.sourceType === cat.type).length;
     const btn = document.createElement('button');
-    btn.className = `nav-item ${state.activeCategory === cat.id ? 'active' : ''}`;
-    btn.dataset.category = cat.id;
+    btn.className = `nav-item ${state.activeCategory === cat.label ? 'active' : ''}`;
+    btn.dataset.category = cat.label;
 
     btn.innerHTML = `
       <div class="nav-item-left">
@@ -348,6 +370,13 @@ function updateCompareBadge() {
 // Event Delegation Handlers (Pure & Safe)
 // ==========================================================================
 function bindEvents() {
+  // Global Image Error Fallback (Safe, zero inline onerror)
+  document.body.addEventListener('error', (e) => {
+    if (e.target.tagName === 'IMG' && (e.target.classList.contains('item-thumb') || e.target.classList.contains('grid-item-thumb'))) {
+      e.target.src = 'https://web.poecdn.com/image/Art/2DItems/Currency/CurrencyRerollRare.png';
+    }
+  }, true);
+
   // Game Selector
   dom.btnPoe1.addEventListener('click', () => switchGame('poe1'));
   dom.btnPoe2.addEventListener('click', () => switchGame('poe2'));
@@ -355,7 +384,7 @@ function bindEvents() {
   // League Selector
   dom.leagueSelect.addEventListener('change', (e) => {
     state.currentLeague = e.target.value;
-    loadData();
+    loadCategoriesAndData();
   });
 
   // Sidebar Category Delegation
@@ -469,26 +498,35 @@ function bindEvents() {
     Clipboard.showToast(`Đang làm mới danh mục "${state.activeCategory}"...`);
     try {
       await Api.refreshCategory(state.currentGame, state.currentLeague, state.activeCategory);
-      await loadData();
+      await loadCategoriesAndData();
       Clipboard.showToast(`Đã làm mới "${state.activeCategory}" thành công!`, 'success');
     } catch (err) {
-      Clipboard.showToast('Lỗi làm mới danh mục', 'error');
+      Clipboard.showToast(`Lỗi: ${err.message}`, 'error');
     } finally {
       dom.btnRefreshCategory.classList.remove('fa-spin');
     }
   });
 
-  // Full Refresh Button
+  // Full Refresh with Status Polling (No blind setTimeout!)
   dom.btnRefreshAll.addEventListener('click', async () => {
     dom.btnRefreshAll.classList.add('fa-spin');
-    Clipboard.showToast('Bắt đầu đồng bộ cache từ PoE Ninja...');
+    Clipboard.showToast('Bắt đầu đồng bộ toàn bộ cache...');
     try {
       await Api.refreshAll();
-      setTimeout(loadData, 1500);
+      
+      // Poll /api/status until isRefreshing becomes false
+      const pollInterval = setInterval(async () => {
+        const st = await Api.fetchStatus();
+        if (!st.isRefreshing) {
+          clearInterval(pollInterval);
+          dom.btnRefreshAll.classList.remove('fa-spin');
+          await loadCategoriesAndData();
+          Clipboard.showToast('Đã hoàn tất đồng bộ toàn bộ cache!', 'success');
+        }
+      }, 1500);
     } catch (err) {
+      dom.btnRefreshAll.classList.remove('fa-spin');
       Clipboard.showToast('Không thể kích hoạt làm mới cache', 'error');
-    } finally {
-      setTimeout(() => dom.btnRefreshAll.classList.remove('fa-spin'), 1500);
     }
   });
 
@@ -599,7 +637,7 @@ function bindEvents() {
       dom.btnCopyCalcWhisper.innerHTML = '<i class="fa-solid fa-check"></i> Đã sao chép!';
       dom.btnCopyCalcWhisper.classList.add('copied');
       setTimeout(() => {
-        dom.btnCopyCalcWhisper.innerHTML = '<i class="fa-solid fa-copy"></i> Sao chép';
+        dom.btnCopyCalcWhisper.innerHTML = '<i class="fa-solid fa-copy"></i> Sao chép whisper';
         dom.btnCopyCalcWhisper.classList.remove('copied');
       }, 1800);
       Clipboard.showToast(`Đã sao chép tin nhắn whisper!`, 'success');
@@ -680,7 +718,7 @@ function handleItemAction(e) {
   }
 }
 
-function switchGame(game) {
+async function switchGame(game) {
   if (state.currentGame === game) return;
   state.currentGame = game;
   state.activeCategory = 'Currency';
@@ -689,10 +727,7 @@ function switchGame(game) {
   dom.btnPoe2.classList.toggle('active', game === 'poe2');
 
   populateLeagueSelect();
-  dom.breadcrumbCategory.textContent = 'Currency';
-  dom.currentCategoryTitle.textContent = 'Currency';
-
-  loadData();
+  await loadCategoriesAndData();
   Clipboard.showToast(`Chuyển sang ${game.toUpperCase()}`);
 }
 

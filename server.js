@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const cacheManager = require('./services/cacheManager');
+const CategoryRegistry = require('./services/categoryRegistry');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -10,63 +11,42 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// API: Check system status, diagnostics and cache info
+// API: System status, diagnostics and cache info
 app.get('/api/status', (req, res) => {
   res.json(cacheManager.getStatus());
 });
 
-// API: Get items for a game and league
-app.get('/api/items', (req, res) => {
-  const game = req.query.game === 'poe2' ? 'poe2' : 'poe1';
-  let league = req.query.league || cacheManager.getActiveLeague(game);
-
-  let data = cacheManager.getData(game, league);
-  
-  // Fallback to Standard or first available if requested league is not cached
-  if (!data && league !== 'Standard') {
-    data = cacheManager.getData(game, 'Standard');
-    league = 'Standard';
+// API: Dynamic available categories for a specific game and league
+app.get('/api/categories', (req, res) => {
+  const game = (req.query.game || 'poe1').toLowerCase();
+  if (game !== 'poe1' && game !== 'poe2') {
+    return res.status(400).json({ error: 'Invalid game parameter. Allowed values: poe1, poe2.' });
   }
 
-  if (!data) {
-    return res.json({
-      game,
-      league,
-      updatedAt: null,
-      divinePriceInChaos: 0,
-      mirrorPriceInChaos: 0,
-      rates: {},
-      count: 0,
-      items: [],
-      snapshots: [],
-      message: 'Data is being prepared or not yet cached.'
-    });
-  }
-
+  const league = req.query.league || cacheManager.getActiveLeague(game);
+  const categories = cacheManager.getAvailableCategories(game, league);
   res.json({
-    game: data.game,
-    league: data.league,
-    updatedAt: data.updatedAt,
-    divinePriceInChaos: data.divinePriceInChaos,
-    mirrorPriceInChaos: data.mirrorPriceInChaos,
-    rates: data.rates || {},
-    count: data.count,
-    items: data.items,
-    snapshots: data.snapshots || []
+    game,
+    league,
+    categories
   });
+});
+
+// API: Get items for a game and league (with non-silent warming status)
+app.get('/api/items', (req, res) => {
+  const game = (req.query.game || 'poe1').toLowerCase();
+  if (game !== 'poe1' && game !== 'poe2') {
+    return res.status(400).json({ error: 'Invalid game parameter. Allowed values: poe1, poe2.' });
+  }
+
+  const league = req.query.league || cacheManager.getActiveLeague(game);
+  const data = cacheManager.getData(game, league);
+
+  res.json(data);
 });
 
 // API: Trigger full refresh manually
 app.post('/api/refresh', async (req, res) => {
-  if (cacheManager.isRefreshing) {
-    return res.status(409).json({
-      success: false,
-      message: 'A refresh is already currently running.',
-      status: cacheManager.refreshProgress
-    });
-  }
-
-  // Run in background so user doesn't wait
   cacheManager.refreshAll().catch(err => {
     console.error('[Server] Manual refresh error:', err);
   });
@@ -74,35 +54,46 @@ app.post('/api/refresh', async (req, res) => {
   res.json({
     success: true,
     message: 'Full cache refresh started in background.',
-    intervalMinutes: 30
+    activeJobs: Array.from(cacheManager.activeJobs)
   });
 });
 
-// API: Refresh single category on-demand
+// API: Refresh single category on-demand with strict whitelist validation
 app.post('/api/refresh-category', async (req, res) => {
-  const { game, league, category } = req.body;
-  if (!category) {
-    return res.status(400).json({ success: false, message: 'Category is required.' });
+  const { game = 'poe1', league, category } = req.body;
+
+  if (game !== 'poe1' && game !== 'poe2') {
+    return res.status(400).json({ error: 'Invalid game parameter. Must be "poe1" or "poe2".' });
   }
 
-  const targetGame = game === 'poe2' ? 'poe2' : 'poe1';
-  const targetLeague = league || cacheManager.getActiveLeague(targetGame);
+  if (!category || typeof category !== 'string') {
+    return res.status(400).json({ error: 'Category parameter is required and must be a string.' });
+  }
+
+  if (!CategoryRegistry.isValid(game, category)) {
+    return res.status(400).json({ 
+      error: `Unknown category "${category}" for ${game}.`,
+      validCategories: CategoryRegistry.getRegistry(game).map(c => c.type)
+    });
+  }
+
+  const targetLeague = league || cacheManager.getActiveLeague(game);
 
   try {
-    const updated = await cacheManager.refreshSingleCategory(targetGame, targetLeague, category);
+    const updated = await cacheManager.refreshSingleCategory(game, targetLeague, category);
     res.json({
       success: true,
-      message: `Category "${category}" refreshed successfully for ${targetGame.toUpperCase()} - ${targetLeague}.`,
+      message: `Category "${category}" refreshed successfully for ${game.toUpperCase()} - ${targetLeague}.`,
       itemCount: updated?.count || 0,
       rates: updated?.rates || {}
     });
   } catch (err) {
     console.error(`[Server] Error refreshing category ${category}:`, err.message);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
 
-// API: Dynamic available leagues
+// API: Dynamic available leagues list
 app.get('/api/leagues', (req, res) => {
   res.json(cacheManager.getLeagues());
 });
@@ -112,22 +103,11 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Initial boot check: if cache is empty, start sync
+// Boot server
 app.listen(PORT, async () => {
   console.log(`=======================================================`);
-  console.log(`  PoE Quick Price Checker is running!`);
+  console.log(`  PoE Quick Price Checker v1.0.0 is running!`);
   console.log(`  Local URL: http://localhost:${PORT}`);
-  console.log(`  Cache refresh interval: Every 30 minutes`);
+  console.log(`  Data Architecture: Data-Driven Dynamic Categories`);
   console.log(`=======================================================`);
-
-  // Check if any cache already loaded
-  const status = cacheManager.getStatus();
-  const hasItems = Object.values(status.summary.poe1).some(l => l.count > 0);
-
-  if (!hasItems) {
-    console.log('[Server] No local cache found. Initiating first sync from PoE Ninja in background...');
-    cacheManager.refreshAll().catch(err => console.error('[Server] Initial sync error:', err));
-  } else {
-    console.log('[Server] Local cache ready! Ready for instant search.');
-  }
 });

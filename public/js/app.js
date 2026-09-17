@@ -74,6 +74,19 @@ function initDom() {
   dom.convChaosInput = document.getElementById('convChaosInput');
   dom.convDivineInput = document.getElementById('convDivineInput');
   dom.convPrimarySym = document.getElementById('convPrimarySym');
+
+  // PoE In-Game Floating Tooltip
+  dom.poeFloatingTooltip = document.getElementById('poeFloatingTooltip');
+  dom.tooltipTitle = document.getElementById('tooltipTitle');
+  dom.tooltipBasetype = document.getElementById('tooltipBasetype');
+  dom.tooltipMagic = document.getElementById('tooltipMagic');
+  dom.tooltipInstructions = document.getElementById('tooltipInstructions');
+  dom.tooltipExplicits = document.getElementById('tooltipExplicits');
+  dom.tooltipDivider = document.getElementById('tooltipDivider');
+  dom.tooltipFlavour = document.getElementById('tooltipFlavour');
+  dom.tooltipFooter = document.getElementById('tooltipFooter');
+  dom.tooltipIcon = document.getElementById('tooltipIcon');
+  dom.tooltipPinBtn = document.getElementById('tooltipPinBtn');
 }
 
 // Current categories available for the active game+league
@@ -312,15 +325,88 @@ function renderSidebar() {
     btn.dataset.category = cat.label;
 
     btn.innerHTML = `
-      <div class="nav-item-left">
-        <span class="category-icon ${cat.iconClass}"></span>
-        <span class="category-label">${cat.label}</span>
-      </div>
-      <span class="category-count">${count}</span>
+      <span class="nav-icon ${cat.iconClass}"></span>
+      <span class="nav-label">${Render.escapeHtml(cat.label)}</span>
+      <span class="nav-badge">${count}</span>
     `;
 
     dom.sidebarNav.appendChild(btn);
   }
+}
+
+// ==========================================================================
+// PoE In-game Floating Tooltip Logic
+// ==========================================================================
+let isTooltipPinned = false;
+
+function showItemTooltip(e, item) {
+  if (!dom.poeFloatingTooltip || isTooltipPinned) return;
+  if (typeof window === 'undefined' || !window.PoeItemDescriptions) return;
+
+  const tt = window.PoeItemDescriptions.getTooltip(item);
+  if (!tt) return;
+
+  dom.tooltipTitle.textContent = tt.title || item.name;
+  dom.tooltipTitle.className = `tooltip-title rarity-${tt.rarity || 'currency'}`;
+
+  dom.tooltipBasetype.textContent = tt.baseType || tt.category || '';
+  dom.tooltipMagic.textContent = tt.magicLine || '';
+  dom.tooltipInstructions.textContent = tt.instructions || '';
+
+  if (tt.explicits) {
+    dom.tooltipExplicits.textContent = tt.explicits;
+    dom.tooltipExplicits.classList.remove('hidden');
+  } else {
+    dom.tooltipExplicits.textContent = '';
+    dom.tooltipExplicits.classList.add('hidden');
+  }
+
+  if (tt.flavour) {
+    dom.tooltipDivider.classList.remove('hidden');
+    dom.tooltipFlavour.textContent = tt.flavour;
+    dom.tooltipFlavour.classList.remove('hidden');
+  } else {
+    dom.tooltipDivider.classList.add('hidden');
+    dom.tooltipFlavour.classList.add('hidden');
+  }
+
+  const iconSrc = tt.icon || item.icon;
+  if (iconSrc) {
+    dom.tooltipIcon.src = iconSrc;
+    dom.tooltipFooter.classList.remove('hidden');
+  } else {
+    dom.tooltipFooter.classList.add('hidden');
+  }
+
+  positionTooltip(e);
+  dom.poeFloatingTooltip.classList.remove('hidden');
+}
+
+function positionTooltip(e) {
+  if (!dom.poeFloatingTooltip || isTooltipPinned) return;
+  const offset = 18;
+  let x = e.clientX + offset;
+  let y = e.clientY + offset;
+
+  const ttRect = dom.poeFloatingTooltip.getBoundingClientRect();
+  const w = ttRect.width || 320;
+  const h = ttRect.height || 220;
+
+  // Prevent overflowing viewport bounds
+  if (x + w > window.innerWidth - 12) {
+    x = Math.max(12, e.clientX - w - 14);
+  }
+  if (y + h > window.innerHeight - 12) {
+    y = Math.max(12, window.innerHeight - h - 14);
+  }
+
+  dom.poeFloatingTooltip.style.left = `${x}px`;
+  dom.poeFloatingTooltip.style.top = `${y}px`;
+}
+
+function hideItemTooltip() {
+  if (!dom.poeFloatingTooltip || isTooltipPinned) return;
+  dom.poeFloatingTooltip.classList.add('hidden');
 }
 
 function updateHeaderRates() {
@@ -464,9 +550,12 @@ function bindEvents() {
     }
 
     dom.sortHeaders.forEach(h => {
-      h.classList.remove('sorted-asc', 'sorted-desc');
+      h.classList.remove('sorted-asc', 'sorted-desc', 'sorted');
+      const arrow = h.querySelector('.sort-indicator, .sort-arrow');
+      if (arrow) arrow.textContent = '';
       if (h.dataset.sort === state.sortColumn) {
-        h.classList.add(`sorted-${state.sortDirection}`);
+        h.classList.add('sorted', `sorted-${state.sortDirection}`);
+        if (arrow) arrow.textContent = state.sortDirection === 'desc' ? '▼' : '▲';
       }
     });
 
@@ -477,6 +566,70 @@ function bindEvents() {
   // Table Body Delegation
   dom.itemsTableBody.addEventListener('click', handleItemAction);
   dom.itemsGrid.addEventListener('click', handleItemAction);
+
+  // In-Game Floating Tooltip Event Delegation
+  const handleTooltipHover = (e) => {
+    const el = e.target.closest('[data-tooltip-id]');
+    if (el) {
+      const item = state.items.find(i => i.id === el.dataset.tooltipId);
+      if (item) showItemTooltip(e, item);
+    }
+  };
+
+  dom.tableView.addEventListener('mouseover', handleTooltipHover);
+  dom.tableView.addEventListener('mousemove', (e) => {
+    if (!isTooltipPinned && dom.poeFloatingTooltip && !dom.poeFloatingTooltip.classList.contains('hidden')) {
+      positionTooltip(e);
+    }
+  });
+  dom.tableView.addEventListener('mouseout', (e) => {
+    const el = e.target.closest('[data-tooltip-id]');
+    if (el && (!e.relatedTarget || !el.contains(e.relatedTarget))) {
+      hideItemTooltip();
+    }
+  });
+
+  dom.gridView.addEventListener('mouseover', handleTooltipHover);
+  dom.gridView.addEventListener('mousemove', (e) => {
+    if (!isTooltipPinned && dom.poeFloatingTooltip && !dom.poeFloatingTooltip.classList.contains('hidden')) {
+      positionTooltip(e);
+    }
+  });
+  dom.gridView.addEventListener('mouseout', (e) => {
+    const el = e.target.closest('[data-tooltip-id]');
+    if (el && (!e.relatedTarget || !el.contains(e.relatedTarget))) {
+      hideItemTooltip();
+    }
+  });
+
+  // Tooltip Pin Toggle
+  dom.tooltipPinBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    isTooltipPinned = !isTooltipPinned;
+    if (isTooltipPinned) {
+      dom.poeFloatingTooltip.classList.add('pinned');
+      dom.tooltipPinBtn.textContent = '🔒';
+      dom.tooltipPinBtn.title = 'Bỏ ghim tooltip';
+    } else {
+      dom.poeFloatingTooltip.classList.remove('pinned');
+      dom.tooltipPinBtn.textContent = '📌';
+      dom.tooltipPinBtn.title = 'Ghim tooltip';
+      hideItemTooltip();
+    }
+  });
+
+  // Hide pinned tooltip when clicking anywhere outside
+  document.addEventListener('click', (e) => {
+    if (isTooltipPinned && dom.poeFloatingTooltip && !dom.poeFloatingTooltip.contains(e.target)) {
+      isTooltipPinned = false;
+      dom.poeFloatingTooltip.classList.remove('pinned');
+      if (dom.tooltipPinBtn) {
+        dom.tooltipPinBtn.textContent = '📌';
+        dom.tooltipPinBtn.title = 'Ghim tooltip';
+      }
+      hideItemTooltip();
+    }
+  });
 
   // Pagination Delegation
   dom.pagination.addEventListener('click', (e) => {

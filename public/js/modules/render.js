@@ -62,21 +62,48 @@ export const Render = {
   },
 
   /**
-   * Format Value Cell
+   * Currency Sprite URLs
+   */
+  ICONS: {
+    chaos: 'https://web.poecdn.com/gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvQ3VycmVuY3lSZXJvbGxSYXJlIiwic2NhbGUiOjF9XQ/46a2347805/CurrencyRerollRare.png',
+    divine: 'https://web.poecdn.com/gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvQ3VycmVuY3lNb2RWYWx1ZXMiLCJzY2FsZSI6MX1d/ec48896769/CurrencyModValues.png',
+    exalted: 'https://web.poecdn.com/gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvQ3VycmVuY3lBZGRNb2RUb1JhcmUiLCJzY2FsZSI6MX1d/680327f32d/CurrencyAddModToRare.png',
+    mirror: 'https://web.poecdn.com/gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvQ3VycmVuY3lEdXBsaWNhdGUiLCJzY2FsZSI6MX1d/8d7fea29d1/CurrencyDuplicate.png'
+  },
+
+  /**
+   * Format Value Cell in Faustus Exchange Style
    */
   formatValueHtml(item, game) {
+    const itemIcon = item.icon || this.ICONS.chaos;
+
     if (game === 'poe2') {
       const divVal = typeof item.divineValue === 'number' ? item.divineValue : 0;
       const exVal = typeof item.exaltedValue === 'number' ? item.exaltedValue : 0;
 
       if (divVal >= 1) {
+        const divFormatted = divVal >= 1000 ? (divVal / 1000).toFixed(1) + 'k' : divVal.toLocaleString();
         return `
-          <div class="val-primary">${divVal.toLocaleString()} <span class="val-sym div-sym">Div</span></div>
+          <div class="exchange-pair">
+            <span class="val-primary">${divFormatted}</span>
+            <img src="${this.ICONS.divine}" class="mini-ico" alt="Div" title="Divine Orb" />
+            <span class="exchange-arrow">⇆</span>
+            <span class="val-base">1.0</span>
+            <img src="${this.escapeHtml(itemIcon)}" class="mini-ico" alt="" />
+          </div>
           ${exVal > 0 ? `<div class="val-sub">≈ ${exVal.toLocaleString()} Ex</div>` : ''}
         `;
       }
+
+      const exFormatted = exVal >= 1000 ? (exVal / 1000).toFixed(1) + 'k' : (exVal % 1 === 0 ? exVal.toLocaleString() : exVal.toFixed(1));
       return `
-        <div class="val-primary">${exVal.toLocaleString()} <span class="val-sym ex-sym">Ex</span></div>
+        <div class="exchange-pair">
+          <span class="val-primary">${exFormatted}</span>
+          <img src="${this.ICONS.exalted}" class="mini-ico" alt="Ex" title="Exalted Orb" />
+          <span class="exchange-arrow">⇆</span>
+          <span class="val-base">1.0</span>
+          <img src="${this.escapeHtml(itemIcon)}" class="mini-ico" alt="" />
+        </div>
         ${divVal > 0 ? `<div class="val-sub">≈ ${divVal.toFixed(3)} Div</div>` : ''}
       `;
     }
@@ -85,9 +112,50 @@ export const Render = {
     const chaosVal = typeof item.chaosValue === 'number' ? item.chaosValue : 0;
     const divVal = typeof item.divineValue === 'number' ? item.divineValue : 0;
 
+    if (divVal >= 1) {
+      const divFormatted = divVal >= 1000 ? (divVal / 1000).toFixed(1) + 'k' : divVal.toLocaleString();
+      return `
+        <div class="exchange-pair">
+          <span class="val-primary">${divFormatted}</span>
+          <img src="${this.ICONS.divine}" class="mini-ico" alt="Div" title="Divine Orb" />
+          <span class="exchange-arrow">⇆</span>
+          <span class="val-base">1.0</span>
+          <img src="${this.escapeHtml(itemIcon)}" class="mini-ico" alt="" />
+        </div>
+        ${chaosVal > 0 ? `<div class="val-sub">≈ ${chaosVal.toLocaleString()} C</div>` : ''}
+      `;
+    }
+
+    const chaosFormatted = chaosVal >= 1000 ? (chaosVal / 1000).toFixed(1) + 'k' : (chaosVal % 1 === 0 ? chaosVal.toLocaleString() : chaosVal.toFixed(1));
     return `
-      <div class="val-primary">${chaosVal.toLocaleString()} <span class="val-sym chaos-sym">C</span></div>
-      ${divVal > 0 ? `<div class="val-sub">≈ ${divVal} Div</div>` : ''}
+      <div class="exchange-pair">
+        <span class="val-primary">${chaosFormatted}</span>
+        <img src="${this.ICONS.chaos}" class="mini-ico" alt="C" title="Chaos Orb" />
+        <span class="exchange-arrow">⇆</span>
+        <span class="val-base">1.0</span>
+        <img src="${this.escapeHtml(itemIcon)}" class="mini-ico" alt="" />
+      </div>
+      ${divVal > 0 ? `<div class="val-sub">≈ ${divVal.toFixed(2)} Div</div>` : ''}
+    `;
+  },
+
+  /**
+   * Format Volume Cell
+   */
+  formatVolumeHtml(item, game) {
+    const vol = typeof item.volume === 'number' ? item.volume : 0;
+    if (vol <= 0) return '<span class="volume-num text-muted">-</span>';
+
+    const formatted = vol >= 1000000 ? (vol / 1000000).toFixed(1) + 'M' : vol >= 1000 ? (vol / 1000).toFixed(1) + 'k' : vol.toLocaleString();
+    const isPoe2 = game === 'poe2';
+    const currIcon = isPoe2 ? (item.divineValue >= 1 ? this.ICONS.divine : this.ICONS.exalted) : (item.divineValue >= 1 ? this.ICONS.divine : this.ICONS.chaos);
+
+    return `
+      <div class="volume-display">
+        <span class="volume-num">${formatted}</span>
+        <img src="${currIcon}" class="mini-ico" alt="" />
+        ${this.renderLiquidityBadge(vol)}
+      </div>
     `;
   },
 
@@ -113,51 +181,55 @@ export const Render = {
       const isFav = state.isFavorite(item.id);
       const isComparing = state.isInCompare(item.id);
       const change = typeof item.change7d === 'number' ? item.change7d : 0;
-      const changeClass = change > 0 ? 'trend-up' : change < 0 ? 'trend-down' : 'trend-flat';
+      const changeClass = change > 0 ? 'up' : change < 0 ? 'down' : 'neutral';
       const changeText = change > 0 ? `+${change.toFixed(1)}%` : `${change.toFixed(1)}%`;
-      const volumeText = item.volume ? Number(item.volume).toLocaleString() : '-';
-      const iconUrl = item.icon || 'https://web.poecdn.com/image/Art/2DItems/Currency/CurrencyRerollRare.png';
+      const iconUrl = item.icon || this.ICONS.chaos;
+
+      let rarityClass = 'rarity-currency';
+      const cat = (item.category || '').toLowerCase();
+      if (cat.includes('card')) rarityClass = 'rarity-divination';
+      else if (cat.includes('gem')) rarityClass = 'rarity-gem';
+      else if (cat.includes('unique')) rarityClass = 'rarity-unique';
+
+      const wikiUrl = typeof window !== 'undefined' && window.PoeItemDescriptions
+        ? window.PoeItemDescriptions.getWikiUrl(item)
+        : (state.currentGame === 'poe2' ? `https://poe2db.tw/us/${encodeURIComponent(item.name)}` : `https://www.poewiki.net/wiki/${encodeURIComponent(item.name)}`);
 
       return `
         <tr class="item-table-row ${isComparing ? 'row-comparing' : ''}" data-id="${this.escapeHtml(item.id)}">
-          <td class="col-star" data-action="toggle-fav" data-id="${this.escapeHtml(item.id)}">
+          <td class="col-star text-center">
             <button class="star-btn ${isFav ? 'active' : ''}" data-action="toggle-fav" data-id="${this.escapeHtml(item.id)}" title="${isFav ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích'}">★</button>
           </td>
-          <td class="col-item" data-action="open-calc" data-id="${this.escapeHtml(item.id)}">
-            <div class="item-identity-cell">
-              <div class="item-thumb-wrapper">
-                <img src="${this.escapeHtml(iconUrl)}" alt="" class="item-thumb" loading="lazy">
-              </div>
-              <div class="item-meta-col">
-                <span class="item-name-link">${this.escapeHtml(item.name)}</span>
-                <div class="item-sub-tags">
-                  <span class="item-category-tag">${this.escapeHtml(item.category)}</span>
-                  ${this.renderLiquidityBadge(item.volume)}
-                </div>
+          <td class="col-name">
+            <div class="table-name-cell">
+              <img src="${this.escapeHtml(iconUrl)}" alt="" class="table-item-icon" loading="lazy">
+              <div class="table-name-wrap">
+                <span class="item-link-name ${rarityClass}" data-action="open-calc" data-id="${this.escapeHtml(item.id)}" data-tooltip-id="${this.escapeHtml(item.id)}">${this.escapeHtml(item.name)}</span>
+                <a href="${wikiUrl}" target="_blank" rel="noopener" class="wiki-badge" title="Tra cứu PoE Wiki">WIKI ↗</a>
               </div>
             </div>
           </td>
           <td class="col-val text-right" data-action="open-calc" data-id="${this.escapeHtml(item.id)}">
             ${this.formatValueHtml(item, state.currentGame)}
           </td>
-          <td class="col-trend" data-action="open-calc" data-id="${this.escapeHtml(item.id)}">
+          <td class="col-trend text-center" data-action="open-calc" data-id="${this.escapeHtml(item.id)}">
             <div class="trend-cell-wrapper">
-              <span class="trend-pill ${changeClass}">${changeText}</span>
               <div class="sparkline-wrapper">
                 ${this.renderSparkline(item.sparkline, change)}
               </div>
+              <span class="trend-badge ${changeClass}">${changeText}</span>
             </div>
           </td>
           <td class="col-volume text-right hide-sm" data-action="open-calc" data-id="${this.escapeHtml(item.id)}">
-            <span class="volume-num">${volumeText}</span>
+            ${this.formatVolumeHtml(item, state.currentGame)}
           </td>
-          <td class="col-compare text-center" data-action="toggle-compare" data-id="${this.escapeHtml(item.id)}">
+          <td class="col-compare text-center">
             <label class="compare-checkbox-label">
               <input type="checkbox" class="compare-checkbox" data-action="toggle-compare" data-id="${this.escapeHtml(item.id)}" ${isComparing ? 'checked' : ''}>
               <span class="compare-label-text">So sánh</span>
             </label>
           </td>
-          <td class="col-actions text-right">
+          <td class="col-actions text-center">
             <button class="action-quick-btn" data-action="open-calc" data-id="${this.escapeHtml(item.id)}" title="Mở máy tính giá">
               <i class="fa-solid fa-calculator"></i>
             </button>

@@ -19,24 +19,26 @@
   <div class="app-layout">
     
     <!-- LEFT SIDEBAR -->
-    <aside class="sidebar" id="sidebar">
+    <aside class="app-sidebar sidebar" id="sidebar">
       <div class="sidebar-header">
-        <div class="brand-logo">
-          <div class="brand-icon-wrap">
+        <div class="sidebar-brand">
+          <div class="brand-icon">
             <span class="currency-icon div-icon"></span>
           </div>
-          <div class="brand-text">
+          <div class="brand-info">
             <h1 class="brand-title">EXCHANGE</h1>
-            <span class="brand-subtitle">PoE Ninja Quick Checker</span>
+            <span class="brand-tag">POE NINJA CHECKER</span>
           </div>
         </div>
       </div>
 
       <!-- Categories List -->
-      <div class="sidebar-section-title">HẠNG MỤC TRA CỨU</div>
-      <nav class="sidebar-nav" id="sidebarNav">
-        <!-- Rendered dynamically -->
-      </nav>
+      <div class="sidebar-nav-container">
+        <div class="nav-section-title">GENERAL</div>
+        <nav class="sidebar-nav" id="sidebarNav">
+          <!-- Rendered dynamically -->
+        </nav>
+      </div>
 
       <!-- Sidebar Footer Tools -->
       <div class="sidebar-footer">
@@ -56,10 +58,10 @@
     </aside>
 
     <!-- MAIN VIEWPORT -->
-    <main class="main-viewport">
+    <main class="app-main main-viewport">
       
       <!-- TOP NAVIGATION BAR -->
-      <header class="top-navbar">
+      <header class="top-nav-bar top-navbar">
         
         <!-- Search Box with Fuzzy Search -->
         <div class="top-search-wrap">
@@ -135,7 +137,7 @@
         <div class="category-header-row">
           <div class="breadcrumb-group">
             <div class="breadcrumbs">
-              <span>Faustus Exchange</span>
+              <span>Economy</span>
               <span class="bc-sep">&gt;</span>
               <span id="breadcrumbCategory" class="bc-active">Currency</span>
             </div>
@@ -186,25 +188,25 @@
         </div>
 
         <!-- TABLE VIEW -->
-        <div class="items-table-container" id="tableView">
-          <table class="items-table">
+        <div class="ninja-table-container items-table-container" id="tableView">
+          <table class="ninja-table items-table">
             <thead class="items-table-header">
               <tr>
-                <th class="col-star text-center" width="40">★</th>
-                <th class="col-item sortable-th" data-sort="name">
-                  Vật phẩm <span class="sort-arrow">↕</span>
+                <th class="col-star text-center" style="width: 36px;">★</th>
+                <th class="col-name sortable sortable-th sorted" data-sort="name" style="min-width: 280px;">
+                  Name <span class="sort-indicator sort-arrow">▲</span>
                 </th>
-                <th class="col-val text-right sortable-th sorted-desc" data-sort="value">
-                  Giá trị <span class="sort-arrow">▼</span>
+                <th class="col-val text-right sortable sortable-th" data-sort="value" style="min-width: 190px;">
+                  Value <span class="info-tip" title="Tỷ giá hối đoái Faustus Exchange">ⓘ</span> <span class="sort-indicator sort-arrow"></span>
                 </th>
-                <th class="col-trend sortable-th" data-sort="change7d">
-                  7 ngày qua <span class="sort-arrow">↕</span>
+                <th class="col-trend text-center sortable sortable-th" data-sort="change7d" style="width: 170px;">
+                  Last 7 days <span class="sort-indicator sort-arrow"></span>
                 </th>
-                <th class="col-volume text-right hide-sm sortable-th" data-sort="volume">
-                  Volume / 24h <span class="sort-arrow">↕</span>
+                <th class="col-volume text-right hide-sm sortable sortable-th" data-sort="volume" style="width: 150px;">
+                  Volume / 24h <span class="info-tip" title="Khối lượng giao dịch 24 giờ qua">ⓘ</span> <span class="sort-indicator sort-arrow"></span>
                 </th>
-                <th class="col-compare text-center" width="90">So sánh</th>
-                <th class="col-actions text-right" width="60">Tính</th>
+                <th class="col-compare text-center" style="width: 80px;">So sánh</th>
+                <th class="col-actions text-center" style="width: 50px;">Tính</th>
               </tr>
             </thead>
             <tbody id="itemsTableBody">
@@ -395,10 +397,30 @@
     </div>
   </div>
 
+  <!-- PoE In-Game Floating Hover Tooltip -->
+  <div class="poe-floating-tooltip hidden" id="poeFloatingTooltip">
+    <span class="tooltip-pin-btn" id="tooltipPinBtn" title="Ghim tooltip">📌</span>
+    <div class="tooltip-header">
+      <div class="tooltip-title" id="tooltipTitle">Item Name</div>
+      <div class="tooltip-basetype" id="tooltipBasetype"></div>
+    </div>
+    <div class="tooltip-body">
+      <div class="tooltip-magic" id="tooltipMagic"></div>
+      <div class="tooltip-instructions" id="tooltipInstructions"></div>
+      <div class="tooltip-explicits" id="tooltipExplicits"></div>
+      <div class="tooltip-divider hidden" id="tooltipDivider"></div>
+      <div class="tooltip-flavour hidden" id="tooltipFlavour"></div>
+    </div>
+    <div class="tooltip-footer" id="tooltipFooter">
+      <img id="tooltipIcon" src="" alt="" />
+    </div>
+  </div>
+
   <!-- Toast Notification Container -->
   <div class="toast-container" id="toastContainer"></div>
 
   <!-- Scripts -->
+  <script src="/js/itemDescriptions.js"></script>
   <script src="/js/itemParser.js"></script>
   <script type="module" src="/js/app.js"></script>
 </body>

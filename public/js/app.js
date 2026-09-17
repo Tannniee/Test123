@@ -183,19 +183,24 @@ async function loadData() {
   try {
     const data = await Api.fetchItems(state.currentGame, state.currentLeague);
 
-    if (data.status === 'warming') {
-      dom.resultsCount.textContent = data.message || `Đang tải dữ liệu cache cho league "${state.currentLeague}"...`;
-      state.items = [];
+    if (data.status === 'warming' || data.status === 'discovering') {
+      dom.resultsCount.textContent = data.message || `Đang tải và khám phá danh mục cho "${state.currentLeague}"...`;
+      state.items = data.items || [];
       filterAndRender();
 
-      // Poll every 2.5s until cache is warm
+      // Poll every 2.5s until cache discovery/warming is fully ready
       if (!warmingPollTimer) {
         warmingPollTimer = setInterval(async () => {
           const pollData = await Api.fetchItems(state.currentGame, state.currentLeague);
           if (pollData.status === 'ready') {
             clearInterval(warmingPollTimer);
             warmingPollTimer = null;
+            await loadCategories(); // Crucial: Re-fetch categories so newly discovered ones populate the sidebar!
             applyLoadedData(pollData);
+          } else if (pollData.items && pollData.items.length > 0) {
+            state.items = pollData.items;
+            dom.resultsCount.textContent = pollData.message || `Đang khám phá danh mục (${pollData.items.length} items)...`;
+            filterAndRender();
           }
         }, 2500);
       }
@@ -583,15 +588,30 @@ function bindEvents() {
     Clipboard.showToast('Đã xóa cảnh báo.', 'info');
   });
 
-  // Settings Modal Trigger
+  // Settings Modal Trigger & Overlay Dismissal
   dom.btnSettings.addEventListener('click', () => Modals.openSettings(state));
-  document.getElementById('closeSettingsModal')?.addEventListener('click', Modals.closeSettings);
-  document.getElementById('btnSaveSettings')?.addEventListener('click', () => {
+  document.getElementById('closeSettingsModal')?.addEventListener('click', () => Modals.closeSettings());
+  document.getElementById('settingsModalOverlay')?.addEventListener('click', (e) => {
+    if (e.target.id === 'settingsModalOverlay') Modals.closeSettings();
+  });
+  document.getElementById('btnSaveSettings')?.addEventListener('click', (e) => {
+    e.preventDefault();
     const game = document.getElementById('settingDefaultGame')?.value;
     const view = document.getElementById('settingDefaultView')?.value;
     state.saveSettings({ defaultGame: game, defaultView: view });
     Modals.closeSettings();
     Clipboard.showToast('Đã lưu tùy chọn thành công!', 'success');
+  });
+
+  // Compare & Alerts & Diagnostics Backdrop Dismissals
+  document.getElementById('compareModalOverlay')?.addEventListener('click', (e) => {
+    if (e.target.id === 'compareModalOverlay') Modals.closeCompare();
+  });
+  document.getElementById('alertsModalOverlay')?.addEventListener('click', (e) => {
+    if (e.target.id === 'alertsModalOverlay') Modals.closeAlerts();
+  });
+  document.getElementById('diagnosticsModalOverlay')?.addEventListener('click', (e) => {
+    if (e.target.id === 'diagnosticsModalOverlay') Modals.closeDiagnostics();
   });
 
   // Calculator Modal Events

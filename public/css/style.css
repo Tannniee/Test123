@@ -71,6 +71,11 @@ body {
   background: #394663;
 }
 
+/* Utility Classes */
+.hidden {
+  display: none !important;
+}
+
 /* Ambient glow */
 .ambient-glow {
   position: fixed;

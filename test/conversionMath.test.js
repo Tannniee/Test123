@@ -1,3 +1,4 @@
+process.env.NODE_ENV = 'test';
 const assert = require('assert');
 const ConversionMath = require('../services/conversionMath');
 

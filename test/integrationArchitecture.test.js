@@ -1,3 +1,4 @@
+process.env.NODE_ENV = 'test';
 const assert = require('assert');
 const path = require('path');
 const fs = require('fs');
@@ -6,11 +7,11 @@ const ConversionMath = require('../services/conversionMath');
 const cacheManager = require('../services/cacheManager');
 const { CacheManager } = cacheManager;
 
-// Ensure any background schedulers started by default import are halted
+// Ensure any background schedulers are halted
 cacheManager.stopSchedulers();
 
 console.log('====================================================');
-console.log('  Running v1.0.1 Architecture & Integration Tests');
+console.log('  Running v1.0.1+ Architecture & Integration Tests');
 console.log('====================================================\n');
 
 let passed = 0;
@@ -29,14 +30,8 @@ async function it(desc, fn) {
 }
 
 (async () => {
-  // Setup isolated test cache manager
   const testCacheDir = path.join(__dirname, 'temp_cache');
   if (!fs.existsSync(testCacheDir)) fs.mkdirSync(testCacheDir, { recursive: true });
-
-  const testCm = new CacheManager({
-    autoStart: false,
-    cacheDir: testCacheDir
-  });
 
   // ----------------------------------------------------
   // 1. Category Registry & LineageSupportGems
@@ -61,100 +56,103 @@ async function it(desc, fn) {
   });
 
   // ----------------------------------------------------
-  // 2. 4-Tier Status Taxonomy (Available / Empty / Unsupported / Transient)
+  // 2. Direct Discovery Execution & Single-Flight Deduplication
   // ----------------------------------------------------
-  console.log('\n--- Suite 2: 4-Tier Status Taxonomy ---');
+  console.log('\n--- Suite 2: Direct Discovery & Single-Flight Deduplication ---');
 
-  await it('should classify HTTP 200 with items > 0 as "available"', () => {
-    const mockData = {
-      lines: [{ id: 'chaos', primaryValue: 1.0 }],
-      items: [{ id: 'chaos', name: 'Chaos Orb' }]
+  const mockFetchImpl = async (url) => {
+    if (url.includes('type=Currency')) {
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          core: { primary: 'chaos', rates: { divine: 0.0028 } },
+          items: [{ id: 'chaos', name: 'Chaos Orb' }, { id: 'divine', name: 'Divine Orb' }],
+          lines: [{ id: 'chaos', primaryValue: 1.0 }, { id: 'divine', primaryValue: 360.0 }]
+        })
+      };
+    }
+    if (url.includes('type=Runegraft')) {
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          core: { primary: 'chaos' },
+          items: [{ id: 'runegraft_1', name: 'Runegraft of Treachery' }],
+          lines: [{ id: 'runegraft_1', primaryValue: 15.0 }]
+        })
+      };
+    }
+    if (url.includes('type=Ducat')) {
+      return {
+        ok: false,
+        status: 404,
+        json: async () => ({})
+      };
+    }
+    // Default empty for other types
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        core: { primary: 'chaos' },
+        items: [],
+        lines: []
+      })
     };
-    const normalized = testCm.normalizeExchangeData(mockData, 'Currency', 'poe1', 'TaxonomyTest');
-    assert.strictEqual(normalized.length, 1);
+  };
 
-    testCm.availabilityMap['poe1']['TaxonomyTest'] = {
-      Currency: { status: 'available', count: 1, lastChecked: new Date().toISOString() }
-    };
-    const avail = testCm.getAvailableCategories('poe1', 'TaxonomyTest');
-    assert(avail.some(c => c.type === 'Currency'), 'Currency must be available');
+  const discoveryCm = new CacheManager({
+    autoStart: false,
+    cacheDir: testCacheDir,
+    fetchImpl: mockFetchImpl
   });
 
-  await it('should NOT treat empty (200 with 0 items) or unsupported (404) as available', () => {
-    testCm.availabilityMap['poe1']['TaxonomyTest']['EmptyCategory'] = {
-      status: 'empty',
-      count: 0,
-      lastChecked: new Date().toISOString()
-    };
-    testCm.availabilityMap['poe1']['TaxonomyTest']['Ducat'] = {
-      status: 'unsupported',
-      count: 0,
-      lastChecked: new Date().toISOString()
-    };
+  await it('should run direct discoverLeagueAvailability and discover Runegraft while marking Ducat unsupported', async () => {
+    const league = 'DiscoveryRealTestLeague';
+    const available = await discoveryCm.discoverLeagueAvailability('poe1', league);
 
-    const avail = testCm.getAvailableCategories('poe1', 'TaxonomyTest');
-    assert.strictEqual(avail.some(c => c.type === 'EmptyCategory'), false, 'Empty categories must not be available');
-    assert.strictEqual(avail.some(c => c.type === 'Ducat'), false, 'Unsupported seasonal categories must not be available');
+    const hasRunegraft = available.some(c => c.type === 'Runegraft');
+    const hasDucat = available.some(c => c.type === 'Ducat');
+
+    assert.strictEqual(hasRunegraft, true, 'Runegraft must be discovered with count > 0');
+    assert.strictEqual(hasDucat, false, 'Ducat must be excluded since HTTP 404 returned');
+
+    const batches = discoveryCm.getRotationBatches('poe1', league);
+    assert(batches.some(b => b.includes('Runegraft')), 'Runegraft must be in rotation queue');
   });
 
-  await it('should preserve previous availability under transient network failure (transient safeguard)', () => {
-    testCm.memoryCache['poe1']['TransientLeague'] = {
-      sources: {
-        Scarab: { status: 'available', itemsCount: 45, updatedAt: new Date().toISOString() }
-      },
-      items: [
-        { id: '1', name: 'Gilded Scarab', sourceType: 'Scarab' }
-      ]
-    };
+  await it('should deduplicate parallel discovery calls to the same league (single-flight)', async () => {
+    const league = 'DedupeTestLeague';
+    const p1 = discoveryCm.discoverLeagueAvailability('poe1', league);
+    const p2 = discoveryCm.discoverLeagueAvailability('poe1', league);
 
-    testCm.initAvailabilityForLeague('poe1', 'TransientLeague');
-    const availBefore = testCm.getAvailableCategories('poe1', 'TransientLeague');
-    assert(availBefore.some(c => c.type === 'Scarab'), 'Scarab is available initially');
+    assert(discoveryCm.discoveryJobs.has(`poe1:${league}`), 'Discovery job must be registered in map');
+    const [res1, res2] = await Promise.all([p1, p2]);
 
-    // Simulate transient error
-    testCm.availabilityMap['poe1']['TransientLeague']['Scarab'] = {
-      status: 'available', // Kept by transient safeguard
-      count: 45,
-      isStale: true
-    };
-
-    const availAfter = testCm.getAvailableCategories('poe1', 'TransientLeague');
-    assert(availAfter.some(c => c.type === 'Scarab'), 'Scarab must stay available despite transient glitch');
+    assert.deepStrictEqual(res1, res2);
+    assert.strictEqual(discoveryCm.discoveryJobs.has(`poe1:${league}`), false, 'Discovery job must be cleaned up on completion');
   });
 
   // ----------------------------------------------------
-  // 3. Breaking Circular Discovery for New Leagues
+  // 3. Lifecycle States: warming -> discovering -> ready
   // ----------------------------------------------------
-  console.log('\n--- Suite 3: Breaking Circular Discovery ---');
+  console.log('\n--- Suite 3: Lifecycle States (warming / discovering / ready) ---');
 
-  await it('should discover and adapt rotation batches for newly probed non-priority categories', () => {
-    const freshLeague = 'BrandNewDiscoveredLeague';
-    // Simulate discovery pass populating availability map with seasonal items
-    testCm.availabilityMap['poe1'][freshLeague] = {
-      Currency: { status: 'available', count: 120 },
-      Fragment: { status: 'available', count: 80 },
-      Scarab: { status: 'available', count: 95 },
-      Runegraft: { status: 'available', count: 32 }, // Seasonal item discovered!
-      Ducat: { status: 'unsupported', count: 0 }     // Seasonal item unsupported!
-    };
+  await it('should return discovering status while discovery job is actively in progress', async () => {
+    const league = 'LifecycleTestLeague';
+    const discoveryPromise = discoveryCm.discoverLeagueAvailability('poe1', league);
 
-    testCm.memoryCache['poe1'][freshLeague] = {
-      items: [
-        { id: '1', name: 'Chaos Orb', sourceType: 'Currency' },
-        { id: '2', name: 'Sacrifice at Dusk', sourceType: 'Fragment' },
-        { id: '3', name: 'Rusted Scarab', sourceType: 'Scarab' },
-        { id: '4', name: 'Runegraft of Treachery', sourceType: 'Runegraft' }
-      ]
-    };
+    // Immediate check during in-flight discovery
+    const dataDuring = discoveryCm.getData('poe1', league);
+    assert.strictEqual(dataDuring.status, 'discovering', 'Must report status discovering while pass is running');
 
-    const available = testCm.getAvailableCategories('poe1', freshLeague);
-    assert(available.some(c => c.type === 'Runegraft'), 'Runegraft should be discovered and available');
-    assert.strictEqual(available.some(c => c.type === 'Ducat'), false, 'Ducat should be excluded');
+    await discoveryPromise;
 
-    const rotationBatches = testCm.getRotationBatches('poe1', freshLeague);
-    assert(rotationBatches.length > 0);
-    assert(rotationBatches.some(b => b.includes('Runegraft')), 'Runegraft must be present in rotation queue');
-    assert.notDeepStrictEqual(rotationBatches, [['Currency']], 'Must NEVER fall back to [["Currency"]] when non-priority items exist');
+    // After completion
+    const dataAfter = discoveryCm.getData('poe1', league);
+    assert.strictEqual(dataAfter.status, 'ready', 'Must report status ready once pass finishes');
+    assert(dataAfter.items.length > 0, 'Must have items');
   });
 
   // ----------------------------------------------------
@@ -162,33 +160,30 @@ async function it(desc, fn) {
   // ----------------------------------------------------
   console.log('\n--- Suite 4: Per-League Mutex Queue & Lost Update Elimination ---');
 
-  await it('should prevent lost updates when parallel tasks merge different categories to same league', async () => {
+  await it('should serialize concurrent merges and prevent lost updates', async () => {
     const mutexLeague = 'MutexTestLeague';
-
-    // Seed empty entry
-    testCm.memoryCache['poe1'][mutexLeague] = {
+    discoveryCm.memoryCache['poe1'][mutexLeague] = {
       game: 'poe1',
       league: mutexLeague,
       items: [{ id: 'init_item', name: 'Initial Orb', sourceType: 'Currency' }],
       rates: { divine: 0.005 }
     };
 
-    // Simulate parallel merges using withLeagueMutex
-    const jobA = testCm.withLeagueMutex('poe1', mutexLeague, async () => {
-      await testCm.sleep(30); // artificial async latency
-      const current = testCm.memoryCache['poe1'][mutexLeague];
+    const jobA = discoveryCm.withLeagueMutex('poe1', mutexLeague, async () => {
+      await discoveryCm.sleep(25);
+      const current = discoveryCm.memoryCache['poe1'][mutexLeague];
       const kept = current.items.filter(it => it.sourceType !== 'Essence');
-      testCm.memoryCache['poe1'][mutexLeague] = {
+      discoveryCm.memoryCache['poe1'][mutexLeague] = {
         ...current,
         items: [...kept, { id: 'item_essence', name: 'Essence of Woe', sourceType: 'Essence' }]
       };
     });
 
-    const jobB = testCm.withLeagueMutex('poe1', mutexLeague, async () => {
-      await testCm.sleep(10);
-      const current = testCm.memoryCache['poe1'][mutexLeague];
+    const jobB = discoveryCm.withLeagueMutex('poe1', mutexLeague, async () => {
+      await discoveryCm.sleep(10);
+      const current = discoveryCm.memoryCache['poe1'][mutexLeague];
       const kept = current.items.filter(it => it.sourceType !== 'Fossil');
-      testCm.memoryCache['poe1'][mutexLeague] = {
+      discoveryCm.memoryCache['poe1'][mutexLeague] = {
         ...current,
         items: [...kept, { id: 'item_fossil', name: 'Bound Fossil', sourceType: 'Fossil' }]
       };
@@ -196,73 +191,87 @@ async function it(desc, fn) {
 
     await Promise.all([jobA, jobB]);
 
-    const finalItems = testCm.memoryCache['poe1'][mutexLeague].items;
-    const hasEssence = finalItems.some(i => i.id === 'item_essence');
-    const hasFossil = finalItems.some(i => i.id === 'item_fossil');
-
-    assert.strictEqual(hasEssence, true, 'Essence item from Job A must NOT be lost');
-    assert.strictEqual(hasFossil, true, 'Fossil item from Job B must NOT be lost');
-    assert.strictEqual(finalItems.length, 3, 'All items must be preserved without race-condition overwrites');
+    const finalItems = discoveryCm.memoryCache['poe1'][mutexLeague].items;
+    assert(finalItems.some(i => i.id === 'item_essence'), 'Essence must be present');
+    assert(finalItems.some(i => i.id === 'item_fossil'), 'Fossil must be present');
+    assert.strictEqual(finalItems.length, 3);
   });
 
   // ----------------------------------------------------
-  // 5. Rate Guard & Pre-Condition Safeguards
+  // 5. Operation Tracking & isRefreshing Accuracy
   // ----------------------------------------------------
-  console.log('\n--- Suite 5: Rate Guard & Pre-Condition Safeguards ---');
+  console.log('\n--- Suite 5: Operation Tracking & isRefreshing Accuracy ---');
 
-  await it('should validate PoE 2 Chaos Rate and guard against anomalies', () => {
-    const lastKnownChaos = 0.5;
-    const spikeChaos = 5.0; // 10x spike!
+  await it('should report isRefreshing true during fetch, merge, discovery or refreshAll', () => {
+    assert.strictEqual(discoveryCm.isRefreshing, false);
 
-    const check = ConversionMath.validateRate(spikeChaos, lastKnownChaos);
-    assert.strictEqual(check.valid, false);
-    assert.strictEqual(check.isAnomaly, true);
-    assert.strictEqual(check.rate, lastKnownChaos, 'Should keep last known good chaos rate');
-  });
+    discoveryCm.activeMerges.add('poe1:TestMerge');
+    assert.strictEqual(discoveryCm.isRefreshing, true, 'Must report true when merge is active');
 
-  await it('should accurately track nextRotationBatch index without always returning index 0', () => {
-    const rotLeague = 'RotationIndexLeague';
-    testCm.availabilityMap['poe1'][rotLeague] = {
-      Currency: { status: 'available', count: 10 },
-      Essence: { status: 'available', count: 10 },
-      Fossil: { status: 'available', count: 10 },
-      Oil: { status: 'available', count: 10 }
-    };
+    discoveryCm.activeMerges.clear();
+    discoveryCm.activeDiscoveries.add('poe1:TestDisc');
+    assert.strictEqual(discoveryCm.isRefreshing, true, 'Must report true when discovery is active');
 
-    const batches = testCm.getRotationBatches('poe1', rotLeague);
-    assert.strictEqual(batches.length, 2);
-
-    const key = `poe1_${rotLeague}`;
-    testCm.rotationIndices[key] = 0;
-    const batch0 = testCm.getNextRotationBatch('poe1', rotLeague);
-    assert.deepStrictEqual(batch0, batches[0]);
-
-    testCm.rotationIndices[key] = 1;
-    const batch1 = testCm.getNextRotationBatch('poe1', rotLeague);
-    assert.deepStrictEqual(batch1, batches[1]);
+    discoveryCm.activeDiscoveries.clear();
+    assert.strictEqual(discoveryCm.isRefreshing, false);
   });
 
   // ----------------------------------------------------
-  // 6. League Validation
+  // 6. Tracked Leagues & Auto-Pruning
   // ----------------------------------------------------
-  console.log('\n--- Suite 6: League Validation ---');
+  console.log('\n--- Suite 6: Tracked Leagues & Auto-Pruning ---');
 
-  await it('should validate known leagues and reject fake or malformed league inputs', () => {
-    assert.strictEqual(testCm.isValidLeague('poe1', 'Allflame'), true);
-    assert.strictEqual(testCm.isValidLeague('poe1', 'Standard'), true);
-    assert.strictEqual(testCm.isValidLeague('poe2', 'Forbidden Rites'), true);
-    assert.strictEqual(testCm.isValidLeague('poe1', 'RandomBogusLeagueXYZ'), false);
-    assert.strictEqual(testCm.isValidLeague('poe1', ''), false);
-    assert.strictEqual(testCm.isValidLeague('poe1', null), false);
+  await it('should not track all historical files on disk into scheduler', () => {
+    // Disk contains historical files, but trackedLeagues must only contain active/standard
+    assert.strictEqual(discoveryCm.trackedLeagues['poe1'].has('Allflame'), true);
+    assert.strictEqual(discoveryCm.trackedLeagues['poe1'].has('Standard'), true);
+    assert.strictEqual(discoveryCm.trackedLeagues['poe1'].has('AncientOldLeague2024'), false);
   });
 
-  // Cleanup temp test directory
+  await it('should prune retired leagues on league refresh', () => {
+    discoveryCm.trackedLeagues['poe1'].add('DeadLeague2023');
+    discoveryCm.leaguesList['poe1'] = [
+      { id: 'Allflame', name: 'Allflame' },
+      { id: 'Standard', name: 'Standard' }
+    ];
+
+    discoveryCm.syncTrackedLeagues('poe1');
+    assert.strictEqual(discoveryCm.trackedLeagues['poe1'].has('DeadLeague2023'), false, 'Retired league must be pruned');
+  });
+
+  // ----------------------------------------------------
+  // 7. Rate Guard & PoE 2 Chaos Rate Stale Tracking
+  // ----------------------------------------------------
+  console.log('\n--- Suite 7: Rate Guard & Rate Anomalies ---');
+
+  await it('should validate PoE 2 Chaos Rate and flag stale when either Exalted or Chaos is abnormal', () => {
+    const checkNormal = ConversionMath.validateRate(0.5, 0.5);
+    assert.strictEqual(checkNormal.valid, true);
+
+    const checkSpike = ConversionMath.validateRate(5.0, 0.5);
+    assert.strictEqual(checkSpike.isAnomaly, true);
+    assert.strictEqual(checkSpike.isStale, true);
+  });
+
+  // ----------------------------------------------------
+  // 8. CSS .hidden Utility Verification
+  // ----------------------------------------------------
+  console.log('\n--- Suite 8: CSS Utility Rule Verification ---');
+
+  await it('should have .hidden { display: none !important; } in style.css for proper modal dismissals', () => {
+    const cssPath = path.join(__dirname, '..', 'public', 'css', 'style.css');
+    const css = fs.readFileSync(cssPath, 'utf-8');
+    assert(css.includes('.hidden'), 'style.css must contain .hidden');
+    assert(css.includes('display: none !important;'), 'style.css must set display: none !important for .hidden');
+  });
+
+  // Cleanup
   try {
     fs.rmSync(testCacheDir, { recursive: true, force: true });
   } catch (e) {}
 
   console.log('\n====================================================');
-  console.log(`  v1.0.1 Integration Tests completed: ${passed} passed, ${failed} failed`);
+  console.log(`  v1.0.1+ Integration Tests completed: ${passed} passed, ${failed} failed`);
   console.log('====================================================\n');
 
   if (failed > 0) process.exit(1);

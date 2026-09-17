@@ -1,3 +1,4 @@
+process.env.NODE_ENV = 'test';
 import { Search } from '../public/js/modules/search.js';
 import { Render } from '../public/js/modules/render.js';
 import assert from 'assert';

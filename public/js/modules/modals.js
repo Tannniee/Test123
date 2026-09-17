@@ -38,12 +38,16 @@ export const Modals = {
     this.updateCalculatorValues(item, 1, state, elements);
 
     elements.calcModalOverlay.classList.remove('hidden');
+    elements.calcModalOverlay.removeAttribute('hidden');
+    elements.calcModalOverlay.style.display = 'flex';
     elements.calcQtyInput.focus();
     elements.calcQtyInput.select();
   },
 
   closeCalculator(elements) {
     elements.calcModalOverlay.classList.add('hidden');
+    elements.calcModalOverlay.setAttribute('hidden', '');
+    elements.calcModalOverlay.style.display = 'none';
   },
 
   determineMaxStack(item) {
@@ -169,12 +173,21 @@ export const Modals = {
     `;
 
     container.innerHTML = html;
-    document.getElementById('compareModalOverlay').classList.remove('hidden');
+    const modal = document.getElementById('compareModalOverlay');
+    if (modal) {
+      modal.classList.remove('hidden');
+      modal.removeAttribute('hidden');
+      modal.style.display = 'flex';
+    }
   },
 
   closeCompare() {
     const modal = document.getElementById('compareModalOverlay');
-    if (modal) modal.classList.add('hidden');
+    if (modal) {
+      modal.classList.add('hidden');
+      modal.setAttribute('hidden', '');
+      modal.style.display = 'none';
+    }
   },
 
   // -----------------------------------------------------------------
@@ -185,11 +198,17 @@ export const Modals = {
     if (!modal) return;
     this.renderAlertsList(state);
     modal.classList.remove('hidden');
+    modal.removeAttribute('hidden');
+    modal.style.display = 'flex';
   },
 
   closeAlerts() {
     const modal = document.getElementById('alertsModalOverlay');
-    if (modal) modal.classList.add('hidden');
+    if (modal) {
+      modal.classList.add('hidden');
+      modal.setAttribute('hidden', '');
+      modal.style.display = 'none';
+    }
   },
 
   renderAlertsList(state) {
@@ -335,11 +354,17 @@ export const Modals = {
 
     content.innerHTML = html;
     modal.classList.remove('hidden');
+    modal.removeAttribute('hidden');
+    modal.style.display = 'flex';
   },
 
   closeDiagnostics() {
     const modal = document.getElementById('diagnosticsModalOverlay');
-    if (modal) modal.classList.add('hidden');
+    if (modal) {
+      modal.classList.add('hidden');
+      modal.setAttribute('hidden', '');
+      modal.style.display = 'none';
+    }
   },
 
   // -----------------------------------------------------------------
@@ -356,10 +381,16 @@ export const Modals = {
     if (viewSelect) viewSelect.value = state.settings.defaultView || 'table';
 
     modal.classList.remove('hidden');
+    modal.removeAttribute('hidden');
+    modal.style.display = 'flex';
   },
 
   closeSettings() {
     const modal = document.getElementById('settingsModalOverlay');
-    if (modal) modal.classList.add('hidden');
+    if (modal) {
+      modal.classList.add('hidden');
+      modal.setAttribute('hidden', '');
+      modal.style.display = 'none';
+    }
   }
 };

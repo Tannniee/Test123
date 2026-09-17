@@ -33,6 +33,7 @@ const CATEGORY_REGISTRY = {
     { type: 'Abyss', label: 'Abyssal Bones', priority: false, iconClass: 'fossil-ico' },
     { type: 'Expedition', label: 'Expedition', priority: false, iconClass: 'poe2-expedition-ico' },
     { type: 'UncutGems', label: 'Uncut Gems', priority: false, iconClass: 'poe2-ritual-ico' },
+    { type: 'LineageSupportGems', label: 'Lineage Gems', priority: false, iconClass: 'poe2-ritual-ico' },
     { type: 'Essences', label: 'Essences', priority: false, iconClass: 'essence-ico' },
     { type: 'SoulCores', label: 'Soul Cores', priority: false, iconClass: 'poe2-vaal-ico' },
     { type: 'Idols', label: 'Idols', priority: false, iconClass: 'tattoo-ico' },

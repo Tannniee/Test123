@@ -24,6 +24,13 @@ app.get('/api/categories', (req, res) => {
   }
 
   const league = req.query.league || cacheManager.getActiveLeague(game);
+  if (!cacheManager.isValidLeague(game, league)) {
+    return res.status(400).json({ 
+      error: `Invalid or unknown league "${league}" for ${game}.`,
+      validLeagues: cacheManager.getLeagues()[game]?.map(l => l.id) || []
+    });
+  }
+
   const categories = cacheManager.getAvailableCategories(game, league);
   res.json({
     game,
@@ -40,30 +47,54 @@ app.get('/api/items', (req, res) => {
   }
 
   const league = req.query.league || cacheManager.getActiveLeague(game);
-  const data = cacheManager.getData(game, league);
+  if (!cacheManager.isValidLeague(game, league)) {
+    return res.status(400).json({ 
+      error: `Invalid or unknown league "${league}" for ${game}.`,
+      validLeagues: cacheManager.getLeagues()[game]?.map(l => l.id) || []
+    });
+  }
 
+  const data = cacheManager.getData(game, league);
   res.json(data);
 });
 
-// API: Trigger full refresh manually
+// API: Trigger true full refresh across all available categories
 app.post('/api/refresh', async (req, res) => {
-  cacheManager.refreshAll().catch(err => {
+  const { game, league } = req.body || {};
+
+  if (game && game !== 'poe1' && game !== 'poe2') {
+    return res.status(400).json({ error: 'Invalid game parameter. Must be "poe1" or "poe2".' });
+  }
+
+  if (league && game && !cacheManager.isValidLeague(game, league)) {
+    return res.status(400).json({ error: `Invalid or unknown league "${league}" for ${game}.` });
+  }
+
+  cacheManager.refreshAllAvailable(game, league).catch(err => {
     console.error('[Server] Manual refresh error:', err);
   });
 
   res.json({
     success: true,
-    message: 'Full cache refresh started in background.',
-    activeJobs: Array.from(cacheManager.activeJobs)
+    message: 'Full cache refresh across all available categories started in background.',
+    activeJobs: Array.from(cacheManager.activeFetches)
   });
 });
 
 // API: Refresh single category on-demand with strict whitelist validation
 app.post('/api/refresh-category', async (req, res) => {
-  const { game = 'poe1', league, category } = req.body;
+  const { game = 'poe1', league, category } = req.body || {};
 
   if (game !== 'poe1' && game !== 'poe2') {
     return res.status(400).json({ error: 'Invalid game parameter. Must be "poe1" or "poe2".' });
+  }
+
+  const targetLeague = league || cacheManager.getActiveLeague(game);
+  if (!cacheManager.isValidLeague(game, targetLeague)) {
+    return res.status(400).json({ 
+      error: `Invalid or unknown league "${targetLeague}" for ${game}.`,
+      validLeagues: cacheManager.getLeagues()[game]?.map(l => l.id) || []
+    });
   }
 
   if (!category || typeof category !== 'string') {
@@ -76,8 +107,6 @@ app.post('/api/refresh-category', async (req, res) => {
       validCategories: CategoryRegistry.getRegistry(game).map(c => c.type)
     });
   }
-
-  const targetLeague = league || cacheManager.getActiveLeague(game);
 
   try {
     const updated = await cacheManager.refreshSingleCategory(game, targetLeague, category);
@@ -104,10 +133,12 @@ app.get('*', (req, res) => {
 });
 
 // Boot server
-app.listen(PORT, async () => {
+const server = app.listen(PORT, async () => {
   console.log(`=======================================================`);
-  console.log(`  PoE Quick Price Checker v1.0.0 is running!`);
+  console.log(`  PoE Quick Price Checker v1.0.1 is running!`);
   console.log(`  Local URL: http://localhost:${PORT}`);
   console.log(`  Data Architecture: Data-Driven Dynamic Categories`);
   console.log(`=======================================================`);
 });
+
+module.exports = { app, server };

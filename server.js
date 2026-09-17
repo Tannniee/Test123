@@ -10,7 +10,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// API: Check system status and cache info
+// API: Check system status, diagnostics and cache info
 app.get('/api/status', (req, res) => {
   res.json(cacheManager.getStatus());
 });
@@ -18,11 +18,11 @@ app.get('/api/status', (req, res) => {
 // API: Get items for a game and league
 app.get('/api/items', (req, res) => {
   const game = req.query.game === 'poe2' ? 'poe2' : 'poe1';
-  let league = req.query.league || (game === 'poe1' ? 'Allflame' : 'Standard');
+  let league = req.query.league || cacheManager.getActiveLeague(game);
 
   let data = cacheManager.getData(game, league);
   
-  // Fallback to Standard if requested league is not found
+  // Fallback to Standard or first available if requested league is not cached
   if (!data && league !== 'Standard') {
     data = cacheManager.getData(game, 'Standard');
     league = 'Standard';
@@ -35,8 +35,10 @@ app.get('/api/items', (req, res) => {
       updatedAt: null,
       divinePriceInChaos: 0,
       mirrorPriceInChaos: 0,
+      rates: {},
       count: 0,
       items: [],
+      snapshots: [],
       message: 'Data is being prepared or not yet cached.'
     });
   }
@@ -49,7 +51,8 @@ app.get('/api/items', (req, res) => {
     mirrorPriceInChaos: data.mirrorPriceInChaos,
     rates: data.rates || {},
     count: data.count,
-    items: data.items
+    items: data.items,
+    snapshots: data.snapshots || []
   });
 });
 
@@ -70,22 +73,38 @@ app.post('/api/refresh', async (req, res) => {
 
   res.json({
     success: true,
-    message: 'Cache refresh started in background.',
+    message: 'Full cache refresh started in background.',
     intervalMinutes: 30
   });
 });
 
-// API: Available leagues
+// API: Refresh single category on-demand
+app.post('/api/refresh-category', async (req, res) => {
+  const { game, league, category } = req.body;
+  if (!category) {
+    return res.status(400).json({ success: false, message: 'Category is required.' });
+  }
+
+  const targetGame = game === 'poe2' ? 'poe2' : 'poe1';
+  const targetLeague = league || cacheManager.getActiveLeague(targetGame);
+
+  try {
+    const updated = await cacheManager.refreshSingleCategory(targetGame, targetLeague, category);
+    res.json({
+      success: true,
+      message: `Category "${category}" refreshed successfully for ${targetGame.toUpperCase()} - ${targetLeague}.`,
+      itemCount: updated?.count || 0,
+      rates: updated?.rates || {}
+    });
+  } catch (err) {
+    console.error(`[Server] Error refreshing category ${category}:`, err.message);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// API: Dynamic available leagues
 app.get('/api/leagues', (req, res) => {
-  res.json({
-    poe1: [
-      { id: 'Allflame', name: 'Allflame (Current League)', default: true },
-      { id: 'Standard', name: 'Standard', default: false }
-    ],
-    poe2: [
-      { id: 'Standard', name: 'PoE 2 Standard', default: true }
-    ]
-  });
+  res.json(cacheManager.getLeagues());
 });
 
 // Serve frontend SPA fallback

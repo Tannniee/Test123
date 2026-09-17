@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const ConversionMath = require('./conversionMath');
 
 const CACHE_DIR = path.join(__dirname, '..', 'data', 'cache');
 const PRIORITY_INTERVAL_MS = 30 * 60 * 1000; // 30 minutes for Priority (Currency, Scarabs, Fragments)
@@ -15,21 +16,20 @@ if (!fs.existsSync(CACHE_DIR)) {
 const POE1_PRIORITY_TYPES = ['Currency', 'Fragment', 'Scarab'];
 const POE2_PRIORITY_TYPES = ['Currency'];
 
-// Rotational batches (2 categories per batch, refreshed every 5 minutes in round-robin)
+// Rotational batches (Clean valid 200 OK Exchange categories)
 const POE1_ROTATION_BATCHES = [
   ['AllflameEmber', 'DivinationCard'], // Batch 0: Allflame Embers + Divination Cards
   ['Essence', 'Runegraft'],            // Batch 1: Essences + Runegrafts
   ['Fossil', 'Oil'],                   // Batch 2: Fossils + Oils
-  ['Catalyst', 'DeliriumOrb'],         // Batch 3: Catalysts + Delirium Orbs
+  ['DeliriumOrb', 'Omen'],             // Batch 3: Delirium Orbs + Omens
   ['Artifact', 'Tattoo'],              // Batch 4: Artifacts + Tattoos
-  ['Omen', 'Incubator'],               // Batch 5: Omens + Incubators
-  ['Ducat', 'EnshroudingCrystal']      // Batch 6: Ducats + Enshrouding Crystals
+  ['Ducat', 'EnshroudingCrystal']      // Batch 5: Ducats + Enshrouding Crystals
 ];
 
 const POE2_ROTATION_BATCHES = [
   ['Ritual', 'Breach'],                // Batch 0: Ritual + Breach
   ['Delirium', 'Abyss'],               // Batch 1: Delirium + Abyss
-  ['Expedition', 'Vaal']               // Batch 2: Expedition + Vaal Infusers
+  ['Expedition']                       // Batch 2: Expedition
 ];
 
 class CacheManager {
@@ -40,6 +40,34 @@ class CacheManager {
     };
     this.isRefreshing = false;
     this.refreshProgress = { current: 0, total: 0, status: 'idle' };
+
+    // Dynamic Leagues
+    this.activeLeagues = {
+      poe1: 'Allflame',
+      poe2: 'Forbidden Rites'
+    };
+    this.leaguesList = {
+      poe1: [
+        { id: 'Allflame', name: 'Allflame (Current League)', default: true },
+        { id: 'Standard', name: 'Standard', default: false }
+      ],
+      poe2: [
+        { id: 'Forbidden Rites', name: 'Forbidden Rites (Current League)', default: true },
+        { id: 'Standard', name: 'Standard', default: false }
+      ]
+    };
+
+    // Diagnostics per category
+    this.diagnostics = {
+      poe1: {},
+      poe2: {}
+    };
+
+    // Historical Snapshots (up to 48 recent checkpoints per league)
+    this.snapshots = {
+      poe1: {},
+      poe2: {}
+    };
 
     // Schedulers & rotation state
     this.priorityTimer = null;
@@ -53,8 +81,43 @@ class CacheManager {
     // Load existing cache from disk on startup
     this.loadAllFromDisk();
 
-    // Start background schedulers (30m Priority + 5m Rotation)
-    this.startSchedulers();
+    // Detect dynamic leagues, then start schedulers
+    this.initDynamicLeagues().then(() => {
+      this.startSchedulers();
+    });
+  }
+
+  async initDynamicLeagues() {
+    console.log('[CacheManager] Detecting dynamic leagues from poe.ninja...');
+    await Promise.allSettled([
+      this.fetchLeagues('poe1'),
+      this.fetchLeagues('poe2')
+    ]);
+  }
+
+  async fetchLeagues(game) {
+    const url = `https://poe.ninja/${game}/api/economy/leagues`;
+    const res = await this.fetchJson(url);
+    if (res.data && Array.isArray(res.data) && res.data.length > 0) {
+      const list = res.data.map((l, index) => ({
+        id: l.id || l.name,
+        name: index === 0 ? `${l.name} (Current League)` : l.name,
+        default: index === 0
+      }));
+      this.leaguesList[game] = list;
+      this.activeLeagues[game] = list[0].id;
+      console.log(`[CacheManager] Dynamic active league for ${game.toUpperCase()}: "${this.activeLeagues[game]}"`);
+    } else {
+      console.warn(`[CacheManager] Could not fetch dynamic leagues for ${game}, using defaults.`);
+    }
+  }
+
+  getActiveLeague(game) {
+    return this.activeLeagues[game] || (game === 'poe2' ? 'Forbidden Rites' : 'Allflame');
+  }
+
+  getLeagues() {
+    return this.leaguesList;
   }
 
   getCacheFilePath(game, league) {
@@ -76,6 +139,12 @@ class CacheManager {
             const data = JSON.parse(content);
             if (!this.memoryCache[game]) this.memoryCache[game] = {};
             this.memoryCache[game][data.league || safeLeague] = data;
+
+            if (data.snapshots && Array.isArray(data.snapshots)) {
+              if (!this.snapshots[game]) this.snapshots[game] = {};
+              this.snapshots[game][data.league || safeLeague] = data.snapshots;
+            }
+
             console.log(`[CacheManager] Loaded ${game} - ${data.league || safeLeague} (${data.items?.length || 0} items, updated: ${data.updatedAt})`);
           }
         }
@@ -117,25 +186,45 @@ class CacheManager {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  async fetchJson(url) {
-    try {
-      const response = await fetch(url, {
-        headers: {
-          'User-Agent': USER_AGENT,
-          'Accept': 'application/json'
-        }
-      });
-      if (!response.ok) {
-        if (response.status !== 404) {
+  /**
+   * Fetch with Retry & Exponential Backoff
+   */
+  async fetchJson(url, retries = 2, delays = [500, 1500]) {
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      const start = Date.now();
+      try {
+        const response = await fetch(url, {
+          headers: {
+            'User-Agent': USER_AGENT,
+            'Accept': 'application/json'
+          }
+        });
+        const latencyMs = Date.now() - start;
+
+        if (!response.ok) {
+          if (response.status >= 500 && attempt < retries) {
+            console.warn(`[CacheManager] HTTP ${response.status} for ${url}. Retrying in ${delays[attempt]}ms...`);
+            await this.sleep(delays[attempt]);
+            continue;
+          }
           console.warn(`[CacheManager] Warning: HTTP ${response.status} for ${url}`);
+          return { data: null, httpCode: response.status, latencyMs, error: `HTTP ${response.status}` };
         }
-        return null;
+
+        const json = await response.json();
+        return { data: json, httpCode: 200, latencyMs, error: null };
+      } catch (err) {
+        const latencyMs = Date.now() - start;
+        if (attempt < retries) {
+          console.warn(`[CacheManager] Request error for ${url}: ${err.message}. Retrying in ${delays[attempt]}ms...`);
+          await this.sleep(delays[attempt]);
+          continue;
+        }
+        console.warn(`[CacheManager] Final request error for ${url}:`, err.message);
+        return { data: null, httpCode: 0, latencyMs, error: err.message };
       }
-      return await response.json();
-    } catch (err) {
-      console.warn(`[CacheManager] Request error for ${url}:`, err.message);
-      return null;
     }
+    return { data: null, httpCode: 0, latencyMs: 0, error: 'Max retries reached' };
   }
 
   normalizeExchangeData(raw, type, game, league) {
@@ -182,14 +271,24 @@ class CacheManager {
         icon = 'https://web.poecdn.com/image/Art/2DItems/Divination/InventoryIcon.png';
       }
 
-      const category = this.mapExchangeCategory(type, it.category, game);
+      // Map categories cleanly, extracting Catalysts and Vaal from Currency
+      let category = this.mapExchangeCategory(type, it.category, game);
+      let subCategory = type;
+
+      if (game === 'poe1' && type === 'Currency' && it.category === 'Catalysts') {
+        category = 'Catalysts';
+        subCategory = 'Catalyst';
+      } else if (game === 'poe2' && type === 'Currency' && it.category === 'Vaal') {
+        category = 'Vaal';
+        subCategory = 'Vaal';
+      }
 
       results.push({
-        id: `${game}_${it.id}_${type}`,
+        id: `${game}_${it.id}_${subCategory}`,
         key: it.id,
         name: it.name,
         category: category,
-        subCategory: type,
+        subCategory: subCategory,
         icon: icon,
         chaosValue: chaosVal,
         divineValue: divineVal,
@@ -248,14 +347,13 @@ class CacheManager {
     if (type === 'Runegraft') return 'Runegrafts';
     if (type === 'Ducat') return 'Ducats';
     if (type === 'EnshroudingCrystal') return 'Enshrouding Crystals';
-    if (type === 'Incubator') return 'Incubators';
 
     return type || itCategory;
   }
 
   /**
    * Incrementally fetches and merges specified categories into existing cache.
-   * Preserves all other categories completely.
+   * With Rate Validation & Anomaly Guard
    */
   async syncCategoryBatch(game, league, types) {
     let existingEntry = this.memoryCache[game]?.[league];
@@ -283,7 +381,11 @@ class CacheManager {
 
     let existingItems = existingEntry.items || [];
     let divineRate = existingEntry.rates?.divine || 0;
+    let exaltedRate = existingEntry.rates?.exalted || 0;
+    let chaosRate = existingEntry.rates?.chaos || 0;
     let mirrorRate = existingEntry.mirrorPriceInChaos || 0;
+    let isRateStale = existingEntry.rates?.isStale || false;
+    let rateValidationReason = null;
 
     // Filter out items belonging to the types we are about to re-fetch
     const typesSet = new Set(types);
@@ -292,15 +394,63 @@ class CacheManager {
     let fetchedItems = [];
     for (const type of types) {
       const url = `https://poe.ninja/${game}/api/economy/exchange/current/overview?league=${encodeURIComponent(league)}&type=${type}`;
-      const data = await this.fetchJson(url);
-      if (data) {
+      const res = await this.fetchJson(url);
+
+      // Record Diagnostics
+      if (!this.diagnostics[game]) this.diagnostics[game] = {};
+      this.diagnostics[game][type] = {
+        type,
+        url,
+        status: res.httpCode === 200 ? 'ok' : 'error',
+        httpCode: res.httpCode,
+        latencyMs: res.latencyMs,
+        itemsCount: res.data?.lines?.length || 0,
+        lastUpdated: new Date().toISOString(),
+        error: res.error
+      };
+
+      if (res.data) {
+        const data = res.data;
         if (type === 'Currency') {
-          if (data.core?.rates?.divine) {
-            divineRate = data.core.rates.divine;
-          } else if (data.core?.primary === 'divine' && data.core?.rates?.chaos) {
-            divineRate = 1 / data.core.rates.chaos;
+          if (game === 'poe1') {
+            // PoE 1 Rate Validation
+            let candidateDivineRate = 0;
+            if (data.core?.rates?.divine) {
+              candidateDivineRate = data.core.rates.divine;
+            }
+            const validation = ConversionMath.validateRate(candidateDivineRate, existingEntry.rates?.divine);
+            if (validation.valid) {
+              divineRate = validation.rate;
+              isRateStale = false;
+            } else {
+              console.warn(`[CacheManager] PoE1 Divine rate guard triggered: ${validation.reason}. Preserving last-known-good: ${validation.rate}`);
+              divineRate = validation.rate;
+              isRateStale = true;
+              rateValidationReason = validation.reason;
+            }
+          } else if (game === 'poe2') {
+            // PoE 2 Rate Validation
+            const exaltedLine = data.lines?.find(l => l.id === 'exalted');
+            const candidateExalted = ConversionMath.derivePoE2ExaltedRate(data.core?.rates, exaltedLine);
+            const validation = ConversionMath.validateRate(candidateExalted, existingEntry.rates?.exalted);
+
+            if (validation.valid) {
+              exaltedRate = validation.rate;
+              isRateStale = false;
+            } else {
+              console.warn(`[CacheManager] PoE2 Exalted rate guard triggered: ${validation.reason}. Preserving last-known-good: ${validation.rate}`);
+              exaltedRate = validation.rate;
+              isRateStale = true;
+              rateValidationReason = validation.reason;
+            }
+
+            if (data.core?.rates?.chaos) {
+              chaosRate = data.core.rates.chaos;
+            }
+            divineRate = 1;
           }
         }
+
         const normalized = this.normalizeExchangeData(data, type, game, league);
         fetchedItems.push(...normalized);
 
@@ -322,6 +472,20 @@ class CacheManager {
     }
     const finalItems = Array.from(uniqueMap.values());
 
+    // Record Historical Snapshot (keep up to 48 recent checkpoints)
+    if (!this.snapshots[game]) this.snapshots[game] = {};
+    if (!this.snapshots[game][league]) this.snapshots[game][league] = [];
+    this.snapshots[game][league].push({
+      timestamp: new Date().toISOString(),
+      divinePriceInChaos: divineRate > 0 ? +(1 / divineRate).toFixed(1) : (game === 'poe2' ? 1 : (existingEntry.divinePriceInChaos || 0)),
+      exaltedPrice: exaltedRate || existingEntry.rates?.exalted || 0,
+      mirrorPriceInChaos: mirrorRate || existingEntry.mirrorPriceInChaos || 0,
+      itemCount: finalItems.length
+    });
+    if (this.snapshots[game][league].length > 48) {
+      this.snapshots[game][league].shift();
+    }
+
     const updatedEntry = {
       ...existingEntry,
       updatedAt: new Date().toISOString(),
@@ -330,8 +494,12 @@ class CacheManager {
       rates: {
         divine: divineRate || existingEntry.rates?.divine || 0,
         chaosToDivine: divineRate || existingEntry.rates?.divine || 0,
-        exalted: existingEntry.rates?.exalted || 457.3
+        exalted: exaltedRate || existingEntry.rates?.exalted || 0,
+        chaos: chaosRate || existingEntry.rates?.chaos || 0,
+        isStale: isRateStale,
+        staleReason: rateValidationReason
       },
+      snapshots: this.snapshots[game][league],
       count: finalItems.length,
       items: finalItems
     };
@@ -342,6 +510,42 @@ class CacheManager {
 
     console.log(`[CacheManager] Batch [${types.join(', ')}] updated for ${game.toUpperCase()} - ${league}: ${finalItems.length} total items.`);
     return updatedEntry;
+  }
+
+  /**
+   * Refresh a single specific category on-demand
+   */
+  async refreshSingleCategory(game, league, categoryName) {
+    console.log(`[CacheManager] Refreshing single category "${categoryName}" for ${game} - ${league}...`);
+
+    // Category mapping to underlying Exchange types
+    const catTypeMap = {
+      'Currency': ['Currency'],
+      'Catalysts': ['Currency'],
+      'Vaal': ['Currency'],
+      'Scarabs': ['Scarab'],
+      'Divination Cards': ['DivinationCard'],
+      'Fragments': ['Fragment'],
+      'Essences': ['Essence'],
+      'Fossils': ['Fossil'],
+      'Oils': ['Oil'],
+      'Delirium Orbs': ['DeliriumOrb'],
+      'Artifacts': ['Artifact'],
+      'Tattoos': ['Tattoo'],
+      'Omens': ['Omen'],
+      'Allflame Embers': ['AllflameEmber'],
+      'Runegrafts': ['Runegraft'],
+      'Ducats': ['Ducat'],
+      'Enshrouding Crystals': ['EnshroudingCrystal'],
+      'Ritual': ['Ritual'],
+      'Breach': ['Breach'],
+      'Delirium': ['Delirium'],
+      'Abyss': ['Abyss'],
+      'Expedition': ['Expedition']
+    };
+
+    const types = catTypeMap[categoryName] || [categoryName];
+    return await this.syncCategoryBatch(game, league, types);
   }
 
   /**
@@ -364,6 +568,9 @@ class CacheManager {
     const friendlyP1 = p1Batch.map(t => this.mapExchangeCategory(t, t, 'poe1')).join(' & ');
     const friendlyP2 = p2Batch.map(t => this.mapExchangeCategory(t, t, 'poe2')).join(' & ');
 
+    const activeP1 = this.getActiveLeague('poe1');
+    const activeP2 = this.getActiveLeague('poe2');
+
     console.log(`[CacheManager] Starting 5m Rotation: PoE 1 [${friendlyP1}], PoE 2 [${friendlyP2}]...`);
     this.refreshProgress = {
       current: 1,
@@ -372,16 +579,18 @@ class CacheManager {
     };
 
     try {
-      // 1. Sync PoE 1 Allflame
-      await this.syncCategoryBatch('poe1', 'Allflame', p1Batch);
+      // 1. Sync PoE 1 Active League
+      await this.syncCategoryBatch('poe1', activeP1, p1Batch);
       await this.sleep(400);
 
       // 2. Sync PoE 1 Standard
-      await this.syncCategoryBatch('poe1', 'Standard', p1Batch);
-      await this.sleep(400);
+      if (activeP1 !== 'Standard') {
+        await this.syncCategoryBatch('poe1', 'Standard', p1Batch);
+        await this.sleep(400);
+      }
 
-      // 3. Sync PoE 2 Standard
-      await this.syncCategoryBatch('poe2', 'Standard', p2Batch);
+      // 3. Sync PoE 2 Active League
+      await this.syncCategoryBatch('poe2', activeP2, p2Batch);
 
       this.lastRotationTime = new Date().toISOString();
       this.lastRotatedBatch = {
@@ -418,14 +627,19 @@ class CacheManager {
       status: 'Đồng bộ 30p: Currency, Scarabs, Fragments'
     };
 
+    const activeP1 = this.getActiveLeague('poe1');
+    const activeP2 = this.getActiveLeague('poe2');
+
     try {
-      await this.syncCategoryBatch('poe1', 'Allflame', POE1_PRIORITY_TYPES);
+      await this.syncCategoryBatch('poe1', activeP1, POE1_PRIORITY_TYPES);
       await this.sleep(400);
 
-      await this.syncCategoryBatch('poe1', 'Standard', POE1_PRIORITY_TYPES);
-      await this.sleep(400);
+      if (activeP1 !== 'Standard') {
+        await this.syncCategoryBatch('poe1', 'Standard', POE1_PRIORITY_TYPES);
+        await this.sleep(400);
+      }
 
-      await this.syncCategoryBatch('poe2', 'Standard', POE2_PRIORITY_TYPES);
+      await this.syncCategoryBatch('poe2', activeP2, POE2_PRIORITY_TYPES);
 
       this.lastPriorityTime = new Date().toISOString();
       console.log(`[CacheManager] 30m Priority sync completed.`);
@@ -450,8 +664,9 @@ class CacheManager {
     await this.stepRotation();
   }
 
-  getData(game = 'poe1', league = 'Standard') {
-    return this.memoryCache[game]?.[league] || null;
+  getData(game = 'poe1', league = null) {
+    const targetLeague = league || this.getActiveLeague(game);
+    return this.memoryCache[game]?.[targetLeague] || null;
   }
 
   getSummary() {
@@ -464,7 +679,9 @@ class CacheManager {
           updatedAt: data.updatedAt,
           count: data.count,
           divinePriceInChaos: data.divinePriceInChaos,
-          mirrorPriceInChaos: data.mirrorPriceInChaos
+          mirrorPriceInChaos: data.mirrorPriceInChaos,
+          exaltedRate: data.rates?.exalted,
+          isStale: data.rates?.isStale
         };
       }
     }
@@ -476,10 +693,12 @@ class CacheManager {
     const nextP2 = POE2_ROTATION_BATCHES[this.rotationIndexPoe2 % POE2_ROTATION_BATCHES.length];
 
     return {
+      status: 'ok',
       isRefreshing: this.isRefreshing,
       refreshProgress: this.refreshProgress,
       priorityIntervalMinutes: 30,
       rotationIntervalMinutes: 5,
+      activeLeagues: this.activeLeagues,
       lastPriorityTime: this.lastPriorityTime,
       lastRotationTime: this.lastRotationTime,
       lastRotatedBatch: this.lastRotatedBatch,
@@ -489,6 +708,7 @@ class CacheManager {
         friendlyP1: nextP1.map(t => this.mapExchangeCategory(t, t, 'poe1')).join(', '),
         friendlyP2: nextP2.map(t => this.mapExchangeCategory(t, t, 'poe2')).join(', ')
       },
+      diagnostics: this.diagnostics,
       summary: this.getSummary()
     };
   }

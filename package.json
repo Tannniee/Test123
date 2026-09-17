@@ -4,7 +4,11 @@
   "description": "Local fast price check app for PoE 1 and PoE 2 powered by PoE Ninja with 30m cache",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node test/conversionMath.test.js && node test/frontendFeatures.mjs"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "dependencies": {
     "cors": "^2.8.5",

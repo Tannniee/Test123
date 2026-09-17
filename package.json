@@ -1,0 +1,22 @@
+{
+  "name": "poe-quick-price-checker",
+  "version": "1.0.0",
+  "description": "Local fast price check app for PoE 1 and PoE 2 powered by PoE Ninja with 30m cache",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  },
+  "keywords": [
+    "path-of-exile",
+    "poe",
+    "poe2",
+    "poe-ninja",
+    "price-checker"
+  ],
+  "author": "",
+  "license": "MIT"
+}

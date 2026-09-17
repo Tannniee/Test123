@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Cache and local runtime data
+data/cache/
+*.log
+
+# System & Editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Antigravity & Agent workspace temp files
+.gemini/
+.agents/
+scratch/

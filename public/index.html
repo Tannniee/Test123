@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PoE Ninja Quick Price Checker - Exchange Only</title>
+  <meta name="description" content="Ứng dụng tra cứu giá nhanh thị trường Faustus Currency Exchange cho Path of Exile 1 và 2 với cache 30 phút, miêu tả chi tiết và link Wiki.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;900&family=Outfit:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="theme-poe-ninja">
+  <!-- Top Ambient Glow -->
+  <div class="ambient-glow bg-glow-1"></div>
+
+  <!-- App Wrapper (Sidebar + Main Content) -->
+  <div class="app-layout">
+    
+    <!-- LEFT SIDEBAR -->
+    <aside class="app-sidebar" id="appSidebar">
+      <!-- Sidebar Brand -->
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <div class="brand-icon">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 2 7 12 12 22 7 12 2" stroke="#f2a93b" fill="rgba(242,169,59,0.2)" />
+              <polyline points="2 17 12 22 22 17" stroke="#f2a93b" />
+              <polyline points="2 12 12 17 22 12" stroke="#f2a93b" />
+            </svg>
+          </div>
+          <div class="brand-info">
+            <span class="brand-title">POE.NINJA</span>
+            <span class="brand-tag">EXCHANGE ONLY</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dynamic Sidebar Navigation (Rendered in JS per PoE 1 / PoE 2) -->
+      <div class="sidebar-nav-container" id="sidebarNavContainer">
+        <!-- Injected dynamically by renderSidebarNav() in app.js -->
+      </div>
+    </aside>
+
+    <!-- RIGHT MAIN CONTENT -->
+    <main class="app-main">
+      
+      <!-- TOP NAVIGATION BAR -->
+      <header class="top-nav-bar">
+        <!-- Global Search Input -->
+        <div class="top-search-wrap">
+          <span class="top-search-icon">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </span>
+          <input 
+            type="text" 
+            id="searchInput" 
+            class="top-search-input" 
+            placeholder="Search by item... (bấm '/' để gõ, Ctrl+V để dán từ game)"
+            autocomplete="off"
+            autofocus
+          />
+          <button class="search-clear-btn" id="searchClearBtn" title="Xóa" style="display: none;">&times;</button>
+          <kbd class="shortcut-kbd">/</kbd>
+        </div>
+
+        <!-- Controls (Game, League, Rates, Sync) -->
+        <div class="top-controls">
+          
+          <!-- Game Switcher -->
+          <div class="segmented-control" id="gameSwitcher">
+            <button class="seg-btn active" data-game="poe1" id="btnPoe1">PoE 1</button>
+            <button class="seg-btn" data-game="poe2" id="btnPoe2">PoE 2</button>
+          </div>
+
+          <!-- League Dropdown -->
+          <div class="league-dropdown-wrap">
+            <span class="league-label">League</span>
+            <select id="leagueSelect" class="league-select">
+              <option value="Allflame">Allflame</option>
+              <option value="Standard">Standard</option>
+            </select>
+          </div>
+
+          <!-- Rates Ticker -->
+          <div class="rates-ticker" id="ratesTicker" title="Tỷ giá hối đoái thị trường">
+            <div class="rate-chip">
+              <span class="currency-icon chaos-icon"></span>
+              <span id="tickerDivineChaos">1 Div = <strong id="divinePriceText">...</strong></span>
+            </div>
+            <div class="rate-chip hide-md">
+              <span class="currency-icon mirror-icon"></span>
+              <span id="tickerMirrorDiv">1 Mirror = <strong id="mirrorPriceText">...</strong></span>
+            </div>
+          </div>
+
+          <!-- Cache Status & Sync Button -->
+          <div class="cache-status-wrap">
+            <div class="cache-pill" id="cacheStatusPill" title="Tự động cập nhật mỗi 30 phút">
+              <span class="pulse-dot" id="cachePulse"></span>
+              <span id="cacheText">Đang tải...</span>
+            </div>
+            <button class="btn-icon" id="btnSyncNow" title="Làm mới dữ liệu từ PoE Ninja ngay bây giờ">
+              <svg id="syncIcon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.19"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Ctrl + V Paste Button -->
+          <button class="btn-paste-header" id="btnPasteAction" title="Dán vật phẩm đã copy trong game (Ctrl + C)">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+            <span>Ctrl + V</span>
+          </button>
+
+        </div>
+      </header>
+
+      <!-- MAIN DATA PANEL -->
+      <section class="content-panel">
+        
+        <!-- Breadcrumbs & Category Title Row -->
+        <div class="category-header-row">
+          <div class="breadcrumb-group">
+            <div class="breadcrumbs">
+              <span>Economy</span>
+              <span class="bc-sep">&gt;</span>
+              <span id="breadcrumbCategory" class="bc-active">Currency</span>
+            </div>
+            <h2 class="category-title" id="currentCategoryTitle">Currency</h2>
+          </div>
+
+          <!-- Quick Converter Bar -->
+          <div class="header-tools">
+            <div class="mini-converter">
+              <span class="conv-lbl">Đổi nhanh:</span>
+              <input type="number" id="convChaosInput" value="100" class="conv-input" title="Nhập Chaos/Exalted">
+              <span class="conv-sym" id="convPrimarySym">C</span>
+              <span class="conv-arrow">⇄</span>
+              <input type="number" id="convDivineInput" value="0.28" step="0.01" class="conv-input" title="Nhập Divine">
+              <span class="conv-sym">Div</span>
+            </div>
+
+            <!-- View Switcher (Table / Grid) -->
+            <div class="view-switch-btns">
+              <button class="view-btn active" id="viewTableBtn" title="Chế độ Bảng PoE Ninja (Table)">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                  <line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="2"/>
+                  <line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="2"/>
+                  <line x1="3" y1="18" x2="21" y2="18" stroke="currentColor" stroke-width="2"/>
+                </svg>
+              </button>
+              <button class="view-btn" id="viewGridBtn" title="Chế độ Lưới (Card)">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                  <rect x="3" y="3" width="7" height="7" rx="1"/>
+                  <rect x="14" y="3" width="7" height="7" rx="1"/>
+                  <rect x="14" y="14" width="7" height="7" rx="1"/>
+                  <rect x="3" y="14" width="7" height="7" rx="1"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sub-filter Row -->
+        <div class="sub-filter-row">
+          <div class="sub-search-box">
+            <input type="text" id="subSearchInput" class="sub-search-input" placeholder="Filter by Name...">
+          </div>
+
+          <div class="sub-options">
+            <div class="val-display-select">
+              <label for="valDisplaySelect">Value Display:</label>
+              <select id="valDisplaySelect" class="sub-select">
+                <option value="adaptive">Adaptive (Auto)</option>
+                <option value="divine">Always Divine (Div)</option>
+                <option value="chaos">Always Chaos / Exalted</option>
+              </select>
+            </div>
+            <div class="results-stats" id="resultsCount">
+              Đang tải dữ liệu...
+            </div>
+          </div>
+        </div>
+
+        <!-- TABLE VIEW (PoE Ninja standard layout) -->
+        <div class="ninja-table-container" id="itemsTableWrap">
+          <table class="ninja-table" id="itemsTable">
+            <thead>
+              <tr>
+                <th class="col-name sortable" id="thName" onclick="handleSort('name')">
+                  Name <span class="sort-indicator" id="sortIndName">↕</span>
+                </th>
+                <th class="col-value text-right sortable sorted" id="thValue" onclick="handleSort('value')">
+                  Value <span class="sort-indicator" id="sortIndValue">▼</span>
+                  <span class="info-tip" title="Giá trị thị trường tính theo Divine hoặc Chaos">ⓘ</span>
+                </th>
+                <th class="col-trend text-center sortable" width="130" id="thTrend" onclick="handleSort('change7d')">
+                  Last 7 days <span class="sort-indicator" id="sortIndTrend">↕</span>
+                </th>
+                <th class="col-volume text-right sortable" width="130" id="thVolume" onclick="handleSort('volume')">
+                  Volume / Hour <span class="sort-indicator" id="sortIndVolume">↕</span>
+                  <span class="info-tip" title="Khối lượng giao dịch mỗi giờ">ⓘ</span>
+                </th>
+                <th class="col-popular text-center" width="160" id="thPopular">
+                  Most Popular <span class="info-tip" title="Tỷ giá quy đổi thịnh hành">ⓘ</span>
+                </th>
+                <th class="col-action text-center" width="70">Calc</th>
+              </tr>
+            </thead>
+            <tbody id="itemsTableBody">
+              <!-- Rows inserted dynamically -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- GRID VIEW (Card Mode) -->
+        <div class="items-grid" id="itemsGrid" style="display: none;">
+          <!-- Cards inserted dynamically -->
+        </div>
+
+        <!-- EMPTY STATE -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+          <div class="empty-icon">🔍</div>
+          <h3>Không tìm thấy vật phẩm</h3>
+          <p>Thử tìm với từ khóa khác hoặc chuyển danh mục ở thanh menu bên trái.</p>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <!-- FLOATING IN-GAME STYLE HOVER TOOLTIP (PoE Ninja Replica) -->
+  <div class="poe-floating-tooltip" id="poeTooltip" style="display: none;">
+    <div class="tooltip-pin-btn" id="tooltipPinBtn" title="Ghim bảng miêu tả (Click để giữ)">📌</div>
+    <div class="tooltip-header">
+      <h3 class="tooltip-title" id="ttTitle">Item Name</h3>
+      <div class="tooltip-basetype" id="ttBaseType" style="display: none;">Base Type</div>
+    </div>
+    <div class="tooltip-body">
+      <!-- Implicits -->
+      <div class="tooltip-implicits" id="ttImplicits" style="display: none;"></div>
+      <div class="tooltip-divider" id="ttDiv1" style="display: none;"></div>
+
+      <!-- Magic / Primary description -->
+      <div class="tooltip-magic" id="ttMagic" style="display: none;"></div>
+
+      <!-- Explicits -->
+      <div class="tooltip-explicits" id="ttExplicits" style="display: none;"></div>
+      <div class="tooltip-divider" id="ttDiv2" style="display: none;"></div>
+
+      <!-- Instructions -->
+      <div class="tooltip-instructions" id="ttInstructions" style="display: none;"></div>
+
+      <!-- Flavour text / lore -->
+      <div class="tooltip-flavour" id="ttFlavour" style="display: none;"></div>
+    </div>
+    <!-- Bottom Artwork -->
+    <div class="tooltip-footer">
+      <img id="ttIcon" src="" alt="Artwork" />
+    </div>
+  </div>
+
+  <!-- ITEM DETAIL & QUANTITY MODAL -->
+  <div class="modal-overlay" id="itemModal" style="display: none;">
+    <div class="modal-card">
+      <button class="modal-close" id="modalCloseBtn">&times;</button>
+      
+      <div class="modal-header">
+        <div class="modal-item-icon-wrap">
+          <img id="modalItemIcon" src="" alt="Icon" />
+        </div>
+        <div class="modal-item-title-group">
+          <h2 id="modalItemName" class="modal-item-name">Item Name</h2>
+          <div class="modal-item-sub" id="modalItemSub">Base Type • Category</div>
+        </div>
+      </div>
+
+      <div class="modal-body">
+        <!-- Price Stats Grid -->
+        <div class="modal-stats-grid">
+          <div class="stat-box">
+            <span class="stat-label" id="modalLabelPrimary">Giá Chaos</span>
+            <span class="stat-value" id="modalChaosVal">0 C</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">Giá Divine</span>
+            <span class="stat-value divine-glow" id="modalDivineVal">0 Div</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">Biến động 7 ngày</span>
+            <span class="stat-value" id="modalTrendVal">0%</span>
+          </div>
+        </div>
+
+        <!-- Description Box in Modal -->
+        <div class="modal-desc-box" id="modalDescBox">
+          <span class="desc-label">Chi tiết & Miêu tả Wiki:</span>
+          <div class="desc-content" id="modalDescContent"></div>
+        </div>
+
+        <!-- Sparkline Trend Chart -->
+        <div class="modal-chart-box">
+          <span class="chart-title">Biểu đồ xu hướng giá 7 ngày qua:</span>
+          <div class="chart-canvas-wrap" id="modalSparklineWrap"></div>
+        </div>
+
+        <!-- Quick Quantity Calculator -->
+        <div class="modal-calc-box">
+          <label for="modalQtyInput" class="calc-label">Tính tổng giá trị theo số lượng:</label>
+          <div class="calc-input-row">
+            <div class="qty-field">
+              <span class="qty-prefix">x</span>
+              <input type="number" id="modalQtyInput" value="1" min="1" max="99999">
+            </div>
+            <div class="calc-result-badge">
+              <span>= <strong id="modalCalcChaos">0</strong> <span id="modalCalcPrimarySym">C</span></span>
+              <span class="calc-divider">•</span>
+              <span><strong id="modalCalcDivine">0</strong> Div</span>
+            </div>
+          </div>
+          <!-- Quick Quantity Presets -->
+          <div class="quick-qty-presets">
+            <button type="button" class="qty-btn" onclick="setModalQty(1)">1</button>
+            <button type="button" class="qty-btn" onclick="setModalQty(5)">5</button>
+            <button type="button" class="qty-btn" onclick="setModalQty(10)">10</button>
+            <button type="button" class="qty-btn" onclick="setModalQty(20)">20</button>
+            <button type="button" class="qty-btn" id="modalStackBtn" onclick="setModalStackQty()">Full Stack</button>
+            <button type="button" class="qty-btn btn-qty-reset" onclick="setModalQty(1)">Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <a id="modalWikiLink" href="#" target="_blank" rel="noopener" class="btn-wiki-action">
+          WIKI ↗
+        </a>
+        <a id="modalNinjaLink" href="#" target="_blank" rel="noopener" class="btn-action-outlined">
+          PoE.ninja ↗
+        </a>
+        <button class="btn-action-primary" id="modalCopyPriceBtn">
+          Sao chép giá
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Scripts -->
+  <script src="/js/itemDescriptions.js"></script>
+  <script src="/js/itemParser.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

@@ -21,9 +21,11 @@ export const Modals = {
 
     // Direct Wiki link
     if (elements.calcWikiLink) {
-      const wikiUrl = `https://www.poewiki.net/wiki/${encodeURIComponent(item.name.replace(/ /g, '_'))}`;
+      const wikiUrl = isPoe2
+        ? `https://poe2db.tw/us/${encodeURIComponent(item.name)}`
+        : `https://www.poewiki.net/wiki/${encodeURIComponent(item.name.replace(/ /g, '_'))}`;
       elements.calcWikiLink.href = wikiUrl;
-      elements.calcWikiLink.title = `Xem "${item.name}" trên poewiki.net`;
+      elements.calcWikiLink.title = isPoe2 ? `Xem "${item.name}" trên poe2db.tw` : `Xem "${item.name}" trên poewiki.net`;
     }
 
     // Set Max Stack for Full Stack preset

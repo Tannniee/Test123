@@ -98,6 +98,13 @@ let warmingPollTimer = null;
 // ==========================================================================
 async function init() {
   initDom();
+
+  // Sync initial UI classes from loaded preferences
+  dom.btnPoe1.classList.toggle('active', state.currentGame === 'poe1');
+  dom.btnPoe2.classList.toggle('active', state.currentGame === 'poe2');
+  dom.viewTableBtn.classList.toggle('active', state.currentView === 'table');
+  dom.viewGridBtn.classList.toggle('active', state.currentView === 'grid');
+
   bindEvents();
 
   // 1. Fetch dynamic leagues list
@@ -247,10 +254,11 @@ function applyLoadedData(data) {
 }
 
 function filterAndRender() {
+  const isSearching = state.searchQuery.trim().length > 0;
   state.filteredItems = Search.filterAndRank(state.items, {
     query: state.searchQuery,
-    category: state.activeCategory,
-    subCategory: state.activeSubCategory,
+    category: isSearching ? 'All' : state.activeCategory,
+    subCategory: isSearching ? null : state.activeSubCategory,
     priceFilter: state.priceFilter,
     onlyFavorites: state.onlyFavorites,
     favoritesSet: state.favorites,
@@ -415,7 +423,16 @@ function updateHeaderRates() {
     const exRate = state.rates.rawRates?.exalted || 0;
     dom.divinePriceText.textContent = exRate > 0 ? `${exRate} Ex` : '...';
     dom.tickerDivineChaos.innerHTML = `1 <span style="color:#f2a93b;">Div</span> = <strong>${exRate > 0 ? exRate : '...'}</strong> Ex`;
-    dom.tickerMirrorDiv.innerHTML = `1 <span style="color:#f2a93b;">Mirror</span> = <strong>~22k</strong> Div`;
+
+    const mirrorItem = state.items.find(i => i.key === 'mirror' || (i.name && i.name.toLowerCase().includes('mirror of kalandra')));
+    const mirrorDiv = mirrorItem?.divineValue || 0;
+    if (mirrorDiv > 0) {
+      const mFormatted = mirrorDiv >= 1000 ? (mirrorDiv / 1000).toFixed(1) + 'k' : mirrorDiv.toLocaleString();
+      dom.mirrorPriceText.textContent = `${mFormatted} Div`;
+      dom.tickerMirrorDiv.innerHTML = `1 <span style="color:#f2a93b;">Mirror</span> = <strong>${mFormatted}</strong> Div`;
+    } else {
+      dom.tickerMirrorDiv.innerHTML = `1 <span style="color:#f2a93b;">Mirror</span> = <strong>...</strong> Div`;
+    }
     dom.convPrimarySym.textContent = 'Ex';
   } else {
     const divChaos = state.rates.divinePriceInChaos;
@@ -426,6 +443,7 @@ function updateHeaderRates() {
     if (state.rates.mirrorPriceInChaos > 0 && divChaos > 0) {
       const mirrorInDiv = Math.round(state.rates.mirrorPriceInChaos / divChaos);
       dom.mirrorPriceText.textContent = `${mirrorInDiv.toLocaleString()} Div`;
+      dom.tickerMirrorDiv.innerHTML = `1 <span style="color:#f2a93b;">Mirror</span> = <strong>${mirrorInDiv.toLocaleString()}</strong> Div`;
     }
     dom.convPrimarySym.textContent = 'C';
   }
@@ -534,6 +552,33 @@ function bindEvents() {
   // Views Toggle
   dom.viewTableBtn.addEventListener('click', () => switchView('table'));
   dom.viewGridBtn.addEventListener('click', () => switchView('grid'));
+
+  // Quick Currency Converter Two-Way Reactivity
+  if (dom.convChaosInput && dom.convDivineInput) {
+    dom.convChaosInput.addEventListener('input', () => {
+      const val = parseFloat(dom.convChaosInput.value) || 0;
+      const isPoe2 = state.currentGame === 'poe2';
+      if (isPoe2) {
+        const exRate = state.rates.rawRates?.exalted || 0;
+        dom.convDivineInput.value = exRate > 0 ? +(val / exRate).toFixed(3) : 0;
+      } else {
+        const divChaos = state.rates.divinePriceInChaos || 0;
+        dom.convDivineInput.value = divChaos > 0 ? +(val / divChaos).toFixed(2) : 0;
+      }
+    });
+
+    dom.convDivineInput.addEventListener('input', () => {
+      const val = parseFloat(dom.convDivineInput.value) || 0;
+      const isPoe2 = state.currentGame === 'poe2';
+      if (isPoe2) {
+        const exRate = state.rates.rawRates?.exalted || 0;
+        dom.convChaosInput.value = exRate > 0 ? Math.round(val * exRate) : 0;
+      } else {
+        const divChaos = state.rates.divinePriceInChaos || 0;
+        dom.convChaosInput.value = divChaos > 0 ? Math.round(val * divChaos) : 0;
+      }
+    });
+  }
 
   // Table Sort Delegation
   document.querySelector('.items-table-header')?.addEventListener('click', (e) => {

@@ -162,7 +162,7 @@ app.get('*', (req, res) => {
 // Boot server
 const server = app.listen(PORT, async () => {
   console.log(`=======================================================`);
-  console.log(`  PoE Quick Price Checker v1.0.1 is running!`);
+  console.log(`  PoE Quick Price Checker v1.0.5 is running!`);
   console.log(`  Local URL: http://localhost:${PORT}`);
   console.log(`  Data Architecture: Data-Driven Dynamic Categories`);
   console.log(`=======================================================`);

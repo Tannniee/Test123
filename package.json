@@ -1,6 +1,6 @@
 {
   "name": "poe-quick-price-checker",
-  "version": "1.0.1",
+  "version": "1.0.5",
   "description": "Local fast price check app for PoE 1 and PoE 2 powered by PoE Ninja with 30m cache",
   "main": "server.js",
   "scripts": {

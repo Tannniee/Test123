@@ -884,9 +884,11 @@ function handleItemAction(e) {
     const res = state.toggleCompare(item);
     if (res === 'limit_reached') {
       Clipboard.showToast('Bạn chỉ có thể so sánh tối đa 5 vật phẩm cùng lúc!', 'warning');
-      target.checked = false;
+      if ('checked' in target) target.checked = false;
       return;
     }
+    const isNowComparing = state.isInCompare(item.id);
+    Clipboard.showToast(isNowComparing ? `⚖️ Đã thêm "${item.name}" vào bảng so sánh (${state.compareList.length}/5)` : `Đã bỏ so sánh "${item.name}"`);
     renderCurrentView();
   }
 }

@@ -166,7 +166,7 @@ export const Render = {
     if (!items || items.length === 0) {
       return `
         <tr>
-          <td colspan="7" class="empty-table-cell">
+          <td colspan="5" class="empty-table-cell">
             <div class="empty-state">
               <i class="fa-solid fa-box-open empty-icon"></i>
               <p class="empty-title">Không tìm thấy vật phẩm nào</p>
@@ -197,11 +197,9 @@ export const Render = {
 
       return `
         <tr class="item-table-row ${isComparing ? 'row-comparing' : ''}" data-id="${this.escapeHtml(item.id)}">
-          <td class="col-star text-center">
-            <button class="star-btn ${isFav ? 'active' : ''}" data-action="toggle-fav" data-id="${this.escapeHtml(item.id)}" title="${isFav ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích'}">★</button>
-          </td>
           <td class="col-name">
             <div class="table-name-cell">
+              <button class="star-btn ${isFav ? 'active' : ''}" data-action="toggle-fav" data-id="${this.escapeHtml(item.id)}" title="${isFav ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích'}">★</button>
               <img src="${this.escapeHtml(iconUrl)}" alt="" class="table-item-icon" loading="lazy">
               <div class="table-name-wrap">
                 <span class="item-link-name ${rarityClass}" data-action="open-calc" data-id="${this.escapeHtml(item.id)}" data-tooltip-id="${this.escapeHtml(item.id)}">${this.escapeHtml(item.name)}</span>
@@ -223,16 +221,15 @@ export const Render = {
           <td class="col-volume text-right hide-sm" data-action="open-calc" data-id="${this.escapeHtml(item.id)}">
             ${this.formatVolumeHtml(item, state.currentGame)}
           </td>
-          <td class="col-compare text-center">
-            <label class="compare-checkbox-label">
-              <input type="checkbox" class="compare-checkbox" data-action="toggle-compare" data-id="${this.escapeHtml(item.id)}" ${isComparing ? 'checked' : ''}>
-              <span class="compare-label-text">So sánh</span>
-            </label>
-          </td>
           <td class="col-actions text-center">
-            <button class="action-quick-btn" data-action="open-calc" data-id="${this.escapeHtml(item.id)}" title="Mở máy tính giá">
-              <i class="fa-solid fa-calculator"></i>
-            </button>
+            <div class="table-actions-group">
+              <button class="action-quick-btn btn-calc" data-action="open-calc" data-id="${this.escapeHtml(item.id)}" title="Mở máy tính giá">
+                <i class="fa-solid fa-calculator"></i>
+              </button>
+              <button class="action-quick-btn btn-compare ${isComparing ? 'active' : ''}" data-action="toggle-compare" data-id="${this.escapeHtml(item.id)}" title="${isComparing ? 'Xóa khỏi so sánh' : 'So sánh vật phẩm'}">
+                <i class="fa-solid fa-code-compare"></i>
+              </button>
+            </div>
           </td>
         </tr>
       `;

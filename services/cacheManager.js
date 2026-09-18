@@ -134,8 +134,28 @@ class CacheManager {
       this.activeLeagues[game] = list[0].id;
       this.syncTrackedLeagues(game);
       console.log(`[CacheManager] Dynamic active league for ${game.toUpperCase()}: "${this.activeLeagues[game]}"`);
+
+      // Proactively guarantee priority Currency is loaded for active league
+      const activeLg = this.activeLeagues[game];
+      const entry = this.memoryCache[game]?.[activeLg];
+      const hasCurrency = entry?.items?.some(it => (it.sourceType || it.category) === 'Currency');
+      if (!hasCurrency) {
+        console.log(`[CacheManager] Active league ${game.toUpperCase()} - "${activeLg}" lacks Currency in cache, initiating immediate sync...`);
+        this.syncCategoryBatch(game, activeLg, ['Currency']).catch(e => {
+          console.error(`[CacheManager] Startup Currency sync failed for ${game}/${activeLg}:`, e.message);
+        });
+      }
     } else {
       console.warn(`[CacheManager] Could not fetch dynamic leagues for ${game}, using fallback defaults.`);
+      const activeLg = this.getActiveLeague(game);
+      const entry = this.memoryCache[game]?.[activeLg];
+      const hasCurrency = entry?.items?.some(it => (it.sourceType || it.category) === 'Currency');
+      if (!hasCurrency) {
+        console.log(`[CacheManager] Fallback active league ${game.toUpperCase()} - "${activeLg}" lacks Currency, syncing...`);
+        this.syncCategoryBatch(game, activeLg, ['Currency']).catch(e => {
+          console.error(`[CacheManager] Startup Currency sync failed for ${game}/${activeLg}:`, e.message);
+        });
+      }
     }
   }
 
@@ -395,6 +415,22 @@ class CacheManager {
             if (data.snapshots && Array.isArray(data.snapshots)) {
               if (!this.snapshots[game]) this.snapshots[game] = {};
               this.snapshots[game][actualLeague] = data.snapshots;
+            }
+
+            // Populate diagnostics from cached sources
+            if (data.sources) {
+              if (!this.diagnostics[game]) this.diagnostics[game] = {};
+              if (!this.diagnostics[game][actualLeague]) this.diagnostics[game][actualLeague] = {};
+              for (const [sType, sData] of Object.entries(data.sources)) {
+                this.diagnostics[game][actualLeague][sType] = {
+                  type: sType,
+                  httpCode: sData.status === 'unsupported' ? 404 : 200,
+                  latencyMs: sData.latencyMs || 100,
+                  itemsCount: sData.itemsCount || 0,
+                  status: sData.status || 'available',
+                  lastUpdated: sData.updatedAt || data.updatedAt
+                };
+              }
             }
 
             this.initAvailabilityForLeague(game, actualLeague);
@@ -769,6 +805,23 @@ class CacheManager {
       }
       const finalItems = Array.from(uniqueMap.values());
 
+      // Record live diagnostics
+      if (!this.diagnostics[game]) this.diagnostics[game] = {};
+      if (!this.diagnostics[game][league]) this.diagnostics[game][league] = {};
+      for (const { type, res } of rawResults) {
+        const src = sourcesFreshness[type];
+        if (src) {
+          this.diagnostics[game][league][type] = {
+            type,
+            httpCode: res.httpCode || (src.status === 'unsupported' ? 404 : 200),
+            latencyMs: res.latencyMs || src.latencyMs || 0,
+            itemsCount: src.itemsCount || 0,
+            status: src.status,
+            lastUpdated: src.updatedAt
+          };
+        }
+      }
+
       // Historical Snapshot
       if (!this.snapshots[game]) this.snapshots[game] = {};
       if (!this.snapshots[game][league]) this.snapshots[game][league] = [];
@@ -981,11 +1034,31 @@ class CacheManager {
       };
     }
 
-    // Only return 'ready' when discovery is NOT running and cache entry is ready with items
-    if (entry && entry.items && entry.items.length > 0) {
+    // Only return 'ready' when discovery is NOT running and cache entry is ready with items INCLUDING priority Currency
+    const hasCurrency = entry?.items?.some(it => (it.sourceType || it.category) === 'Currency');
+    if (entry && entry.items && entry.items.length > 0 && hasCurrency) {
       return {
         status: 'ready',
         ...entry
+      };
+    }
+
+    if (entry && entry.items && entry.items.length > 0 && !hasCurrency) {
+      // Entry has other categories but lacks Currency - fetch Currency actively
+      this.syncCategoryBatch(game, targetLeague, ['Currency']).catch(e => {
+        console.error(`[CacheManager] On-demand Currency sync failed for ${game}/${targetLeague}:`, e.message);
+      });
+      return {
+        status: 'warming',
+        game,
+        league: targetLeague,
+        updatedAt: entry?.updatedAt || null,
+        divinePriceInChaos: entry?.divinePriceInChaos || (game === 'poe2' ? 1 : 0),
+        mirrorPriceInChaos: entry?.mirrorPriceInChaos || 0,
+        rates: entry?.rates || {},
+        count: entry?.items?.length || 0,
+        items: entry?.items || [],
+        message: `Đang nạp dữ liệu Currency cho league "${targetLeague}"... Vui lòng đợi trong giây lát.`
       };
     }
 

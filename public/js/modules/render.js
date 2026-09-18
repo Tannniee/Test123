@@ -164,71 +164,204 @@ export const Render = {
   },
 
   /**
-   * Format Value Cell in Faustus Exchange Style
+   * Format Value Cell in Faustus Exchange / poe.ninja Style
+   * Flexible exchange ratio: inverts when item < 1 base currency (e.g. 1.0 C ⇆ 36 Lifeforce, 1.0 C ⇆ 1.1 Bauble)
    */
-  formatValueHtml(item, game) {
+  formatValueHtml(item, game, rates) {
     const itemIcon = item.icon || this.ICONS.chaos;
+    const isPoe2 = game === 'poe2';
 
-    if (game === 'poe2') {
-      const divVal = typeof item.divineValue === 'number' ? item.divineValue : 0;
+    if (isPoe2) {
       const exVal = typeof item.exaltedValue === 'number' ? item.exaltedValue : 0;
+      const divVal = typeof item.divineValue === 'number' ? item.divineValue : 0;
 
-      if (divVal >= 1) {
-        const divFormatted = divVal >= 1000 ? (divVal / 1000).toFixed(1) + 'k' : divVal.toLocaleString();
+      // Expensive PoE 2 item (>= 1 Exalted)
+      if (exVal >= 1) {
+        const exFormatted = exVal >= 1000 ? (exVal / 1000).toFixed(1) + 'k' : (exVal % 1 === 0 ? exVal.toLocaleString() : exVal.toFixed(1));
         return `
           <div class="exchange-pair">
-            <span class="val-primary">${divFormatted}</span>
-            <img src="${this.ICONS.divine}" class="mini-ico" alt="Div" title="Divine Orb" />
+            <span class="val-primary">${exFormatted}</span>
+            <img src="${this.ICONS.exalted}" class="mini-ico" alt="Ex" title="Exalted Orb" />
             <span class="exchange-arrow">⇆</span>
             <span class="val-base">1.0</span>
             <img src="${this.escapeHtml(itemIcon)}" class="mini-ico" alt="" />
           </div>
-          ${exVal > 0 ? `<div class="val-sub">≈ ${exVal.toLocaleString()} Ex</div>` : ''}
+          ${divVal > 0 ? `<div class="val-sub">≈ ${divVal >= 1 ? (divVal % 1 === 0 ? divVal.toLocaleString() : divVal.toFixed(1)) : divVal.toFixed(2)} Div</div>` : ''}
         `;
       }
 
-      const exFormatted = exVal >= 1000 ? (exVal / 1000).toFixed(1) + 'k' : (exVal % 1 === 0 ? exVal.toLocaleString() : exVal.toFixed(1));
-      return `
-        <div class="exchange-pair">
-          <span class="val-primary">${exFormatted}</span>
-          <img src="${this.ICONS.exalted}" class="mini-ico" alt="Ex" title="Exalted Orb" />
-          <span class="exchange-arrow">⇆</span>
-          <span class="val-base">1.0</span>
-          <img src="${this.escapeHtml(itemIcon)}" class="mini-ico" alt="" />
-        </div>
-        ${divVal > 0 ? `<div class="val-sub">≈ ${divVal.toFixed(3)} Div</div>` : ''}
-      `;
+      // Fractional PoE 2 item (< 1 Exalted): Invert ratio to show how many items per 1 Exalted!
+      if (exVal > 0) {
+        const unitsPerEx = 1 / exVal;
+        const unitsFormatted = unitsPerEx >= 1000 ? (unitsPerEx / 1000).toFixed(1) + 'k' : (unitsPerEx >= 10 ? Math.round(unitsPerEx).toLocaleString() : unitsPerEx.toFixed(1));
+        return `
+          <div class="exchange-pair">
+            <span class="val-primary">1.0</span>
+            <img src="${this.ICONS.exalted}" class="mini-ico" alt="Ex" title="Exalted Orb" />
+            <span class="exchange-arrow">⇆</span>
+            <span class="val-base">${unitsFormatted}</span>
+            <img src="${this.escapeHtml(itemIcon)}" class="mini-ico" alt="" />
+          </div>
+          <div class="val-sub">1 ${this.escapeHtml(item.name)} ≈ ${exVal.toFixed(2)} Ex</div>
+        `;
+      }
+
+      return `<div class="exchange-pair"><span class="val-primary text-muted">-</span></div>`;
     }
 
     // PoE 1
     const chaosVal = typeof item.chaosValue === 'number' ? item.chaosValue : 0;
     const divVal = typeof item.divineValue === 'number' ? item.divineValue : 0;
 
-    if (divVal >= 1) {
-      const divFormatted = divVal >= 1000 ? (divVal / 1000).toFixed(1) + 'k' : divVal.toLocaleString();
+    // Item >= 1 Chaos
+    if (chaosVal >= 1) {
+      const chaosFormatted = chaosVal >= 1000 ? (chaosVal / 1000).toFixed(1) + 'k' : (chaosVal % 1 === 0 ? chaosVal.toLocaleString() : chaosVal.toFixed(1));
       return `
         <div class="exchange-pair">
-          <span class="val-primary">${divFormatted}</span>
+          <span class="val-primary">${chaosFormatted}</span>
+          <img src="${this.ICONS.chaos}" class="mini-ico" alt="C" title="Chaos Orb" />
+          <span class="exchange-arrow">⇆</span>
+          <span class="val-base">1.0</span>
+          <img src="${this.escapeHtml(itemIcon)}" class="mini-ico" alt="" />
+        </div>
+        ${divVal > 0 ? `<div class="val-sub">≈ ${divVal >= 1 ? (divVal % 1 === 0 ? divVal.toLocaleString() : divVal.toFixed(1)) : divVal.toFixed(2)} Div</div>` : ''}
+      `;
+    }
+
+    // Fractional item (< 1 Chaos): Invert ratio to show how many per 1 Chaos (e.g. 1.0 C ⇆ 36 Lifeforce, 1.0 C ⇆ 1.1 Bauble)!
+    if (chaosVal > 0) {
+      const unitsPerChaos = 1 / chaosVal;
+      const unitsFormatted = unitsPerChaos >= 1000 ? (unitsPerChaos / 1000).toFixed(1) + 'k' : (unitsPerChaos >= 10 ? Math.round(unitsPerChaos).toLocaleString() : unitsPerChaos.toFixed(1));
+      return `
+        <div class="exchange-pair">
+          <span class="val-primary">1.0</span>
+          <img src="${this.ICONS.chaos}" class="mini-ico" alt="C" title="Chaos Orb" />
+          <span class="exchange-arrow">⇆</span>
+          <span class="val-base">${unitsFormatted}</span>
+          <img src="${this.escapeHtml(itemIcon)}" class="mini-ico" alt="" />
+        </div>
+        <div class="val-sub">1 ${this.escapeHtml(item.name)} ≈ ${chaosVal.toFixed(3).replace(/0+$/, '').replace(/\.$/, '')} C</div>
+      `;
+    }
+
+    return `<div class="exchange-pair"><span class="val-primary text-muted">-</span></div>`;
+  },
+
+  /**
+   * Format Most Popular Column (poe.ninja Authentic)
+   * Shows the most active trading denomination (e.g. 1.0 Div ⇆ 13k Lifeforce, 1.0 Div ⇆ 409 Bauble, 55 C ⇆ 1.0 Chisel)
+   */
+  formatMostPopularHtml(item, game, rates) {
+    const itemIcon = item.icon || this.ICONS.chaos;
+    const isPoe2 = game === 'poe2';
+
+    if (isPoe2) {
+      const divVal = typeof item.divineValue === 'number' ? item.divineValue : 0;
+      const exVal = typeof item.exaltedValue === 'number' ? item.exaltedValue : 0;
+      const exRate = (rates && rates.rawRates && rates.rawRates.exalted) || (divVal > 0 && exVal > 0 ? Math.round(exVal / divVal) : 120);
+
+      // 1. Expensive items (>= 1 Divine)
+      if (divVal >= 1) {
+        const divFormatted = divVal >= 1000 ? (divVal / 1000).toFixed(1) + 'k' : (divVal % 1 === 0 ? divVal.toLocaleString() : divVal.toFixed(1));
+        return `
+          <div class="exchange-pair popular-pair">
+            <span class="val-primary val-gold">${divFormatted}</span>
+            <img src="${this.ICONS.divine}" class="mini-ico" alt="Div" title="Divine Orb" />
+            <span class="exchange-arrow">⇆</span>
+            <span class="val-base">1.0</span>
+            <img src="${this.escapeHtml(itemIcon)}" class="mini-ico" alt="" />
+          </div>
+          <div class="val-sub">≈ ${Math.round(divVal * exRate).toLocaleString()} Ex</div>
+        `;
+      }
+
+      // 2. High Exalted item (>= 15 Exalted, traded per unit in Exalted)
+      if (exVal >= 15) {
+        const exFormatted = exVal >= 1000 ? (exVal / 1000).toFixed(1) + 'k' : (exVal % 1 === 0 ? exVal.toLocaleString() : exVal.toFixed(1));
+        return `
+          <div class="exchange-pair popular-pair">
+            <span class="val-primary">${exFormatted}</span>
+            <img src="${this.ICONS.exalted}" class="mini-ico" alt="Ex" title="Exalted Orb" />
+            <span class="exchange-arrow">⇆</span>
+            <span class="val-base">1.0</span>
+            <img src="${this.escapeHtml(itemIcon)}" class="mini-ico" alt="" />
+          </div>
+          ${divVal > 0 ? `<div class="val-sub">≈ ${divVal.toFixed(2)} Div</div>` : ''}
+        `;
+      }
+
+      // 3. Bulk items (< 15 Exalted): Traded in bulk Divine!
+      if (exVal > 0 && exRate > 0) {
+        const unitsPerDiv = exRate / exVal;
+        const unitsFormatted = unitsPerDiv >= 1000000 ? (unitsPerDiv / 1000000).toFixed(1) + 'M' : (unitsPerDiv >= 1000 ? (unitsPerDiv / 1000).toFixed(1) + 'k' : (unitsPerDiv >= 10 ? Math.round(unitsPerDiv).toLocaleString() : unitsPerDiv.toFixed(1)));
+        return `
+          <div class="exchange-pair popular-pair">
+            <span class="val-primary val-gold">1.0</span>
+            <img src="${this.ICONS.divine}" class="mini-ico" alt="Div" title="Divine Orb" />
+            <span class="exchange-arrow">⇆</span>
+            <span class="val-base">${unitsFormatted}</span>
+            <img src="${this.escapeHtml(itemIcon)}" class="mini-ico" alt="" />
+          </div>
+          <div class="val-sub">1 Div = ${Math.round(unitsPerDiv).toLocaleString()}</div>
+        `;
+      }
+
+      return `<div class="exchange-pair"><span class="val-primary text-muted">-</span></div>`;
+    }
+
+    // PoE 1
+    const chaosVal = typeof item.chaosValue === 'number' ? item.chaosValue : 0;
+    const divVal = typeof item.divineValue === 'number' ? item.divineValue : 0;
+    const divChaosRate = (rates && rates.divinePriceInChaos) || (divVal > 0 && chaosVal > 0 ? Math.round(chaosVal / divVal) : 366);
+
+    // 1. Expensive items (>= 1 Divine)
+    if (divVal >= 1) {
+      const divFormatted = divVal >= 1000 ? (divVal / 1000).toFixed(1) + 'k' : (divVal % 1 === 0 ? divVal.toLocaleString() : divVal.toFixed(1));
+      return `
+        <div class="exchange-pair popular-pair">
+          <span class="val-primary val-gold">${divFormatted}</span>
           <img src="${this.ICONS.divine}" class="mini-ico" alt="Div" title="Divine Orb" />
           <span class="exchange-arrow">⇆</span>
           <span class="val-base">1.0</span>
           <img src="${this.escapeHtml(itemIcon)}" class="mini-ico" alt="" />
         </div>
-        ${chaosVal > 0 ? `<div class="val-sub">≈ ${chaosVal.toLocaleString()} C</div>` : ''}
+        <div class="val-sub">≈ ${Math.round(divVal * divChaosRate).toLocaleString()} C</div>
       `;
     }
 
-    const chaosFormatted = chaosVal >= 1000 ? (chaosVal / 1000).toFixed(1) + 'k' : (chaosVal % 1 === 0 ? chaosVal.toLocaleString() : chaosVal.toFixed(1));
-    return `
-      <div class="exchange-pair">
-        <span class="val-primary">${chaosFormatted}</span>
-        <img src="${this.ICONS.chaos}" class="mini-ico" alt="C" title="Chaos Orb" />
-        <span class="exchange-arrow">⇆</span>
-        <span class="val-base">1.0</span>
-        <img src="${this.escapeHtml(itemIcon)}" class="mini-ico" alt="" />
-      </div>
-      ${divVal > 0 ? `<div class="val-sub">≈ ${divVal.toFixed(2)} Div</div>` : ''}
-    `;
+    // 2. High Chaos item (>= 15 Chaos and < 1 Divine, e.g. 50C Sacred Lifeforce, 55C Maven Chisel)
+    if (chaosVal >= 15) {
+      const chaosFormatted = chaosVal >= 1000 ? (chaosVal / 1000).toFixed(1) + 'k' : (chaosVal % 1 === 0 ? chaosVal.toLocaleString() : chaosVal.toFixed(1));
+      return `
+        <div class="exchange-pair popular-pair">
+          <span class="val-primary">${chaosFormatted}</span>
+          <img src="${this.ICONS.chaos}" class="mini-ico" alt="C" title="Chaos Orb" />
+          <span class="exchange-arrow">⇆</span>
+          <span class="val-base">1.0</span>
+          <img src="${this.escapeHtml(itemIcon)}" class="mini-ico" alt="" />
+        </div>
+        ${divVal > 0 ? `<div class="val-sub">≈ ${divVal.toFixed(2)} Div</div>` : ''}
+      `;
+    }
+
+    // 3. Bulk items (< 15 Chaos, e.g. 0.89 C Bauble, 0.027 C Lifeforce, 2 C Essences, 5 C Scarabs)
+    // Most popular trade on the market is 1 Divine worth of bulk!
+    if (chaosVal > 0 && divChaosRate > 0) {
+      const unitsPerDiv = divChaosRate / chaosVal;
+      const unitsFormatted = unitsPerDiv >= 1000000 ? (unitsPerDiv / 1000000).toFixed(1) + 'M' : (unitsPerDiv >= 1000 ? (unitsPerDiv / 1000).toFixed(1) + 'k' : (unitsPerDiv >= 10 ? Math.round(unitsPerDiv).toLocaleString() : unitsPerDiv.toFixed(1)));
+      return `
+        <div class="exchange-pair popular-pair">
+          <span class="val-primary val-gold">1.0</span>
+          <img src="${this.ICONS.divine}" class="mini-ico" alt="Div" title="Divine Orb" />
+          <span class="exchange-arrow">⇆</span>
+          <span class="val-base">${unitsFormatted}</span>
+          <img src="${this.escapeHtml(itemIcon)}" class="mini-ico" alt="" />
+        </div>
+        <div class="val-sub">1 Div = ${Math.round(unitsPerDiv).toLocaleString()}</div>
+      `;
+    }
+
+    return `<div class="exchange-pair"><span class="val-primary text-muted">-</span></div>`;
   },
 
   /**
@@ -252,21 +385,6 @@ export const Render = {
   },
 
   /**
-   * Format Divine Column
-   */
-  formatDivineHtml(item, game) {
-    const divVal = typeof item.divineValue === 'number' ? item.divineValue : 0;
-    if (divVal <= 0) return '<span class="text-muted">-</span>';
-    const formatted = divVal >= 1000 ? (divVal / 1000).toFixed(1) + 'k' : (divVal >= 1 ? (divVal % 1 === 0 ? divVal.toLocaleString() : divVal.toFixed(1)) : divVal.toFixed(2));
-    return `
-      <div class="divine-display">
-        <span class="val-primary" style="color: var(--text-gold); font-family: var(--font-mono); font-weight: 600;">${formatted}</span>
-        <img src="${this.ICONS.divine}" class="mini-ico" alt="Div" title="Divine Orb" />
-      </div>
-    `;
-  },
-
-  /**
    * Get direct PoE Wiki URL
    */
   getWikiUrl(item, game) {
@@ -276,6 +394,84 @@ export const Render = {
     return game === 'poe2'
       ? `https://poe2db.tw/us/${encodeURIComponent(item.name)}`
       : `https://www.poewiki.net/wiki/${encodeURIComponent(item.name.replace(/ /g, '_'))}`;
+  },
+
+  /**
+   * Get authentic poe.ninja economy URL (PoE 1 has NO /poe1/ in web URL, uses kebab-case plural slugs)
+   */
+  getNinjaUrl(item, game = 'poe1', league = 'Standard') {
+    if (!item) return 'https://poe.ninja';
+
+    const isPoe2 = game === 'poe2';
+    const baseUrl = isPoe2 ? 'https://poe.ninja/poe2/economy' : 'https://poe.ninja/economy';
+
+    let leagueSlug = (league || item.league || 'standard').trim().toLowerCase();
+    if (leagueSlug === 'hardcore allflame') leagueSlug = 'allflamehc';
+    else leagueSlug = leagueSlug.replace(/\s+/g, '-');
+
+    const typeKey = (item.sourceType || item.category || '').trim();
+    const map = {
+      // PoE 1
+      'Currency': 'currency',
+      'Fragment': 'fragments',
+      'Fragments': 'fragments',
+      'Scarab': 'scarabs',
+      'Scarabs': 'scarabs',
+      'DivinationCard': 'divination-cards',
+      'Divination Cards': 'divination-cards',
+      'Artifact': 'artifacts',
+      'Artifacts': 'artifacts',
+      'Tattoo': 'tattoos',
+      'Tattoos': 'tattoos',
+      'Omen': 'omens',
+      'Omens': 'omens',
+      'AllflameEmber': 'allflame-embers',
+      'Allflame Embers': 'allflame-embers',
+      'Runegraft': 'runegrafts',
+      'Runegrafts': 'runegrafts',
+      'Map': 'maps',
+      'Maps': 'maps',
+      'BlightedMap': 'blighted-maps',
+      'Blighted Maps': 'blighted-maps',
+      'UniqueMap': 'unique-maps',
+      'Unique Maps': 'unique-maps',
+      'DeliriumOrb': 'delirium-orbs',
+      'Delirium Orbs': 'delirium-orbs',
+      'Essence': 'essences',
+      'Essences': 'essences',
+      'Fossil': 'fossils',
+      'Fossils': 'fossils',
+      'Resonator': 'resonators',
+      'Resonators': 'resonators',
+      'Oil': 'oils',
+      'Oils': 'oils',
+      'Invitation': 'invitations',
+      'Invitations': 'invitations',
+      'Memory': 'memories',
+      'Memories': 'memories',
+      'Beast': 'beasts',
+      'Beasts': 'beasts',
+      // PoE 2
+      'UncutGems': 'uncut-gems',
+      'Uncut Gems': 'uncut-gems',
+      'LineageSupportGems': 'lineage-support-gems',
+      'Lineage Gems': 'lineage-support-gems',
+      'SoulCores': 'soul-cores',
+      'Soul Cores': 'soul-cores',
+      'Idols': 'idols',
+      'Runes': 'runes',
+      'Breach': 'breach',
+      'Catalysts': 'breach',
+      'Delirium': 'delirium',
+      'Liquid Emotions': 'delirium',
+      'Ritual': 'ritual',
+      'Expedition': 'expedition',
+      'Abyss': 'abyss',
+      'Abyssal Bones': 'abyss'
+    };
+
+    const typeSlug = map[typeKey] || typeKey.toLowerCase().replace(/([a-z])([A-Z])/g, '$1-$2').replace(/\s+/g, '-');
+    return `${baseUrl}/${encodeURIComponent(leagueSlug)}/${encodeURIComponent(typeSlug)}`;
   },
 
   /**
@@ -324,18 +520,21 @@ export const Render = {
         : (item.variant || '');
 
       return `
-        <tr class="item-table-row ${isComparing ? 'row-comparing' : ''}" data-id="${this.escapeHtml(item.id)}">
+        <tr class="item-table-row ${isComparing ? 'row-comparing' : ''}" data-id="${this.escapeHtml(item.id)}" data-tooltip-id="${this.escapeHtml(item.id)}">
           <td class="col-name">
             <div class="table-name-cell">
               <button class="star-btn ${isFav ? 'active' : ''}" data-action="toggle-fav" data-id="${this.escapeHtml(item.id)}" title="${isFav ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích'}">★</button>
-              <img src="${this.escapeHtml(iconUrl)}" alt="" class="table-item-icon" loading="lazy" data-tooltip-id="${this.escapeHtml(item.id)}" data-action="open-inspect">
+              <img src="${this.escapeHtml(iconUrl)}" alt="" class="table-item-icon" loading="lazy" data-action="open-inspect">
               <div class="table-name-wrap">
-                <span class="item-link-name ${rarityClass}" data-action="open-inspect" data-id="${this.escapeHtml(item.id)}" data-tooltip-id="${this.escapeHtml(item.id)}">${this.escapeHtml(item.name)}</span>
+                <span class="item-link-name ${rarityClass}" data-action="open-inspect" data-id="${this.escapeHtml(item.id)}">${this.escapeHtml(item.name)}</span>
                 ${subtitle ? `<span class="item-subtext">${this.escapeHtml(subtitle)}</span>` : ''}
                 ${showCategoryBadge ? `<span class="table-cat-badge">${this.escapeHtml(item.category || item.sourceType)}</span>` : ''}
                 <a href="${wikiUrl}" target="_blank" rel="noopener" class="wiki-badge" title="Tra cứu PoE Wiki">WIKI ↗</a>
               </div>
             </div>
+          </td>
+          <td class="col-val text-right" data-action="open-inspect" data-id="${this.escapeHtml(item.id)}">
+            ${this.formatValueHtml(item, state.currentGame, state.rates)}
           </td>
           <td class="col-trend text-center" data-action="open-inspect" data-id="${this.escapeHtml(item.id)}">
             <div class="trend-cell-wrapper">
@@ -345,14 +544,11 @@ export const Render = {
               <span class="trend-badge ${changeClass}">${changeText}</span>
             </div>
           </td>
-          <td class="col-val text-right" data-action="open-inspect" data-id="${this.escapeHtml(item.id)}">
-            ${this.formatValueHtml(item, state.currentGame)}
-          </td>
-          <td class="col-divine text-right hide-xs" data-action="open-inspect" data-id="${this.escapeHtml(item.id)}">
-            ${this.formatDivineHtml(item, state.currentGame)}
-          </td>
           <td class="col-volume text-right hide-sm" data-action="open-inspect" data-id="${this.escapeHtml(item.id)}">
             ${this.formatVolumeHtml(item, state.currentGame)}
+          </td>
+          <td class="col-popular text-right hide-xs" data-action="open-inspect" data-id="${this.escapeHtml(item.id)}">
+            ${this.formatMostPopularHtml(item, state.currentGame, state.rates)}
           </td>
           <td class="col-actions text-center">
             <div class="table-actions-group">
@@ -403,19 +599,22 @@ export const Render = {
       const wikiUrl = this.getWikiUrl(item, state.currentGame);
 
       return `
-        <div class="item-grid-card ${isComparing ? 'card-comparing' : ''}" data-id="${this.escapeHtml(item.id)}">
+        <div class="item-grid-card ${isComparing ? 'card-comparing' : ''}" data-id="${this.escapeHtml(item.id)}" data-tooltip-id="${this.escapeHtml(item.id)}">
           <div class="card-header-bar">
             <button class="star-btn ${isFav ? 'active' : ''}" data-action="toggle-fav" data-id="${this.escapeHtml(item.id)}" title="${isFav ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích'}">★</button>
             <span class="item-category-tag">${this.escapeHtml(item.category)}</span>
             ${this.renderLiquidityBadge(item.volume)}
           </div>
-          <div class="card-body" data-action="open-calc" data-id="${this.escapeHtml(item.id)}" data-tooltip-id="${this.escapeHtml(item.id)}">
-            <div class="grid-item-thumb-wrapper" data-tooltip-id="${this.escapeHtml(item.id)}">
-              <img src="${this.escapeHtml(iconUrl)}" alt="" class="grid-item-thumb" loading="lazy" data-tooltip-id="${this.escapeHtml(item.id)}">
+          <div class="card-body" data-action="open-inspect" data-id="${this.escapeHtml(item.id)}">
+            <div class="grid-item-thumb-wrapper">
+              <img src="${this.escapeHtml(iconUrl)}" alt="" class="grid-item-thumb" loading="lazy">
             </div>
-            <div class="grid-item-name" data-tooltip-id="${this.escapeHtml(item.id)}">${this.escapeHtml(item.name)}</div>
+            <div class="grid-item-name">${this.escapeHtml(item.name)}</div>
             <div class="grid-item-price">
-              ${this.formatValueHtml(item, state.currentGame)}
+              ${this.formatValueHtml(item, state.currentGame, state.rates)}
+            </div>
+            <div class="grid-item-popular">
+              <span class="popular-tag">Phổ biến:</span> ${this.formatMostPopularHtml(item, state.currentGame, state.rates)}
             </div>
             <div class="grid-item-trend">
               <span class="trend-pill ${changeClass}">${changeText}</span>
@@ -423,8 +622,8 @@ export const Render = {
             </div>
           </div>
           <div class="card-footer-actions">
-            <button class="btn-card-calc" data-action="open-calc" data-id="${this.escapeHtml(item.id)}" title="Mở máy tính giá">
-              <i class="fa-solid fa-calculator"></i> Tính giá
+            <button class="btn-card-inspect" data-action="open-inspect" data-id="${this.escapeHtml(item.id)}" title="Xem chi tiết & lịch sử giá">
+              <i class="fa-solid fa-magnifying-glass-chart"></i> Soi đồ
             </button>
             <a href="${wikiUrl}" target="_blank" rel="noopener" class="btn-card-wiki" title="Tra cứu PoE Wiki">
               <i class="fa-solid fa-book-open"></i>

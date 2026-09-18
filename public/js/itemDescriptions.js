@@ -3,7 +3,7 @@
  * Provides rich in-game and community wiki tooltips for currencies, cards, scarabs, essences, fossils, catalysts, and PoE 2 items.
  */
 
-const PoeItemDescriptions = {
+var PoeItemDescriptions = {
   // Built-in descriptions for currencies, special fragments and orbs
   currencies: {
     'mirror-of-kalandra': {
@@ -119,34 +119,175 @@ const PoeItemDescriptions = {
       instructions: 'Right click this item then left click a magic item to apply it. Current modifiers are retained and one new modifier is added.'
     },
     'gemcutters-prism': {
+      stackSize: 20,
       magic: 'Improves the quality of a skill or support gem',
       instructions: 'Right click this item then left click a gem to apply it. Maximum quality is 20%.'
     },
+    'gcp': {
+      stackSize: 20,
+      magic: 'Improves the quality of a skill or support gem',
+      instructions: 'Right click this item then left click a gem to apply it. Maximum quality is 20%.'
+    },
+    'glassblowers-bauble': {
+      stackSize: 20,
+      magic: 'Improves the quality of a flask or tincture',
+      instructions: 'Right click this item then left click a flask or tincture to apply it. Has greater effect on lower item level, non-unique flasks. The maximum quality is 20%.'
+    },
+    'bauble': {
+      stackSize: 20,
+      magic: 'Improves the quality of a flask or tincture',
+      instructions: 'Right click this item then left click a flask or tincture to apply it. Has greater effect on lower item level, non-unique flasks. The maximum quality is 20%.'
+    },
     'cartographers-chisel': {
+      stackSize: 20,
       magic: 'Improves the quality of a map',
-      instructions: 'Right click this item then left click a map to apply it. Maximum quality is 20%.'
+      instructions: 'Right click this item then left click a map to apply it. The maximum quality is 20%.'
+    },
+    'chisel': {
+      stackSize: 20,
+      magic: 'Improves the quality of a map',
+      instructions: 'Right click this item then left click a map to apply it. The maximum quality is 20%.'
+    },
+    // Maven's Chisels
+    'mavens-chisel-of-avarice': {
+      stackSize: 20,
+      magic: 'Improves the quality of a map enhancing Currency found\nReplaces other quality types',
+      instructions: 'Right click this item then left click a map to apply it. The maximum quality is 20%.\nShift click to unstack.'
+    },
+    'mavens-chisel-of-proliferation': {
+      stackSize: 20,
+      magic: 'Improves the quality of a map enhancing Maven-influenced monster pack size\nReplaces other quality types',
+      instructions: 'Right click this item then left click a map to apply it. The maximum quality is 20%.\nShift click to unstack.'
+    },
+    'mavens-chisel-of-scintillation': {
+      stackSize: 20,
+      magic: 'Improves the quality of a map enhancing Rare monster item drops\nReplaces other quality types',
+      instructions: 'Right click this item then left click a map to apply it. The maximum quality is 20%.\nShift click to unstack.'
+    },
+    'mavens-chisel-of-divination': {
+      stackSize: 20,
+      magic: 'Improves the quality of a map enhancing Divination Cards found\nReplaces other quality types',
+      instructions: 'Right click this item then left click a map to apply it. The maximum quality is 20%.\nShift click to unstack.'
+    },
+    'mavens-chisel-of-scarabs': {
+      stackSize: 20,
+      magic: 'Improves the quality of a map enhancing Scarabs found\nReplaces other quality types',
+      instructions: 'Right click this item then left click a map to apply it. The maximum quality is 20%.\nShift click to unstack.'
+    },
+    // Lifeforce
+    'wild-crystallised-lifeforce': {
+      stackSize: 50000,
+      magic: 'Purple crystallised life essence harvested from the Sacred Grove',
+      instructions: 'Can be used at the Horticrafting bench in your hideout for reforges and syntheses.'
+    },
+    'vivid-crystallised-lifeforce': {
+      stackSize: 50000,
+      magic: 'Yellow crystallised life essence harvested from the Sacred Grove',
+      instructions: 'Can be used at the Horticrafting bench in your hideout for card gambles and enchantments.'
+    },
+    'primal-crystallised-lifeforce': {
+      stackSize: 50000,
+      magic: 'Blue crystallised life essence harvested from the Sacred Grove',
+      instructions: 'Can be used at the Horticrafting bench in your hideout for resistance swaps and crafts.'
+    },
+    'sacred-crystallised-lifeforce': {
+      stackSize: 50000,
+      magic: 'Radiant life essence obtained from Oshabi, Avatar of the Grove',
+      instructions: 'Can be used at the Horticrafting bench for endgame sacred recipes.'
+    },
+    // Core currencies
+    'blacksmiths-whetstone': {
+      stackSize: 20,
+      magic: 'Improves the quality of a weapon',
+      instructions: 'Right click this item then left click a weapon to apply it. Maximum quality is 20%.'
+    },
+    'armourers-scrap': {
+      stackSize: 40,
+      magic: 'Improves the quality of an armour item',
+      instructions: 'Right click this item then left click an armour item to apply it. Maximum quality is 20%.'
+    },
+    'orb-of-transmutation': {
+      stackSize: 40,
+      magic: 'Upgrades a normal item to a magic item',
+      instructions: 'Right click this item then left click a normal item to apply it.'
+    },
+    'orb-of-alteration': {
+      stackSize: 20,
+      magic: 'Reforges a magic item with new random modifiers',
+      instructions: 'Right click this item then left click a magic item to apply it.'
+    },
+    'orb-of-augmentation': {
+      stackSize: 30,
+      magic: 'Augments a magic item with a new random modifier',
+      instructions: 'Right click this item then left click a magic item with only one modifier.'
+    },
+    'orb-of-chance': {
+      stackSize: 20,
+      magic: 'Upgrades a normal item to a random rarity',
+      instructions: 'Right click this item then left click a normal item to apply it.'
+    },
+    'blessed-orb': {
+      stackSize: 20,
+      magic: 'Randomises the numeric values of implicit modifiers on an item',
+      instructions: 'Right click this item then left click an item to apply it.'
+    },
+    'orb-of-regret': {
+      stackSize: 40,
+      magic: 'Grants one Passive Skill Respec Point',
+      instructions: 'Right click to gain one Passive Skill Respec Point.'
+    },
+    'portal-scroll': {
+      stackSize: 40,
+      magic: 'Creates a portal to the current act\'s town or hideout',
+      instructions: 'Right click to open a portal.'
+    },
+    'scroll-of-wisdom': {
+      stackSize: 40,
+      magic: 'Identifies an unidentified item',
+      instructions: 'Right click then left click an unidentified item.'
+    },
+    'enkindling-orb': {
+      stackSize: 20,
+      magic: 'Adds an enchantment to a utility flask that triggers when conditions are met',
+      instructions: 'Right click then left click a utility flask.'
+    },
+    'instilling-orb': {
+      stackSize: 20,
+      magic: 'Adds an enchantment to a utility flask that will trigger when certain conditions are met',
+      instructions: 'Right click then left click a utility flask.'
+    },
+    'orb-of-conflict': {
+      stackSize: 10,
+      magic: 'Unpredictably raises the tier of one Eldritch modifier and lowers another',
+      instructions: 'Right click then left click an item with at least two Eldritch modifiers.'
     },
     'orb-of-unmaking': {
+      stackSize: 40,
       magic: 'Grants one Atlas Passive Respec Point',
       instructions: 'Right click to gain one Atlas Passive Respec Point.'
     },
     'orb-of-scouring': {
+      stackSize: 30,
       magic: 'Removes all random modifiers from an item',
       instructions: 'Right click this item then left click a magic or rare item to apply it.'
     },
     'orb-of-alchemy': {
+      stackSize: 20,
       magic: 'Upgrades a normal item to a rare item',
       instructions: 'Right click this item then left click a normal item to apply it.'
     },
     'orb-of-fusing': {
+      stackSize: 20,
       magic: 'Reforges the links between sockets on an item',
       instructions: 'Right click this item then left click a socketed item to apply it.'
     },
     'chromatic-orb': {
+      stackSize: 20,
       magic: 'Reforges the colours of sockets on an item',
       instructions: 'Right click this item then left click a socketed item to apply it. Socket colours are influenced by item attribute requirements.'
     },
     'jewellers-orb': {
+      stackSize: 20,
       magic: 'Reforges the number of sockets on an item',
       instructions: 'Right click this item then left click an equipable item to apply it.'
     }
@@ -248,6 +389,58 @@ const PoeItemDescriptions = {
     'enchanted-fossil': 'Adds an ancient Labyrinth enchantment to helmets, boots or gloves'
   },
 
+  // Boss & Endgame Map Fragments
+  fragments: {
+    'zorath-s-eye-of-the-inevitable': {
+      magic: 'Used in the Map Device to confront Zorath, Vile Assembled',
+      instructions: 'Can be used in a personal Map Device with other fragments to open a portal to Zorath, Vile Assembled.'
+    },
+    'syndicate-medallion': {
+      magic: 'Opens portals to the Mastermind Safehouse',
+      instructions: 'Can be placed in a Map Device to open portals to the Mastermind Safehouse.'
+    },
+    'mavens-writ': {
+      magic: 'Opens portals to the Crucible of the Maven',
+      instructions: 'Place into a personal Map Device to confront the Maven.'
+    },
+    'the-mavens-writ': {
+      magic: 'Opens portals to the Crucible of the Maven',
+      instructions: 'Place into a personal Map Device to confront the Maven.'
+    },
+    'simulacrum': {
+      magic: 'Opens portals to the Simulacrum',
+      instructions: 'Confront up to 30 waves of Delirium madness in a personal Map Device.'
+    },
+    'writhing-invitation': {
+      magic: 'Opens portals to the Infinite Hunger encounter',
+      instructions: 'Place into a personal Map Device.'
+    },
+    'screaming-invitation': {
+      magic: 'Opens portals to the Black Star encounter',
+      instructions: 'Place into a personal Map Device.'
+    },
+    'polaric-invitation': {
+      magic: 'Opens portals to the Black Star encounter',
+      instructions: 'Place into a personal Map Device.'
+    },
+    'incandescent-invitation': {
+      magic: 'Opens portals to the Searing Exarch encounter',
+      instructions: 'Place into a personal Map Device.'
+    },
+    'fragment-of-the-phoenix': { magic: 'Part of the key to the Shaper\'s Realm', instructions: 'Place into a Map Device with Hydra, Minotaur, and Chimera fragments.' },
+    'fragment-of-the-hydra': { magic: 'Part of the key to the Shaper\'s Realm', instructions: 'Place into a Map Device with Phoenix, Minotaur, and Chimera fragments.' },
+    'fragment-of-the-minotaur': { magic: 'Part of the key to the Shaper\'s Realm', instructions: 'Place into a Map Device with Phoenix, Hydra, and Chimera fragments.' },
+    'fragment-of-the-chimera': { magic: 'Part of the key to the Shaper\'s Realm', instructions: 'Place into a Map Device with Phoenix, Hydra, and Minotaur fragments.' },
+    'fragment-of-purification': { magic: 'Part of the key to the Elder\'s Realm', instructions: 'Place into a Map Device with Constriction, Enslavement, and Eradication fragments.' },
+    'fragment-of-constriction': { magic: 'Part of the key to the Elder\'s Realm', instructions: 'Place into a Map Device with Purification, Enslavement, and Eradication fragments.' },
+    'fragment-of-enslavement': { magic: 'Part of the key to the Elder\'s Realm', instructions: 'Place into a Map Device with Purification, Constriction, and Eradication fragments.' },
+    'fragment-of-eradication': { magic: 'Part of the key to the Elder\'s Realm', instructions: 'Place into a Map Device with Purification, Constriction, and Enslavement fragments.' },
+    'fragment-of-shape': { magic: 'Key to the Uber Elder Encounter', instructions: 'Combine with Knowledge, Emptiness, and Terror fragments.' },
+    'fragment-of-knowledge': { magic: 'Key to the Uber Elder Encounter', instructions: 'Combine with Shape, Emptiness, and Terror fragments.' },
+    'fragment-of-emptiness': { magic: 'Key to the Uber Elder Encounter', instructions: 'Combine with Shape, Knowledge, and Terror fragments.' },
+    'fragment-of-terror': { magic: 'Key to the Uber Elder Encounter', instructions: 'Combine with Shape, Knowledge, and Emptiness fragments.' }
+  },
+
   /**
    * Generates a complete tooltip structure for any item
    */
@@ -257,16 +450,42 @@ const PoeItemDescriptions = {
     const key = (item.detailsId || item.key || item.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
     const currencyInfo = this.currencies[key] || this.currencies[item.key?.toLowerCase()];
 
+    const poedbKey = `${(item.game || 'poe1').toLowerCase()}:${(item.name || '').toLowerCase().trim()}`;
+    const poedbData = (this.poedbCache && this.poedbCache.get(poedbKey)) || null;
+
     let magicLine = '';
     let instructions = '';
-    let explicits = [];
-    let implicits = [];
+    let explicits = Array.isArray(item.explicitModifiers) ? [...item.explicitModifiers] : [];
+    let implicits = Array.isArray(item.implicitModifiers) ? [...item.implicitModifiers] : [];
     let flavour = item.flavourText || '';
 
     // 1. Currency item
     if (currencyInfo) {
       magicLine = currencyInfo.magic;
       instructions = currencyInfo.instructions;
+    }
+    // 2. Fragments & Boss Keys
+    else if (item.category === 'Fragments' || item.category === 'Fragment' || item.subCategory === 'Fragment' || item.sourceType === 'Fragment') {
+      const fragInfo = this.fragments[key] || this.fragments[item.key?.toLowerCase()];
+      if (fragInfo) {
+        magicLine = fragInfo.magic;
+        instructions = fragInfo.instructions;
+      } else {
+        const name = item.name || '';
+        if (name.toLowerCase().includes('breachstone')) {
+          magicLine = 'Opens a portal to the Breachlord Domain';
+          instructions = 'Place into a personal Map Device to enter.';
+        } else if (name.toLowerCase().includes('invitation')) {
+          magicLine = 'Opens portals to an Eldritch or Maven encounter';
+          instructions = 'Place into a personal Map Device alongside required conditions.';
+        } else if (name.toLowerCase().includes('scarab')) {
+          magicLine = 'Augments map encounters when placed into the Map Device';
+          instructions = 'Use in a Map Device alongside a map.';
+        } else {
+          magicLine = `Endgame encounter fragment for ${name}`;
+          instructions = 'Can be placed into a personal Map Device to open special portals.';
+        }
+      }
     }
     // 2. Divination Card
     else if (item.category === 'Divination Cards' || item.subCategory === 'DivinationCard') {
@@ -441,6 +660,30 @@ const PoeItemDescriptions = {
       instructions = `Liquid economy trade item on the Faustus Currency Exchange.`;
     }
 
+    // Stack Size & Requirements
+    const stackSize = (currencyInfo && currencyInfo.stackSize) || poedbData?.stackSize || item.stackSize || null;
+    const levelRequired = poedbData?.levelRequired || item.levelRequired || null;
+
+    if (poedbData) {
+      if (poedbData.explicitModifiers && poedbData.explicitModifiers.length > 0) {
+        explicits = [...poedbData.explicitModifiers];
+      } else if (poedbData.explicitMod) {
+        explicits = [poedbData.explicitMod];
+      }
+      if (poedbData.implicitModifiers && poedbData.implicitModifiers.length > 0) {
+        implicits = [...poedbData.implicitModifiers];
+      } else if (poedbData.implicitMod) {
+        implicits = [poedbData.implicitMod];
+      }
+      if (poedbData.instructions) instructions = poedbData.instructions;
+      if (poedbData.flavourText) flavour = poedbData.flavourText;
+    }
+
+    // Trigger background PoEDB fetch if not in cache
+    if (!currencyInfo && !poedbData && item.name && typeof window !== 'undefined') {
+      this.fetchPoedbDescription(item.name, item.game || 'poe1');
+    }
+
     return {
       title: item.name,
       baseType: item.baseType && item.baseType !== item.name ? item.baseType : '',
@@ -451,12 +694,50 @@ const PoeItemDescriptions = {
       implicits,
       explicits,
       flavour,
+      stackSize,
+      levelRequired,
       icon: item.icon,
       chaosValue: item.chaosValue,
       divineValue: item.divineValue,
       exaltedValue: item.exaltedValue,
       volume: item.volume
     };
+  },
+
+  poedbCache: new Map(),
+  poedbPending: new Set(),
+  callbacks: [],
+
+  onPoedbLoaded(cb) {
+    if (typeof cb === 'function') this.callbacks.push(cb);
+  },
+
+  /**
+   * Fetch item description from backend PoEDB proxy (/api/item-description)
+   */
+  async fetchPoedbDescription(itemName, game = 'poe1') {
+    if (!itemName) return null;
+    const cleanKey = `${game}:${itemName.toLowerCase().trim()}`;
+    if (this.poedbCache.has(cleanKey)) return this.poedbCache.get(cleanKey);
+    if (this.poedbPending.has(cleanKey)) return null;
+
+    this.poedbPending.add(cleanKey);
+    try {
+      const res = await fetch(`/api/item-description?name=${encodeURIComponent(itemName)}&game=${encodeURIComponent(game)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.description) {
+          this.poedbCache.set(cleanKey, data.description);
+          this.callbacks.forEach(fn => fn(cleanKey, data.description));
+          return data.description;
+        }
+      }
+    } catch (err) {
+      console.debug('[PoeItemDescriptions] fetchPoedbDescription notice:', err.message);
+    } finally {
+      this.poedbPending.delete(cleanKey);
+    }
+    return null;
   },
 
   getItemRarity(item) {
@@ -481,9 +762,66 @@ const PoeItemDescriptions = {
       return `https://poe2db.tw/us/${encodeURIComponent(cleanName)}`;
     }
     return `https://www.poewiki.net/wiki/${encodeURIComponent(cleanName)}`;
+  },
+
+  /**
+   * Generates formatted PoE description HTML for modals and cards (Authentic PoE Card)
+   */
+  getPoEDescription(item) {
+    if (!item) return '';
+
+    const tt = this.getTooltip(item);
+    if (!tt) return 'Right-click to inspect or consume this item.';
+
+    let parts = [];
+
+    if (tt.stackSize) {
+      parts.push(`<div class="poe-card-property">STACK SIZE: ${tt.stackSize}</div>`);
+    }
+
+    if (tt.levelRequired) {
+      parts.push(`<div class="poe-card-property">REQUIRES LEVEL ${tt.levelRequired}</div>`);
+    }
+
+    if (tt.implicits && tt.implicits.length > 0) {
+      parts.push(`<div class="poe-card-mods" style="color: #8888ff;">${tt.implicits.map(m => this.escapeHtml(m)).join('<br>')}</div>`);
+      parts.push(`<div class="poe-card-separator"></div>`);
+    }
+
+    if (tt.explicits && tt.explicits.length > 0) {
+      parts.push(`<div class="poe-card-mods">${tt.explicits.map(m => this.escapeHtml(m)).join('<br>')}</div>`);
+    } else if (tt.magicLine) {
+      parts.push(`<div class="poe-card-mods" style="color: #8888ff;">${this.escapeHtml(tt.magicLine).replace(/\n/g, '<br>')}</div>`);
+    }
+
+    if (tt.instructions) {
+      parts.push(`<div class="poe-card-instructions">${this.escapeHtml(tt.instructions).replace(/\n/g, '<br>')}</div>`);
+    }
+
+    if (tt.flavour) {
+      parts.push(`<div class="poe-card-separator"></div><div class="poe-card-flavour">${this.escapeHtml(tt.flavour)}</div>`);
+    }
+
+    return parts.length > 0 ? parts.join('') : 'Right-click to inspect or consume this item.';
+  },
+
+  escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
   }
 };
 
+if (typeof window !== 'undefined') {
+  window.PoeItemDescriptions = PoeItemDescriptions;
+}
+if (typeof globalThis !== 'undefined') {
+  globalThis.PoeItemDescriptions = PoeItemDescriptions;
+}
 if (typeof module !== 'undefined') {
   module.exports = PoeItemDescriptions;
 }

@@ -49,33 +49,49 @@ export const Modals = {
       const divVal = typeof item.divineValue === 'number' ? item.divineValue : 0;
       const exVal = typeof item.exaltedValue === 'number' ? item.exaltedValue : 0;
 
+      const divChaosRate = state.rates?.rawRates?.exalted || (state.rates?.divinePriceInChaos) || 120;
       if (divVal >= 1) {
         elements.inspectMainPrice.textContent = (divVal % 1 === 0 ? divVal.toLocaleString() : divVal.toFixed(1));
         elements.inspectMainCur.textContent = 'Divine';
-        elements.inspectSubPrice.textContent = exVal > 0 ? `≈ ${exVal.toLocaleString()} Exalted` : '';
+        elements.inspectSubPrice.textContent = exVal > 0 ? `≈ ${exVal.toLocaleString()} Exalted` : `≈ ${(divVal * divChaosRate).toFixed(0)} Exalted`;
+        if (elements.inspectRateNote) elements.inspectRateNote.textContent = `Tỷ giá: 1 Div = ${divChaosRate} Ex`;
+      } else if (exVal < 1 && exVal > 0) {
+        const perEx = Math.round(1 / exVal * 10) / 10;
+        const perDiv = Math.round(divChaosRate / exVal);
+        elements.inspectMainPrice.textContent = perEx;
+        elements.inspectMainCur.textContent = '/ 1 Ex';
+        elements.inspectSubPrice.textContent = `1 Div = ${perDiv.toLocaleString()} • (Đơn giá: ≈ ${exVal.toFixed(2)} Ex)`;
+        if (elements.inspectRateNote) elements.inspectRateNote.textContent = `Quy đổi: 1 Ex = ${perEx} • 1 Div = ${perDiv.toLocaleString()} (Tỷ giá 1 Div = ${divChaosRate} Ex)`;
       } else {
+        const perDiv = divVal > 0 ? Math.round(1 / divVal) : 0;
         elements.inspectMainPrice.textContent = exVal > 0 ? (exVal % 1 === 0 ? exVal.toLocaleString() : exVal.toFixed(1)) : '0';
         elements.inspectMainCur.textContent = 'Exalted';
-        elements.inspectSubPrice.textContent = divVal > 0 ? `≈ ${divVal.toFixed(3)} Divine` : '';
-      }
-      if (elements.inspectRateNote) {
-        elements.inspectRateNote.textContent = state.rates?.exalted ? `Tỷ giá: 1 Div = ${state.rates.exalted} Ex` : '';
+        elements.inspectSubPrice.textContent = divVal > 0 ? `≈ ${divVal.toFixed(3)} Divine (1 Div = ${perDiv})` : '';
+        if (elements.inspectRateNote) elements.inspectRateNote.textContent = `Tỷ giá: 1 Div = ${divChaosRate} Ex`;
       }
     } else {
       const chaosVal = typeof item.chaosValue === 'number' ? item.chaosValue : 0;
       const divVal = typeof item.divineValue === 'number' ? item.divineValue : 0;
+      const divChaosRate = state.rates?.divinePriceInChaos || state.divineChaosPrice || 366;
 
       if (divVal >= 1) {
         elements.inspectMainPrice.textContent = (divVal % 1 === 0 ? divVal.toLocaleString() : divVal.toFixed(1));
         elements.inspectMainCur.textContent = 'Divine';
-        elements.inspectSubPrice.textContent = chaosVal > 0 ? `≈ ${chaosVal.toLocaleString()} Chaos` : '';
+        elements.inspectSubPrice.textContent = chaosVal > 0 ? `≈ ${chaosVal.toLocaleString()} Chaos` : `≈ ${Math.round(divVal * divChaosRate).toLocaleString()} Chaos`;
+        if (elements.inspectRateNote) elements.inspectRateNote.textContent = `Tỷ giá: 1 Div = ${divChaosRate} C`;
+      } else if (chaosVal < 1 && chaosVal > 0) {
+        const perC = Math.round(1 / chaosVal * 10) / 10;
+        const perDiv = Math.round(divChaosRate / chaosVal);
+        elements.inspectMainPrice.textContent = perC;
+        elements.inspectMainCur.textContent = '/ 1 Chaos';
+        elements.inspectSubPrice.textContent = `1 Div = ${perDiv.toLocaleString()} • (Đơn giá: ≈ ${chaosVal.toFixed(3).replace(/0+$/, '').replace(/\.$/, '')} C)`;
+        if (elements.inspectRateNote) elements.inspectRateNote.textContent = `Quy đổi: 1 C = ${perC} • 1 Div = ${perDiv.toLocaleString()} (Tỷ giá 1 Div = ${divChaosRate} C)`;
       } else {
+        const perDiv = divVal > 0 ? Math.round(1 / divVal) : 0;
         elements.inspectMainPrice.textContent = (chaosVal % 1 === 0 ? chaosVal.toLocaleString() : chaosVal.toFixed(1));
         elements.inspectMainCur.textContent = 'Chaos';
         elements.inspectSubPrice.textContent = divVal > 0 ? `≈ ${divVal.toFixed(2)} Divine` : '';
-      }
-      if (elements.inspectRateNote) {
-        elements.inspectRateNote.textContent = state.divineChaosPrice ? `Tỷ giá: 1 Div = ${state.divineChaosPrice} C` : '';
+        if (elements.inspectRateNote) elements.inspectRateNote.textContent = perDiv > 0 ? `1 Div = ${perDiv.toLocaleString()} ${item.name} • Tỷ giá 1 Div = ${divChaosRate} C` : `Tỷ giá: 1 Div = ${divChaosRate} C`;
       }
     }
 
@@ -85,37 +101,59 @@ export const Modals = {
       elements.inspectWikiLink.title = `Xem "${item.name}" trên PoE Wiki`;
     }
     if (elements.inspectNinjaLink) {
-      const ninjaType = encodeURIComponent(item.sourceType || item.category || 'currency');
-      const ninjaGame = state.currentGame === 'poe2' ? 'poe2' : 'poe1';
-      elements.inspectNinjaLink.href = `https://poe.ninja/${ninjaGame}/economy/${encodeURIComponent(state.currentLeague)}/${ninjaType.toLowerCase()}`;
+      elements.inspectNinjaLink.href = Render.getNinjaUrl(item, state.currentGame, state.currentLeague);
+      elements.inspectNinjaLink.title = `Xem "${item.name}" trên poe.ninja`;
     }
 
     // 5. Authentic PoE Card
-    if (elements.poeCardName) elements.poeCardName.textContent = item.name;
-    if (elements.poeCardType) {
-      elements.poeCardType.textContent = item.baseType || item.category || '';
+    const pDesc = (typeof window !== 'undefined' && window.PoeItemDescriptions) ||
+                  (typeof globalThis !== 'undefined' && globalThis.PoeItemDescriptions);
+    const tt = pDesc ? pDesc.getTooltip(item) : null;
+
+    if (elements.poeCardName) {
+      elements.poeCardName.textContent = (tt && tt.title) ? tt.title : (item.name || 'Item Name');
+      elements.poeCardName.className = `poe-card-name rarity-${tt?.rarity || 'currency'}`;
     }
-    if (elements.poeCardMods) {
-      if (item.explicitModifiers && item.explicitModifiers.length > 0) {
+    if (elements.poeCardType) {
+      elements.poeCardType.textContent = (tt && tt.baseType) ? tt.baseType : (item.baseType || item.category || '');
+    }
+
+    const renderCardBody = () => {
+      if (!elements.poeCardMods) return;
+      if (pDesc && typeof pDesc.getPoEDescription === 'function') {
+        elements.poeCardMods.innerHTML = pDesc.getPoEDescription(item);
+      } else if (item.explicitModifiers && item.explicitModifiers.length > 0) {
         elements.poeCardMods.innerHTML = item.explicitModifiers.map(m => Render.escapeHtml(m)).join('<br>');
       } else if (item.mapTier) {
         elements.poeCardMods.innerHTML = `Map Tier: ${item.mapTier}<br>Item Quantity: +0%<br>Item Rarity: +0%`;
-      } else if (typeof window !== 'undefined' && window.PoeItemDescriptions && typeof window.PoeItemDescriptions.getPoEDescription === 'function') {
-        const desc = window.PoeItemDescriptions.getPoEDescription(item);
-        elements.poeCardMods.textContent = desc || 'Right-click to inspect or consume this item.';
       } else {
         elements.poeCardMods.textContent = 'Right-click to inspect or consume this item.';
       }
-    }
-    if (elements.poeCardFlavour && elements.poeCardFlavourSep) {
-      if (item.flavourText) {
-        elements.poeCardFlavour.textContent = item.flavourText;
+    };
+
+    renderCardBody();
+
+    // Flavor text handling
+    const flavour = item.flavourText || (tt && tt.flavour) || '';
+    if (elements.poeCardFlavour) {
+      if (flavour) {
+        elements.poeCardFlavour.textContent = flavour;
         elements.poeCardFlavour.classList.remove('hidden');
-        elements.poeCardFlavourSep.classList.remove('hidden');
+        if (elements.poeCardFlavourSep) elements.poeCardFlavourSep.classList.remove('hidden');
       } else {
+        elements.poeCardFlavour.textContent = '';
         elements.poeCardFlavour.classList.add('hidden');
-        elements.poeCardFlavourSep.classList.add('hidden');
+        if (elements.poeCardFlavourSep) elements.poeCardFlavourSep.classList.add('hidden');
       }
+    }
+
+    // Subscribe to background PoEDB fetch if description arrives while modal is open
+    if (pDesc && typeof pDesc.onPoedbLoaded === 'function') {
+      pDesc.onPoedbLoaded((loadedName) => {
+        if (state.activeModalItem && (state.activeModalItem.name || '').toLowerCase() === loadedName.toLowerCase()) {
+          renderCardBody();
+        }
+      });
     }
 
     // 6. Right Column: 7-day Bezier Area Chart
@@ -127,7 +165,7 @@ export const Modals = {
     }
 
     // 7. Right Column: Market Ranking & Position
-    const allItems = state.allItems || [];
+    const allItems = state.allItems || state.items || [];
     const catItems = allItems.filter(i => (i.category === item.category || i.sourceType === item.sourceType));
     const sortVal = (it) => isPoe2 ? (it.exaltedValue || it.divineValue || 0) : (it.chaosValue || it.divineValue || 0);
     catItems.sort((a, b) => sortVal(b) - sortVal(a));

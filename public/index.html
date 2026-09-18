@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   
   <!-- Stylesheet -->
-  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/style.css?v=1.0.5">
 </head>
 <body class="theme-dark">
   <div class="app-layout">
@@ -202,17 +202,17 @@
                 <th class="col-name sortable sortable-th" data-sort="name">
                   Item <span class="sort-indicator sort-arrow"></span>
                 </th>
+                <th class="col-val text-right sortable sortable-th sorted sorted-desc" data-sort="value">
+                  Value <span class="info-tip" title="Tỷ giá quy đổi thị trường (VD: 55 C ⇆ 1.0 Chisel hoặc 1.0 C ⇆ 36 Lifeforce)">ⓘ</span> <span class="sort-indicator sort-arrow">▼</span>
+                </th>
                 <th class="col-trend text-center sortable sortable-th" data-sort="change7d">
                   Trend (7d) <span class="sort-indicator sort-arrow"></span>
                 </th>
-                <th class="col-val text-right sortable sortable-th sorted sorted-desc" data-sort="value">
-                  Chaos / Exalted <span class="info-tip" title="Giá trị thị trường quy đổi">ⓘ</span> <span class="sort-indicator sort-arrow">▼</span>
-                </th>
-                <th class="col-divine text-right sortable sortable-th hide-xs" data-sort="divine">
-                  Divine <span class="sort-indicator sort-arrow"></span>
-                </th>
                 <th class="col-volume text-right hide-sm sortable sortable-th" data-sort="volume">
                   Listings / Volume <span class="info-tip" title="Khối lượng giao dịch hoặc số lượng niêm yết">ⓘ</span> <span class="sort-indicator sort-arrow"></span>
+                </th>
+                <th class="col-popular text-right sortable sortable-th hide-xs" data-sort="popular">
+                  Most Popular <span class="info-tip" title="Giao dịch phổ biến nhất (VD: 1.0 Div ⇆ 13k Lifeforce, 1.0 Div ⇆ 409 Bauble, 55 C ⇆ 1.0 Chisel)">ⓘ</span> <span class="sort-indicator sort-arrow"></span>
                 </th>
                 <th class="col-actions text-center">Thao tác</th>
               </tr>
@@ -475,8 +475,10 @@
     <div class="tooltip-header">
       <div class="tooltip-title" id="tooltipTitle">Item Name</div>
       <div class="tooltip-basetype" id="tooltipBasetype"></div>
+      <div class="tooltip-property hidden" id="tooltipProperty"></div>
     </div>
     <div class="tooltip-body">
+      <div class="tooltip-implicits hidden" id="tooltipImplicits"></div>
       <div class="tooltip-magic" id="tooltipMagic"></div>
       <div class="tooltip-instructions" id="tooltipInstructions"></div>
       <div class="tooltip-explicits" id="tooltipExplicits"></div>
@@ -485,6 +487,7 @@
     </div>
     <div class="tooltip-footer" id="tooltipFooter">
       <img id="tooltipIcon" src="" alt="" />
+      <span class="tooltip-footer-val" id="tooltipPrice"></span>
     </div>
   </div>
 
@@ -492,8 +495,8 @@
   <div class="toast-container" id="toastContainer"></div>
 
   <!-- Scripts -->
-  <script src="/js/itemDescriptions.js?v=1.0.2"></script>
-  <script src="/js/itemParser.js?v=1.0.2"></script>
-  <script type="module" src="/js/app.js?v=1.0.2"></script>
+  <script src="/js/itemDescriptions.js?v=1.0.6"></script>
+  <script src="/js/itemParser.js?v=1.0.6"></script>
+  <script type="module" src="/js/app.js?v=1.0.6"></script>
 </body>
 </html>

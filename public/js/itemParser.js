@@ -1,7 +1,7 @@
 /**
  * PoE In-game Item Text Parser (Ctrl+C from game)
  */
-const PoeItemParser = {
+var PoeItemParser = {
   parse(text) {
     if (!text || typeof text !== 'string') return null;
 
@@ -74,6 +74,12 @@ const PoeItemParser = {
   }
 };
 
+if (typeof window !== 'undefined') {
+  window.PoeItemParser = PoeItemParser;
+}
+if (typeof globalThis !== 'undefined') {
+  globalThis.PoeItemParser = PoeItemParser;
+}
 if (typeof module !== 'undefined') {
   module.exports = PoeItemParser;
 }

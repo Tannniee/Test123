@@ -59,12 +59,13 @@ export const Clipboard = {
   /**
    * Format PoE whisper text
    */
-  formatWhisper(item, qty = 1, priceText = '') {
-    const itemName = item.name || 'Item';
+  formatWhisper(item, qty = 1, priceText = '', defaultLeague = '') {
+    const itemName = item?.name || 'Item';
+    const league = item?.league || defaultLeague || 'Standard';
     if (qty > 1) {
-      return `@trade Hi, I'd like to buy your ${qty}x ${itemName} for ${priceText} in ${item.league || 'current league'}.`;
+      return `@trade Hi, I'd like to buy your ${qty}x ${itemName} for ${priceText} in ${league}.`;
     }
-    return `@trade Hi, I'd like to buy your ${itemName} for ${priceText} in ${item.league || 'current league'}.`;
+    return `@trade Hi, I'd like to buy your ${itemName} for ${priceText} in ${league}.`;
   },
 
   /**

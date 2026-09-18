@@ -288,7 +288,11 @@ class CacheManager {
       const info = leagueAvail[reg.type];
       const count = items.filter(it => (it.sourceType || it.subCategory) === reg.type).length;
 
-      if (info?.status === 'available' || count > 0) {
+      if (info?.status === 'unsupported') {
+        continue;
+      }
+
+      if (game === 'poe1' || info?.status === 'available' || count > 0) {
         available.push({
           type: reg.type,
           label: reg.label,
@@ -622,6 +626,13 @@ class CacheManager {
         subCategory = `Tier ${line.mapTier}`;
       }
 
+      const explicitMods = Array.isArray(line.explicitModifiers)
+        ? line.explicitModifiers.map(m => typeof m === 'object' && m !== null ? (m.text || '') : String(m)).filter(Boolean)
+        : [];
+      const implicitMods = Array.isArray(line.implicitModifiers)
+        ? line.implicitModifiers.map(m => typeof m === 'object' && m !== null ? (m.text || '') : String(m)).filter(Boolean)
+        : [];
+
       results.push({
         id: `${game}_${line.id || line.detailsId}_${type}`,
         key: String(line.id || line.detailsId),
@@ -641,7 +652,10 @@ class CacheManager {
         mapTier: line.mapTier || null,
         variant: line.variant || '',
         itemClass: line.itemClass || null,
-        explicitModifiers: Array.isArray(line.explicitModifiers) ? line.explicitModifiers : [],
+        levelRequired: line.levelRequired || null,
+        links: line.links || null,
+        explicitModifiers: explicitMods,
+        implicitModifiers: implicitMods,
         flavourText: line.flavourText || '',
         detailsId: line.detailsId || String(line.id),
         game,

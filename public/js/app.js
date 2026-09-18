@@ -103,13 +103,16 @@ function initDom() {
   dom.poeFloatingTooltip = document.getElementById('poeFloatingTooltip');
   dom.tooltipTitle = document.getElementById('tooltipTitle');
   dom.tooltipBasetype = document.getElementById('tooltipBasetype');
+  dom.tooltipProperty = document.getElementById('tooltipProperty');
   dom.tooltipMagic = document.getElementById('tooltipMagic');
   dom.tooltipInstructions = document.getElementById('tooltipInstructions');
+  dom.tooltipImplicits = document.getElementById('tooltipImplicits');
   dom.tooltipExplicits = document.getElementById('tooltipExplicits');
   dom.tooltipDivider = document.getElementById('tooltipDivider');
   dom.tooltipFlavour = document.getElementById('tooltipFlavour');
   dom.tooltipFooter = document.getElementById('tooltipFooter');
   dom.tooltipIcon = document.getElementById('tooltipIcon');
+  dom.tooltipPrice = document.getElementById('tooltipPrice');
   dom.tooltipPinBtn = document.getElementById('tooltipPinBtn');
 }
 
@@ -157,6 +160,19 @@ async function init() {
 
   // 4. Background status poll
   setInterval(updateStatusUI, 60000);
+
+  // 5. PoEDB dynamic description updates
+  const pDesc = (typeof window !== 'undefined' && window.PoeItemDescriptions) ||
+                (typeof globalThis !== 'undefined' && globalThis.PoeItemDescriptions);
+  if (pDesc && typeof pDesc.onPoedbLoaded === 'function') {
+    pDesc.onPoedbLoaded((normalizedName) => {
+      if (currentHoveredItem && (currentHoveredItem.name || '').toLowerCase() === normalizedName.toLowerCase()) {
+        if (lastHoverEvent && !isTooltipPinned) {
+          showItemTooltip(lastHoverEvent, currentHoveredItem);
+        }
+      }
+    });
+  }
 }
 
 async function loadLeagues() {
@@ -321,6 +337,11 @@ function applySort(items) {
       const valB = state.currentGame === 'poe2' ? (b.divineValue || 0) : (b.chaosValue || 0);
       return dir * (valA - valB);
     }
+    if (col === 'popular' || col === 'divine') {
+      const valA = (a.divineValue || 0);
+      const valB = (b.divineValue || 0);
+      return dir * (valA - valB);
+    }
     if (col === 'change7d') {
       return dir * ((a.change7d || 0) - (b.change7d || 0));
     }
@@ -359,8 +380,8 @@ function renderCurrentView() {
 
 const SIDEBAR_GROUPS = [
   { id: 'general', label: 'GENERAL' },
-  { id: 'atlas', label: 'ATLAS & MAPS' },
   { id: 'gems', label: 'EQUIPMENT & GEMS' },
+  { id: 'atlas', label: 'ATLAS' },
   { id: 'crafting', label: 'CRAFTING' }
 ];
 
@@ -434,12 +455,23 @@ function renderSidebar() {
 // PoE In-game Floating Tooltip Logic
 // ==========================================================================
 let isTooltipPinned = false;
+let currentHoveredItemId = null;
+let currentHoveredItem = null;
+let lastHoverEvent = null;
 
 function showItemTooltip(e, item) {
-  if (!dom.poeFloatingTooltip || isTooltipPinned) return;
-  if (typeof window === 'undefined' || !window.PoeItemDescriptions) return;
+  if (!dom.poeFloatingTooltip || isTooltipPinned || !item) return;
 
-  const tt = window.PoeItemDescriptions.getTooltip(item);
+  currentHoveredItemId = item.id || item.name;
+  currentHoveredItem = item;
+  lastHoverEvent = e;
+
+  const pDesc = (typeof window !== 'undefined' && window.PoeItemDescriptions) ||
+                (typeof globalThis !== 'undefined' && globalThis.PoeItemDescriptions) ||
+                (typeof PoeItemDescriptions !== 'undefined' ? PoeItemDescriptions : null);
+  if (!pDesc || typeof pDesc.getTooltip !== 'function') return;
+
+  const tt = pDesc.getTooltip(item);
   if (!tt) return;
 
   dom.tooltipTitle.textContent = tt.title || item.name;
@@ -447,14 +479,56 @@ function showItemTooltip(e, item) {
 
   dom.tooltipBasetype.textContent = tt.baseType || tt.category || '';
   dom.tooltipMagic.textContent = tt.magicLine || '';
-  dom.tooltipInstructions.textContent = tt.instructions || '';
 
-  if (tt.explicits) {
-    dom.tooltipExplicits.textContent = tt.explicits;
-    dom.tooltipExplicits.classList.remove('hidden');
-  } else {
-    dom.tooltipExplicits.textContent = '';
-    dom.tooltipExplicits.classList.add('hidden');
+  // Stack size or level requirements property
+  if (dom.tooltipProperty) {
+    if (tt.stackSize) {
+      dom.tooltipProperty.textContent = `STACK SIZE: ${tt.stackSize}`;
+      dom.tooltipProperty.classList.remove('hidden');
+    } else if (tt.levelRequired) {
+      dom.tooltipProperty.textContent = `REQUIRES LEVEL ${tt.levelRequired}`;
+      dom.tooltipProperty.classList.remove('hidden');
+    } else {
+      dom.tooltipProperty.textContent = '';
+      dom.tooltipProperty.classList.add('hidden');
+    }
+  }
+
+  // Instructions (Right click to apply...)
+  if (dom.tooltipInstructions) {
+    if (tt.instructions) {
+      dom.tooltipInstructions.textContent = tt.instructions;
+      dom.tooltipInstructions.classList.remove('hidden');
+    } else {
+      dom.tooltipInstructions.textContent = '';
+      dom.tooltipInstructions.classList.add('hidden');
+    }
+  }
+
+  // Implicit modifiers
+  if (dom.tooltipImplicits) {
+    if (tt.implicits && (Array.isArray(tt.implicits) ? tt.implicits.length > 0 : tt.implicits)) {
+      dom.tooltipImplicits.innerHTML = Array.isArray(tt.implicits)
+        ? tt.implicits.map(m => Render.escapeHtml(m)).join('<br>')
+        : Render.escapeHtml(tt.implicits);
+      dom.tooltipImplicits.classList.remove('hidden');
+    } else {
+      dom.tooltipImplicits.innerHTML = '';
+      dom.tooltipImplicits.classList.add('hidden');
+    }
+  }
+
+  // Explicit modifiers
+  if (dom.tooltipExplicits) {
+    if (tt.explicits && (Array.isArray(tt.explicits) ? tt.explicits.length > 0 : tt.explicits)) {
+      dom.tooltipExplicits.innerHTML = Array.isArray(tt.explicits)
+        ? tt.explicits.map(m => Render.escapeHtml(m)).join('<br>')
+        : Render.escapeHtml(tt.explicits);
+      dom.tooltipExplicits.classList.remove('hidden');
+    } else {
+      dom.tooltipExplicits.innerHTML = '';
+      dom.tooltipExplicits.classList.add('hidden');
+    }
   }
 
   if (tt.flavour) {
@@ -474,30 +548,65 @@ function showItemTooltip(e, item) {
     dom.tooltipFooter.classList.add('hidden');
   }
 
-  positionTooltip(e);
+  if (dom.tooltipPrice) {
+    const isPoe2 = state.currentGame === 'poe2';
+    const divChaosRate = state.rates?.divinePriceInChaos || 366;
+    const exRate = state.rates?.rawRates?.exalted || 120;
+
+    if (isPoe2) {
+      const exVal = typeof item.exaltedValue === 'number' ? item.exaltedValue : 0;
+      const divVal = typeof item.divineValue === 'number' ? item.divineValue : 0;
+      if (divVal >= 1) {
+        dom.tooltipPrice.textContent = `${divVal} Div (≈ ${(divVal * exRate).toFixed(0)} Ex)`;
+      } else if (exVal < 1 && exVal > 0) {
+        const perEx = Math.round(1 / exVal * 10) / 10;
+        const perDiv = Math.round(exRate / exVal);
+        dom.tooltipPrice.textContent = `1 Ex = ${perEx} • 1 Div = ${perDiv.toLocaleString()} (≈ ${exVal.toFixed(2)} Ex)`;
+      } else {
+        const perDiv = divVal > 0 ? Math.round(1 / divVal) : 0;
+        dom.tooltipPrice.textContent = `${exVal} Ex` + (perDiv > 0 ? ` (1 Div = ${perDiv})` : '');
+      }
+    } else {
+      const chaosVal = typeof item.chaosValue === 'number' ? item.chaosValue : 0;
+      const divVal = typeof item.divineValue === 'number' ? item.divineValue : 0;
+      if (divVal >= 1) {
+        dom.tooltipPrice.textContent = `${divVal} Div (≈ ${Math.round(divVal * divChaosRate).toLocaleString()} C)`;
+      } else if (chaosVal < 1 && chaosVal > 0) {
+        const perC = Math.round(1 / chaosVal * 10) / 10;
+        const perDiv = Math.round(divChaosRate / chaosVal);
+        dom.tooltipPrice.textContent = `1 C = ${perC} • 1 Div = ${perDiv.toLocaleString()} (≈ ${chaosVal.toFixed(3).replace(/0+$/, '').replace(/\.$/, '')} C)`;
+      } else {
+        const perDiv = divVal > 0 ? Math.round(1 / divVal) : 0;
+        dom.tooltipPrice.textContent = `${chaosVal} C` + (perDiv > 0 ? ` (1 Div = ${perDiv})` : '');
+      }
+    }
+  }
+
+  // Display first so bounding rect measurements are accurate, then position safely
   dom.poeFloatingTooltip.classList.remove('hidden');
+  positionTooltip(e);
 }
 
 function positionTooltip(e) {
-  if (!dom.poeFloatingTooltip || isTooltipPinned) return;
+  if (!dom.poeFloatingTooltip || isTooltipPinned || !e) return;
   const offset = 18;
   let x = e.clientX + offset;
   let y = e.clientY + offset;
 
   const ttRect = dom.poeFloatingTooltip.getBoundingClientRect();
   const w = ttRect.width || 320;
-  const h = ttRect.height || 220;
+  const h = ttRect.height || 200;
 
-  // Prevent overflowing viewport bounds
+  // Prevent overflowing viewport bounds (flip safely to left / top)
   if (x + w > window.innerWidth - 12) {
-    x = Math.max(12, e.clientX - w - 14);
+    x = Math.max(12, e.clientX - w - 18);
   }
   if (y + h > window.innerHeight - 12) {
-    y = Math.max(12, window.innerHeight - h - 14);
+    y = Math.max(12, e.clientY - h - 18);
   }
 
-  dom.poeFloatingTooltip.style.left = `${x}px`;
-  dom.poeFloatingTooltip.style.top = `${y}px`;
+  dom.poeFloatingTooltip.style.left = `${Math.round(x)}px`;
+  dom.poeFloatingTooltip.style.top = `${Math.round(y)}px`;
 }
 
 function hideItemTooltip() {
@@ -766,40 +875,58 @@ function bindEvents() {
   dom.itemsTableBody.addEventListener('click', handleItemAction);
   dom.itemsGrid.addEventListener('click', handleItemAction);
 
-  // In-Game Floating Tooltip Event Delegation
-  const handleTooltipHover = (e) => {
-    const el = e.target.closest('[data-tooltip-id]');
-    if (el) {
-      const item = state.items.find(i => i.id === el.dataset.tooltipId);
-      if (item) showItemTooltip(e, item);
+  // Unified In-Game Floating Tooltip Event Delegation (Jitter-free)
+  const handleItemHover = (e) => {
+    if (isTooltipPinned) return;
+    const el = e.target.closest('[data-tooltip-id], .item-table-row, .item-grid-card');
+    if (!el) {
+      if (currentHoveredItemId) {
+        currentHoveredItemId = null;
+        hideItemTooltip();
+      }
+      return;
+    }
+
+    const itemId = el.dataset.tooltipId || el.dataset.id;
+    if (!itemId) return;
+
+    if (itemId !== currentHoveredItemId) {
+      currentHoveredItemId = itemId;
+      const item = state.items.find(i => i.id === itemId);
+      if (item) {
+        showItemTooltip(e, item);
+      } else {
+        hideItemTooltip();
+      }
+    } else {
+      positionTooltip(e);
     }
   };
 
-  dom.tableView.addEventListener('mouseover', handleTooltipHover);
-  dom.tableView.addEventListener('mousemove', (e) => {
-    if (!isTooltipPinned && dom.poeFloatingTooltip && !dom.poeFloatingTooltip.classList.contains('hidden')) {
-      positionTooltip(e);
-    }
-  });
-  dom.tableView.addEventListener('mouseout', (e) => {
-    const el = e.target.closest('[data-tooltip-id]');
-    if (el && (!e.relatedTarget || !el.contains(e.relatedTarget))) {
+  const handleItemLeave = (e) => {
+    if (isTooltipPinned) return;
+    const related = e.relatedTarget ? e.relatedTarget.closest('[data-tooltip-id], .item-table-row, .item-grid-card') : null;
+    if (!related) {
+      currentHoveredItemId = null;
       hideItemTooltip();
     }
-  });
+  };
 
-  dom.gridView.addEventListener('mouseover', handleTooltipHover);
-  dom.gridView.addEventListener('mousemove', (e) => {
-    if (!isTooltipPinned && dom.poeFloatingTooltip && !dom.poeFloatingTooltip.classList.contains('hidden')) {
-      positionTooltip(e);
-    }
-  });
-  dom.gridView.addEventListener('mouseout', (e) => {
-    const el = e.target.closest('[data-tooltip-id]');
-    if (el && (!e.relatedTarget || !el.contains(e.relatedTarget))) {
+  dom.tableView.addEventListener('mousemove', handleItemHover);
+  dom.tableView.addEventListener('mouseenter', handleItemHover);
+  dom.tableView.addEventListener('mouseleave', handleItemLeave);
+
+  dom.gridView.addEventListener('mousemove', handleItemHover);
+  dom.gridView.addEventListener('mouseenter', handleItemHover);
+  dom.gridView.addEventListener('mouseleave', handleItemLeave);
+
+  // Hide tooltip when scrolling to keep clean floating alignment
+  window.addEventListener('scroll', () => {
+    if (!isTooltipPinned && currentHoveredItemId) {
+      currentHoveredItemId = null;
       hideItemTooltip();
     }
-  });
+  }, { passive: true });
 
   // Tooltip Pin Toggle
   dom.tooltipPinBtn?.addEventListener('click', (e) => {
@@ -986,7 +1113,7 @@ function bindEvents() {
     const priceText = isPoe2
       ? (state.activeModalItem.divineValue >= 1 ? `${state.activeModalItem.divineValue} Div` : `${state.activeModalItem.exaltedValue || 0} Ex`)
       : (state.activeModalItem.divineValue >= 1 ? `${state.activeModalItem.divineValue} Div` : `${state.activeModalItem.chaosValue || 0} C`);
-    const whisper = Clipboard.formatWhisper(state.activeModalItem, 1, priceText);
+    const whisper = Clipboard.formatWhisper(state.activeModalItem, 1, priceText, state.currentLeague);
     const success = await Clipboard.copyText(whisper);
     if (success) {
       dom.btnInspectWhisper.innerHTML = '<i class="fa-solid fa-check"></i> Đã sao chép!';
@@ -1090,7 +1217,7 @@ function handleItemAction(e) {
     const priceText = isPoe2
       ? (item.divineValue >= 1 ? `${item.divineValue} Div` : `${item.exaltedValue || 0} Ex`)
       : (item.divineValue >= 1 ? `${item.divineValue} Div` : `${item.chaosValue || 0} C`);
-    const whisper = Clipboard.formatWhisper(item, 1, priceText);
+    const whisper = Clipboard.formatWhisper(item, 1, priceText, state.currentLeague);
     Clipboard.copyText(whisper).then(ok => {
       if (ok) Clipboard.showToast(`Đã sao chép whisper cho "${item.name}"!`, 'success');
     });
@@ -1128,6 +1255,8 @@ async function switchGame(game) {
 
 function switchView(view) {
   state.currentView = view;
+  currentHoveredItemId = null;
+  hideItemTooltip();
   dom.viewTableBtn.classList.toggle('active', view === 'table');
   dom.viewGridBtn.classList.toggle('active', view === 'grid');
   renderCurrentView();

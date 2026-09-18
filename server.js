@@ -3,6 +3,7 @@ const cors = require('cors');
 const path = require('path');
 const cacheManager = require('./services/cacheManager');
 const CategoryRegistry = require('./services/categoryRegistry');
+const poedbService = require('./services/poedbService');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -62,6 +63,26 @@ app.get('/api/items', (req, res) => {
 
   const data = cacheManager.getData(game, league);
   res.json(data);
+});
+
+// API: Authentic in-game item description from PoEDB (with disk caching)
+app.get('/api/item-description', async (req, res) => {
+  const name = req.query.name;
+  const game = (req.query.game || 'poe1').toLowerCase();
+
+  if (!name || typeof name !== 'string') {
+    return res.status(400).json({ error: 'Parameter "name" is required.' });
+  }
+
+  try {
+    const desc = await poedbService.getItemDescription(name, game);
+    if (desc) {
+      return res.json({ success: true, description: desc });
+    }
+    return res.status(404).json({ success: false, message: `No poedb description found for "${name}"` });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 // API: Trigger true full refresh across all available categories

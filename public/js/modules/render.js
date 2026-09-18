@@ -160,17 +160,36 @@ export const Render = {
   },
 
   /**
+   * Get direct PoE Wiki URL
+   */
+  getWikiUrl(item, game) {
+    if (typeof window !== 'undefined' && window.PoeItemDescriptions) {
+      return window.PoeItemDescriptions.getWikiUrl(item);
+    }
+    return game === 'poe2'
+      ? `https://poe2db.tw/us/${encodeURIComponent(item.name)}`
+      : `https://www.poewiki.net/wiki/${encodeURIComponent(item.name.replace(/ /g, '_'))}`;
+  },
+
+  /**
    * Render Table Rows (Zero inline handlers, Zero inline onerror)
    */
   renderTableRows(items, state) {
+    const hasQuery = Boolean(state && state.searchQuery && state.searchQuery.trim());
+
     if (!items || items.length === 0) {
       return `
         <tr>
           <td colspan="5" class="empty-table-cell">
             <div class="empty-state">
               <i class="fa-solid fa-box-open empty-icon"></i>
-              <p class="empty-title">Không tìm thấy vật phẩm nào</p>
-              <p class="empty-desc">Thử tìm kiếm với từ khóa khác hoặc chuyển danh mục.</p>
+              <p class="empty-title">${hasQuery ? `Không tìm thấy vật phẩm cho "${this.escapeHtml(state.searchQuery)}"` : 'Không tìm thấy vật phẩm nào'}</p>
+              <p class="empty-desc">${hasQuery ? 'Kiểm tra chính tả hoặc thử tìm kiếm với từ khóa ngắn hơn.' : 'Thử chuyển danh mục hoặc tắt bộ lọc.'}</p>
+              ${hasQuery ? `
+                <button class="btn-clear-search-empty" data-action="clear-search">
+                  <i class="fa-solid fa-rotate-left"></i> Xóa tìm kiếm
+                </button>
+              ` : ''}
             </div>
           </td>
         </tr>
@@ -191,18 +210,18 @@ export const Render = {
       else if (cat.includes('gem')) rarityClass = 'rarity-gem';
       else if (cat.includes('unique')) rarityClass = 'rarity-unique';
 
-      const wikiUrl = typeof window !== 'undefined' && window.PoeItemDescriptions
-        ? window.PoeItemDescriptions.getWikiUrl(item)
-        : (state.currentGame === 'poe2' ? `https://poe2db.tw/us/${encodeURIComponent(item.name)}` : `https://www.poewiki.net/wiki/${encodeURIComponent(item.name)}`);
+      const wikiUrl = this.getWikiUrl(item, state.currentGame);
+      const showCategoryBadge = hasQuery;
 
       return `
         <tr class="item-table-row ${isComparing ? 'row-comparing' : ''}" data-id="${this.escapeHtml(item.id)}">
           <td class="col-name">
             <div class="table-name-cell">
               <button class="star-btn ${isFav ? 'active' : ''}" data-action="toggle-fav" data-id="${this.escapeHtml(item.id)}" title="${isFav ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích'}">★</button>
-              <img src="${this.escapeHtml(iconUrl)}" alt="" class="table-item-icon" loading="lazy">
+              <img src="${this.escapeHtml(iconUrl)}" alt="" class="table-item-icon" loading="lazy" data-tooltip-id="${this.escapeHtml(item.id)}">
               <div class="table-name-wrap">
                 <span class="item-link-name ${rarityClass}" data-action="open-calc" data-id="${this.escapeHtml(item.id)}" data-tooltip-id="${this.escapeHtml(item.id)}">${this.escapeHtml(item.name)}</span>
+                ${showCategoryBadge ? `<span class="table-cat-badge">${this.escapeHtml(item.category || item.sourceType)}</span>` : ''}
                 <a href="${wikiUrl}" target="_blank" rel="noopener" class="wiki-badge" title="Tra cứu PoE Wiki">WIKI ↗</a>
               </div>
             </div>
@@ -240,12 +259,19 @@ export const Render = {
    * Render Grid Cards (Zero inline handlers, Zero inline onerror)
    */
   renderGridCards(items, state) {
+    const hasQuery = Boolean(state && state.searchQuery && state.searchQuery.trim());
+
     if (!items || items.length === 0) {
       return `
         <div class="empty-state grid-span-full">
           <i class="fa-solid fa-box-open empty-icon"></i>
-          <p class="empty-title">Không tìm thấy vật phẩm nào</p>
-          <p class="empty-desc">Thử tìm kiếm với từ khóa khác hoặc chuyển danh mục.</p>
+          <p class="empty-title">${hasQuery ? `Không tìm thấy vật phẩm cho "${this.escapeHtml(state.searchQuery)}"` : 'Không tìm thấy vật phẩm nào'}</p>
+          <p class="empty-desc">${hasQuery ? 'Kiểm tra chính tả hoặc thử tìm kiếm với từ khóa ngắn hơn.' : 'Thử chuyển danh mục hoặc tắt bộ lọc.'}</p>
+          ${hasQuery ? `
+            <button class="btn-clear-search-empty" data-action="clear-search">
+              <i class="fa-solid fa-rotate-left"></i> Xóa tìm kiếm
+            </button>
+          ` : ''}
         </div>
       `;
     }
@@ -257,19 +283,20 @@ export const Render = {
       const changeClass = change > 0 ? 'trend-up' : change < 0 ? 'trend-down' : 'trend-flat';
       const changeText = change > 0 ? `+${change.toFixed(1)}%` : `${change.toFixed(1)}%`;
       const iconUrl = item.icon || 'https://web.poecdn.com/image/Art/2DItems/Currency/CurrencyRerollRare.png';
+      const wikiUrl = this.getWikiUrl(item, state.currentGame);
 
       return `
         <div class="item-grid-card ${isComparing ? 'card-comparing' : ''}" data-id="${this.escapeHtml(item.id)}">
           <div class="card-header-bar">
-            <button class="star-btn ${isFav ? 'active' : ''}" data-action="toggle-fav" data-id="${this.escapeHtml(item.id)}" title="Yêu thích">★</button>
+            <button class="star-btn ${isFav ? 'active' : ''}" data-action="toggle-fav" data-id="${this.escapeHtml(item.id)}" title="${isFav ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích'}">★</button>
             <span class="item-category-tag">${this.escapeHtml(item.category)}</span>
             ${this.renderLiquidityBadge(item.volume)}
           </div>
-          <div class="card-body" data-action="open-calc" data-id="${this.escapeHtml(item.id)}">
-            <div class="grid-item-thumb-wrapper">
-              <img src="${this.escapeHtml(iconUrl)}" alt="" class="grid-item-thumb" loading="lazy">
+          <div class="card-body" data-action="open-calc" data-id="${this.escapeHtml(item.id)}" data-tooltip-id="${this.escapeHtml(item.id)}">
+            <div class="grid-item-thumb-wrapper" data-tooltip-id="${this.escapeHtml(item.id)}">
+              <img src="${this.escapeHtml(iconUrl)}" alt="" class="grid-item-thumb" loading="lazy" data-tooltip-id="${this.escapeHtml(item.id)}">
             </div>
-            <div class="grid-item-name">${this.escapeHtml(item.name)}</div>
+            <div class="grid-item-name" data-tooltip-id="${this.escapeHtml(item.id)}">${this.escapeHtml(item.name)}</div>
             <div class="grid-item-price">
               ${this.formatValueHtml(item, state.currentGame)}
             </div>
@@ -279,12 +306,14 @@ export const Render = {
             </div>
           </div>
           <div class="card-footer-actions">
-            <label class="compare-checkbox-label">
-              <input type="checkbox" class="compare-checkbox" data-action="toggle-compare" data-id="${this.escapeHtml(item.id)}" ${isComparing ? 'checked' : ''}>
-              <span>So sánh</span>
-            </label>
-            <button class="btn-card-calc" data-action="open-calc" data-id="${this.escapeHtml(item.id)}">
+            <button class="btn-card-calc" data-action="open-calc" data-id="${this.escapeHtml(item.id)}" title="Mở máy tính giá">
               <i class="fa-solid fa-calculator"></i> Tính giá
+            </button>
+            <a href="${wikiUrl}" target="_blank" rel="noopener" class="btn-card-wiki" title="Tra cứu PoE Wiki">
+              <i class="fa-solid fa-book-open"></i>
+            </a>
+            <button class="btn-card-compare ${isComparing ? 'active' : ''}" data-action="toggle-compare" data-id="${this.escapeHtml(item.id)}" title="${isComparing ? 'Xóa khỏi so sánh' : 'So sánh vật phẩm'}">
+              <i class="fa-solid fa-code-compare"></i>
             </button>
           </div>
         </div>

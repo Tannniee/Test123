@@ -78,6 +78,7 @@ export const Modals = {
     const quantity = Math.max(1, parseInt(qty, 10) || 1);
 
     if (isPoe2) {
+      if (elements.calcUnitPrimaryLbl) elements.calcUnitPrimaryLbl.textContent = 'Đơn giá Exalted';
       const unitDiv = item.divineValue || 0;
       const unitEx = item.exaltedValue || 0;
       const totalDiv = +(unitDiv * quantity).toFixed(3);
@@ -93,6 +94,7 @@ export const Modals = {
 
       elements.calcSummaryText.textContent = `${quantity}x ${item.name} = ${totalEx.toLocaleString()} Ex (${totalDiv.toLocaleString()} Div)`;
     } else {
+      if (elements.calcUnitPrimaryLbl) elements.calcUnitPrimaryLbl.textContent = 'Đơn giá Chaos';
       const unitChaos = item.chaosValue || 0;
       const unitDiv = item.divineValue || 0;
       const totalChaos = +(unitChaos * quantity).toFixed(1);

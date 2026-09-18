@@ -63,6 +63,11 @@
       <!-- TOP NAVIGATION BAR -->
       <header class="top-nav-bar top-navbar">
         
+        <!-- Mobile Sidebar Toggle -->
+        <button class="btn-mobile-menu" id="btnMobileMenu" title="Mở danh mục">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+
         <!-- Search Box with Fuzzy Search -->
         <div class="top-search-wrap">
           <span class="top-search-icon">
@@ -190,13 +195,13 @@
         <!-- TABLE VIEW -->
         <div class="ninja-table-container items-table-container" id="tableView">
           <table class="ninja-table items-table">
-            <thead class="items-table-header">
+            <thead class="items-table-header" id="itemsTableHeader">
               <tr>
-                <th class="col-name sortable sortable-th sorted" data-sort="name">
-                  Name <span class="sort-indicator sort-arrow">▲</span>
+                <th class="col-name sortable sortable-th" data-sort="name">
+                  Name <span class="sort-indicator sort-arrow"></span>
                 </th>
-                <th class="col-val text-right sortable sortable-th" data-sort="value">
-                  Value <span class="info-tip" title="Tỷ giá hối đoái Faustus Exchange">ⓘ</span> <span class="sort-indicator sort-arrow"></span>
+                <th class="col-val text-right sortable sortable-th sorted sorted-desc" data-sort="value">
+                  Value <span class="info-tip" title="Tỷ giá hối đoái Faustus Exchange">ⓘ</span> <span class="sort-indicator sort-arrow">▼</span>
                 </th>
                 <th class="col-trend text-center sortable sortable-th" data-sort="change7d">
                   Last 7 days <span class="sort-indicator sort-arrow"></span>
@@ -229,6 +234,9 @@
     </main>
   </div>
 
+  <!-- Mobile Sidebar Backdrop -->
+  <div class="sidebar-backdrop hidden" id="sidebarBackdrop"></div>
+
   <!-- CALCULATOR MODAL -->
   <div class="modal-overlay hidden" id="calcModalOverlay">
     <div class="modal-card">
@@ -248,7 +256,7 @@
         <!-- Price Stats Grid -->
         <div class="modal-stats-grid">
           <div class="stat-box">
-            <span class="stat-label">Đơn giá Primary</span>
+            <span class="stat-label" id="calcUnitPrimaryLbl">Đơn giá Chaos</span>
             <span class="stat-value" id="calcUnitChaos">0 C</span>
           </div>
           <div class="stat-box">

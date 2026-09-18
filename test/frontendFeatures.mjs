@@ -34,6 +34,35 @@ assert(Render.renderLiquidityBadge(500).includes('badge-low'));
 assert(Render.renderLiquidityBadge(0).includes('badge-zero'));
 console.log('✓ PASS: Liquidity Badges (High, Med, Low, Zero)');
 
+console.log('\n--- Test 4: PoE 2 Price Tier Filtering (Exalted based) ---');
+const poe2MockItems = [
+  { id: 'p1', name: 'Cheap Catalyst', category: 'Catalysts', exaltedValue: 4, divineValue: 0.01 },
+  { id: 'p2', name: 'Mid Omen', category: 'Omens', exaltedValue: 45, divineValue: 0.1 },
+  { id: 'p3', name: 'High Rune', category: 'Runes', exaltedValue: 800, divineValue: 2 },
+  { id: 'p4', name: 'Mirror of Kalandra', category: 'Currency', exaltedValue: 60000, divineValue: 150 }
+];
+
+const cheapResults = Search.filterAndRank(poe2MockItems, { game: 'poe2', priceFilter: '<10c' });
+assert.strictEqual(cheapResults.length, 1);
+assert.strictEqual(cheapResults[0].name, 'Cheap Catalyst');
+
+const midResults = Search.filterAndRank(poe2MockItems, { game: 'poe2', priceFilter: '10-100c' });
+assert.strictEqual(midResults.length, 1);
+assert.strictEqual(midResults[0].name, 'Mid Omen');
+
+const highResults = Search.filterAndRank(poe2MockItems, { game: 'poe2', priceFilter: '1-5d' });
+assert.strictEqual(highResults.length, 1);
+assert.strictEqual(highResults[0].name, 'High Rune');
+console.log('✓ PASS: PoE 2 Price Tier Filtering works accurately with exaltedValue');
+
+console.log('\n--- Test 5: Wiki URL Generation & Category Badges ---');
+const poe1Wiki = Render.getWikiUrl({ name: 'Divine Orb' }, 'poe1');
+assert(poe1Wiki.includes('poewiki.net/wiki/Divine_Orb'), 'PoE 1 Wiki should link to poewiki.net');
+
+const poe2Wiki = Render.getWikiUrl({ name: 'Distilled Fear' }, 'poe2');
+assert(poe2Wiki.includes('poe2db.tw/us/'), 'PoE 2 Wiki should link to poe2db.tw');
+console.log('✓ PASS: getWikiUrl generates correct game-specific database links');
+
 console.log('\n====================================================');
 console.log('  All Frontend Module Unit Tests Passed! ✓');
 console.log('====================================================\n');

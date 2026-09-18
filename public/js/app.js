@@ -50,7 +50,12 @@ function initDom() {
   dom.pagination = document.getElementById('pagination');
 
   // Table Sort Headers
+  dom.itemsTableHeader = document.getElementById('itemsTableHeader');
   dom.sortHeaders = document.querySelectorAll('.sortable-th');
+
+  // Mobile Drawer Navigation
+  dom.btnMobileMenu = document.getElementById('btnMobileMenu');
+  dom.sidebarBackdrop = document.getElementById('sidebarBackdrop');
 
   // Calculator Modal
   dom.calcModalOverlay = document.getElementById('calcModalOverlay');
@@ -60,6 +65,7 @@ function initDom() {
   dom.calcModalCategory = document.getElementById('calcModalCategory');
   dom.calcWikiLink = document.getElementById('calcWikiLink');
   dom.calcQtyInput = document.getElementById('calcQtyInput');
+  dom.calcUnitPrimaryLbl = document.getElementById('calcUnitPrimaryLbl');
   dom.calcUnitChaos = document.getElementById('calcUnitChaos');
   dom.calcUnitDivine = document.getElementById('calcUnitDivine');
   dom.calcTotalChaos = document.getElementById('calcTotalChaos');
@@ -104,6 +110,8 @@ async function init() {
   dom.btnPoe2.classList.toggle('active', state.currentGame === 'poe2');
   dom.viewTableBtn.classList.toggle('active', state.currentView === 'table');
   dom.viewGridBtn.classList.toggle('active', state.currentView === 'grid');
+  updateSortHeaderUI();
+  updateFilterChipsForGame(state.currentGame);
 
   bindEvents();
 
@@ -300,7 +308,11 @@ function applySort(items) {
 
 function renderCurrentView() {
   const total = state.filteredItems.length;
-  dom.resultsCount.textContent = `${total.toLocaleString()} vật phẩm`;
+  if (state.searchQuery && state.searchQuery.trim()) {
+    dom.resultsCount.innerHTML = `Tìm thấy <strong>${total.toLocaleString()}</strong> kết quả cho "<em>${Render.escapeHtml(state.searchQuery.trim())}</em>"`;
+  } else {
+    dom.resultsCount.textContent = `${total.toLocaleString()} vật phẩm`;
+  }
 
   const totalPages = Math.ceil(total / state.pageSize) || 1;
   const startIdx = (state.currentPage - 1) * state.pageSize;
@@ -447,6 +459,46 @@ function updateHeaderRates() {
     }
     dom.convPrimarySym.textContent = 'C';
   }
+  updateConverterRates();
+  updateFilterChipsForGame(state.currentGame);
+}
+
+function updateConverterRates() {
+  if (!dom.convChaosInput || !dom.convDivineInput) return;
+  const val = parseFloat(dom.convChaosInput.value) || 0;
+  const isPoe2 = state.currentGame === 'poe2';
+  if (isPoe2) {
+    const exRate = state.rates.rawRates?.exalted || 0;
+    dom.convDivineInput.value = exRate > 0 ? +(val / exRate).toFixed(3) : 0;
+  } else {
+    const divChaos = state.rates.divinePriceInChaos || 0;
+    dom.convDivineInput.value = divChaos > 0 ? +(val / divChaos).toFixed(2) : 0;
+  }
+}
+
+function updateFilterChipsForGame(game) {
+  const chipLow = document.querySelector('.chip-btn[data-filter="<10c"]');
+  const chipMid = document.querySelector('.chip-btn[data-filter="10-100c"]');
+  if (game === 'poe2') {
+    if (chipLow) chipLow.textContent = '< 10 Ex';
+    if (chipMid) chipMid.textContent = '10 - 100 Ex';
+  } else {
+    if (chipLow) chipLow.innerHTML = '&lt; 10c';
+    if (chipMid) chipMid.textContent = '10c - 100c';
+  }
+}
+
+function updateSortHeaderUI() {
+  if (!dom.itemsTableHeader) return;
+  dom.itemsTableHeader.querySelectorAll('th.sortable').forEach(h => {
+    h.classList.remove('sorted', 'sorted-asc', 'sorted-desc');
+    const arrow = h.querySelector('.sort-indicator, .sort-arrow');
+    if (arrow) arrow.textContent = '';
+    if (h.dataset.sort === state.sortColumn) {
+      h.classList.add('sorted', `sorted-${state.sortDirection}`);
+      if (arrow) arrow.textContent = state.sortDirection === 'desc' ? '▼' : '▲';
+    }
+  });
 }
 
 async function updateStatusUI() {
@@ -490,6 +542,19 @@ function bindEvents() {
   dom.btnPoe1.addEventListener('click', () => switchGame('poe1'));
   dom.btnPoe2.addEventListener('click', () => switchGame('poe2'));
 
+  // Mobile Menu & Backdrop Delegation
+  if (dom.btnMobileMenu && dom.sidebarBackdrop) {
+    dom.btnMobileMenu.addEventListener('click', () => {
+      dom.sidebar.classList.toggle('mobile-open');
+      dom.sidebarBackdrop.classList.toggle('hidden');
+    });
+
+    dom.sidebarBackdrop.addEventListener('click', () => {
+      dom.sidebar.classList.remove('mobile-open');
+      dom.sidebarBackdrop.classList.add('hidden');
+    });
+  }
+
   // League Selector
   dom.leagueSelect.addEventListener('change', (e) => {
     state.currentLeague = e.target.value;
@@ -513,6 +578,11 @@ function bindEvents() {
 
     dom.breadcrumbCategory.textContent = cat;
     dom.currentCategoryTitle.textContent = cat;
+
+    // Close mobile drawer if open
+    dom.sidebar.classList.remove('mobile-open');
+    dom.sidebarBackdrop?.classList.add('hidden');
+
     filterAndRender();
   });
 
@@ -594,16 +664,7 @@ function bindEvents() {
       state.sortDirection = 'desc';
     }
 
-    dom.sortHeaders.forEach(h => {
-      h.classList.remove('sorted-asc', 'sorted-desc', 'sorted');
-      const arrow = h.querySelector('.sort-indicator, .sort-arrow');
-      if (arrow) arrow.textContent = '';
-      if (h.dataset.sort === state.sortColumn) {
-        h.classList.add('sorted', `sorted-${state.sortDirection}`);
-        if (arrow) arrow.textContent = state.sortDirection === 'desc' ? '▼' : '▲';
-      }
-    });
-
+    updateSortHeaderUI();
     applySort(state.filteredItems);
     renderCurrentView();
   });
@@ -862,46 +923,54 @@ function bindEvents() {
     }
   });
 
-  // Quick Currency Converter Inputs
-  dom.convChaosInput.addEventListener('input', () => {
-    const isPoe2 = state.currentGame === 'poe2';
-    const val = parseFloat(dom.convChaosInput.value) || 0;
-    if (isPoe2) {
-      const exRate = state.rates.rawRates?.exalted || 1;
-      dom.convDivineInput.value = exRate > 0 ? +(val / exRate).toFixed(3) : 0;
-    } else {
-      const divChaos = state.rates.divinePriceInChaos;
-      dom.convDivineInput.value = divChaos > 0 ? +(val / divChaos).toFixed(3) : 0;
-    }
-  });
-
-  dom.convDivineInput.addEventListener('input', () => {
-    const isPoe2 = state.currentGame === 'poe2';
-    const val = parseFloat(dom.convDivineInput.value) || 0;
-    if (isPoe2) {
-      const exRate = state.rates.rawRates?.exalted || 1;
-      dom.convChaosInput.value = +(val * exRate).toFixed(1);
-    } else {
-      const divChaos = state.rates.divinePriceInChaos;
-      dom.convChaosInput.value = +(val * divChaos).toFixed(1);
-    }
-  });
-
   // Keyboard Shortcuts
   window.addEventListener('keydown', (e) => {
+    // 1. Escape: close modals if open, or clear search & blur
     if (e.key === 'Escape') {
-      Modals.closeCalculator(dom);
-      Modals.closeCompare();
-      Modals.closeAlerts();
-      Modals.closeDiagnostics();
-      Modals.closeSettings();
-    } else if (e.key === '/' && document.activeElement !== dom.searchInput) {
+      const isAnyModalOpen = [
+        dom.calcModalOverlay,
+        dom.compareModalOverlay,
+        dom.alertsModalOverlay,
+        dom.diagnosticsModalOverlay,
+        dom.settingsModalOverlay
+      ].some(el => el && !el.classList.contains('hidden') && el.style.display !== 'none');
+
+      if (isAnyModalOpen) {
+        Modals.closeCalculator(dom);
+        Modals.closeCompare();
+        Modals.closeAlerts();
+        Modals.closeDiagnostics();
+        Modals.closeSettings();
+      } else if (document.activeElement === dom.searchInput || state.searchQuery) {
+        dom.searchInput.value = '';
+        state.searchQuery = '';
+        dom.clearSearchBtn.classList.add('hidden');
+        dom.searchInput.blur();
+        filterAndRender();
+      }
+    } 
+    // 2. Focus search on '/' or 'Ctrl+K' / 'Cmd+K'
+    else if ((e.key === '/' && document.activeElement !== dom.searchInput) ||
+             ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k')) {
       e.preventDefault();
       dom.searchInput.focus();
       dom.searchInput.select();
-    } else if (e.key === 'Enter' && document.activeElement === dom.searchInput) {
+    } 
+    // 3. Open calculator on Enter in search
+    else if (e.key === 'Enter' && document.activeElement === dom.searchInput) {
       if (state.filteredItems.length > 0) {
         Modals.openCalculator(state.filteredItems[0], state, dom);
+      }
+    }
+    // 4. Quick pagination with '[' and ']' when not typing in inputs
+    else if (!['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) {
+      const totalPages = Math.ceil(state.filteredItems.length / state.pageSize) || 1;
+      if (e.key === '[' && state.currentPage > 1) {
+        state.currentPage--;
+        renderCurrentView();
+      } else if (e.key === ']' && state.currentPage < totalPages) {
+        state.currentPage++;
+        renderCurrentView();
       }
     }
   });
@@ -913,6 +982,17 @@ function handleItemAction(e) {
   if (!target) return;
 
   const action = target.dataset.action;
+
+  // Clear search quick button (from empty states)
+  if (action === 'clear-search') {
+    dom.searchInput.value = '';
+    state.searchQuery = '';
+    dom.clearSearchBtn.classList.add('hidden');
+    filterAndRender();
+    dom.searchInput.focus();
+    return;
+  }
+
   const id = target.dataset.id;
   const item = state.items.find(i => i.id === id);
   if (!item) return;

@@ -154,7 +154,7 @@ export const Search = {
       }
 
       // 3. Price tier filter
-      const primaryVal = game === 'poe2' ? (item.divineValue || 0) : (item.chaosValue || 0);
+      const primaryVal = game === 'poe2' ? (typeof item.exaltedValue === 'number' ? item.exaltedValue : 0) : (item.chaosValue || 0);
       if (priceFilter === '<10c' && primaryVal >= 10) continue;
       if (priceFilter === '10-100c' && (primaryVal < 10 || primaryVal > 100)) continue;
       if (priceFilter === '1-5d') {

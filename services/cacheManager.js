@@ -292,25 +292,14 @@ class CacheManager {
         continue;
       }
 
-      if (game === 'poe1' || info?.status === 'available' || count > 0) {
-        available.push({
-          type: reg.type,
-          label: reg.label,
-          group: reg.group || 'general',
-          priority: reg.priority,
-          iconClass: reg.iconClass,
-          count: count > 0 ? count : (info?.count || 0)
-        });
-      } else if (!entry && reg.priority) {
-        available.push({
-          type: reg.type,
-          label: reg.label,
-          group: reg.group || 'general',
-          priority: reg.priority,
-          iconClass: reg.iconClass,
-          count: 0
-        });
-      }
+      available.push({
+        type: reg.type,
+        label: reg.label,
+        group: reg.group || 'general',
+        priority: reg.priority,
+        iconClass: reg.iconClass,
+        count: count > 0 ? count : (info?.count || 0)
+      });
     }
 
     if (available.length === 0) {
@@ -609,12 +598,25 @@ class CacheManager {
         icon = `https://web.poecdn.com${icon}`;
       }
 
-      const chaosVal = typeof line.chaosValue === 'number' ? line.chaosValue : 0;
-      let divineVal = typeof line.divineValue === 'number' ? line.divineValue : 0;
-      if (divineVal === 0 && validatedRates.divine > 0) {
-        divineVal = +(chaosVal * validatedRates.divine).toFixed(2);
+      let chaosVal = 0;
+      let divineVal = 0;
+      let exaltedVal = 0;
+
+      if (game === 'poe2') {
+        const rawVal = typeof line.primaryValue === 'number' ? line.primaryValue : 0;
+        divineVal = rawVal;
+        const exRate = validatedRates.exalted || 0;
+        const chRate = validatedRates.chaos || 0;
+        exaltedVal = exRate > 0 ? +(rawVal * exRate).toFixed(2) : 0;
+        chaosVal = chRate > 0 ? +(rawVal * chRate).toFixed(2) : 0;
+      } else {
+        chaosVal = typeof line.chaosValue === 'number' ? line.chaosValue : (typeof line.primaryValue === 'number' ? line.primaryValue : 0);
+        divineVal = typeof line.divineValue === 'number' ? line.divineValue : 0;
+        if (divineVal === 0 && validatedRates.divine > 0) {
+          divineVal = +(chaosVal * validatedRates.divine).toFixed(2);
+        }
+        exaltedVal = typeof line.exaltedValue === 'number' ? line.exaltedValue : 0;
       }
-      const exaltedVal = typeof line.exaltedValue === 'number' ? line.exaltedValue : 0;
 
       const sparklineData = line.sparkLine?.data || line.sparkline?.data || [];
       const change7d = line.sparkLine?.totalChange ?? line.sparkline?.totalChange ?? 0;
@@ -644,7 +646,7 @@ class CacheManager {
         chaosValue: chaosVal,
         divineValue: divineVal,
         exaltedValue: exaltedVal,
-        primaryCurrency: 'chaos',
+        primaryCurrency: game === 'poe2' ? 'divine' : 'chaos',
         change7d: change7d,
         sparkline: sparklineData,
         volume: volume,

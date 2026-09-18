@@ -38,16 +38,20 @@ async function it(desc, fn) {
   // ----------------------------------------------------
   console.log('--- Suite 1: Category Registry & LineageSupportGems ---');
 
-  await it('should have Category Registry for PoE 1 (46 types) and PoE 2 (14 types)', () => {
+  await it('should have Category Registry for PoE 1 (44 types) and PoE 2 (23 types)', () => {
     const p1 = CategoryRegistry.getRegistry('poe1');
     const p2 = CategoryRegistry.getRegistry('poe2');
-    assert.strictEqual(p1.length, 46, 'PoE 1 must have 46 types matching all poe.ninja tabs');
-    assert.strictEqual(p2.length, 14, 'PoE 2 must have exactly 14 exchange types (including LineageSupportGems)');
+    assert.strictEqual(p1.length, 44, 'PoE 1 must have 44 types matching all poe.ninja tabs (Incubator & DjinnCoin removed)');
+    assert.strictEqual(p2.length, 23, 'PoE 2 must have exactly 23 types matching user screenshot');
 
     assert(CategoryRegistry.isValid('poe1', 'Map'));
     assert.strictEqual(CategoryRegistry.getGroup('poe1', 'Map'), 'atlas');
     assert(CategoryRegistry.isValid('poe2', 'LineageSupportGems'));
     assert.strictEqual(CategoryRegistry.getLabel('poe2', 'LineageSupportGems'), 'Lineage Gems');
+    assert(CategoryRegistry.isValid('poe2', 'UniqueWeapons'));
+    assert.strictEqual(CategoryRegistry.getLabel('poe2', 'UniqueWeapons'), 'Unique Weapons');
+    assert(CategoryRegistry.isValid('poe2', 'UniqueTablets'));
+    assert.strictEqual(CategoryRegistry.getLabel('poe2', 'UniqueTablets'), 'Unique Tablets');
   });
 
   await it('should map PoE 2 labels correctly (Abyss -> Abyssal Bones, Ritual -> Omens, Delirium -> Liquid Emotions, Breach -> Catalysts)', () => {

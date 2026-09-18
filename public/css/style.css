@@ -168,8 +168,8 @@ select:focus {
 
 /* LEFT SIDEBAR - Permanently Sticky on Viewport Scroll */
 .app-sidebar {
-  width: 230px;
-  min-width: 230px;
+  width: 248px;
+  min-width: 248px;
   background: var(--bg-sidebar);
   border-right: 1px solid var(--border-sidebar);
   display: flex;
@@ -256,7 +256,7 @@ select:focus {
   border: 1px solid transparent;
   border-left: 3px solid transparent;
   color: var(--text-secondary);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-family: var(--font-body);
   font-weight: 500;
   border-radius: var(--radius-sm);
@@ -275,12 +275,12 @@ select:focus {
 }
 
 .nav-item.active {
-  background: #1c1f28;
-  color: #f0be65;
+  background: rgba(242, 169, 59, 0.12);
+  color: #f5c26b;
   font-weight: 500;
-  border: 1px solid #d49e43;
-  border-left: 3px solid #f0be65;
-  box-shadow: 0 0 10px rgba(240, 190, 101, 0.15);
+  border: 1px solid rgba(242, 169, 59, 0.4);
+  border-left: 3px solid #f2a93b;
+  box-shadow: inset 3px 0 0 #f2a93b, 0 0 12px rgba(242, 169, 59, 0.15);
 }
 
 .nav-icon {
@@ -358,6 +358,9 @@ select:focus {
 .poe2-idol-ico { background-image: url('https://web.poecdn.com/gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvUml0dWFsL1JpdHVhbE1hamVzdGljQmVhc3RzIiwic2NhbGUiOjEsInJlYWxtIjoicG9lMiJ9XQ/db3cfd505d/RitualMajesticBeasts.png'); }
 .poe2-rune-ico { background-image: url('https://web.poecdn.com/gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvUnVuZXMvRGV4UnVuZSIsInNjYWxlIjoxLCJyZWFsbSI6InBvZTIifV0/efa54e5585/DexRune.png'); }
 .verisium-ico { background-image: url('https://web.poecdn.com/gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvRXhwZWRpdGlvbjIvQ2hpcHBlZFZlcmlzaXVtIiwic2NhbGUiOjEsInJlYWxtIjoicG9lMiJ9XQ/5795b74448/ChippedVerisium.png'); }
+.unique-charm-ico { background-image: url('https://web.poecdn.com/gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ2hhcm1zL1VuaXF1ZXMvR29sZGVuVW5pcXVlQ2hhcm0iLCJ3IjoxLCJoIjoxLCJzY2FsZSI6MSwicmVhbG0iOiJwb2UyIn1d/f76038bf1c/GoldenUniqueCharm.png'); }
+.unique-tablet-ico { background-image: url('https://web.poecdn.com/gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvUHJlY3Vyc29yVGFibGV0cy9QcmVjdXJzb3JUYWJsZXRHZW5lcmljVW5pcXVlMSIsInciOjEsImgiOjEsInNjYWxlIjoxLCJyZWFsbSI6InBvZTIifV0/acf337f58c/PrecursorTabletGenericUnique1.png'); }
+.precursor-tablet-ico { background-image: url('https://web.poecdn.com/gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvUHJlY3Vyc29yVGFibGV0cy9QcmVjdXJzb3JUYWJsZXRBYnlzcyIsInciOjEsImgiOjEsInNjYWxlIjoxLCJyZWFsbSI6InBvZTIifV0/478e9f6ae2/PrecursorTabletAbyss.png'); }
 
 .nav-label {
   flex: 1;

@@ -483,16 +483,20 @@ export const Render = {
     if (!items || items.length === 0) {
       return `
         <tr>
-          <td colspan="5" class="empty-table-cell">
+          <td colspan="6" class="empty-table-cell">
             <div class="empty-state">
               <i class="fa-solid fa-box-open empty-icon"></i>
-              <p class="empty-title">${hasQuery ? `Không tìm thấy vật phẩm cho "${this.escapeHtml(state.searchQuery)}"` : 'Không tìm thấy vật phẩm nào'}</p>
-              <p class="empty-desc">${hasQuery ? 'Kiểm tra chính tả hoặc thử tìm kiếm với từ khóa ngắn hơn.' : 'Thử chuyển danh mục hoặc tắt bộ lọc.'}</p>
+              <p class="empty-title">${hasQuery ? `Không tìm thấy vật phẩm cho "${this.escapeHtml(state.searchQuery)}"` : `Chưa có dữ liệu cho danh mục "${this.escapeHtml(state.activeCategory || '')}"`}</p>
+              <p class="empty-desc">${hasQuery ? 'Kiểm tra chính tả hoặc thử tìm kiếm với từ khóa ngắn hơn.' : 'Nhấn nút bên dưới để tải dữ liệu trực tiếp từ poe.ninja.'}</p>
               ${hasQuery ? `
                 <button class="btn-clear-search-empty" data-action="clear-search">
                   <i class="fa-solid fa-rotate-left"></i> Xóa tìm kiếm
                 </button>
-              ` : ''}
+              ` : `
+                <button class="btn-clear-search-empty" data-action="refresh-category-active">
+                  <i class="fa-solid fa-arrows-rotate"></i> Tải ngay từ poe.ninja
+                </button>
+              `}
             </div>
           </td>
         </tr>

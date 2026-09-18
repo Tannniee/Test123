@@ -4,10 +4,10 @@ import CategoryRegistry from '../services/categoryRegistry.js';
 import poedbService from '../services/poedbService.js';
 import PoeItemDescriptions from '../public/js/itemDescriptions.js';
 
-describe('Full 46 PoE 1 Categories & PoEDB Descriptions Suite', () => {
-  it('CategoryRegistry.poe1 must have exactly 46 categories across 4 groups', () => {
+describe('Full 44 PoE 1 Categories & PoEDB Descriptions Suite', () => {
+  it('CategoryRegistry.poe1 must have exactly 44 categories across 4 groups (Incubator & DjinnCoin removed)', () => {
     const cats = CategoryRegistry.getRegistry('poe1');
-    assert.equal(cats.length, 46, `Expected 46 categories in poe1, found ${cats.length}`);
+    assert.equal(cats.length, 44, `Expected 44 categories in poe1, found ${cats.length}`);
 
     const groups = new Set(cats.map(c => c.group));
     assert.deepEqual(Array.from(groups).sort(), ['atlas', 'crafting', 'gems', 'general'].sort());
@@ -17,7 +17,7 @@ describe('Full 46 PoE 1 Categories & PoEDB Descriptions Suite', () => {
     const atlasCats = cats.filter(c => c.group === 'atlas');
     const craftingCats = cats.filter(c => c.group === 'crafting');
 
-    assert.equal(generalCats.length, 15, `Expected 15 general categories, got ${generalCats.length}`);
+    assert.equal(generalCats.length, 13, `Expected 13 general categories, got ${generalCats.length}`);
     assert.equal(gemsCats.length, 12, `Expected 12 gems/equipment categories, got ${gemsCats.length}`);
     assert.equal(atlasCats.length, 12, `Expected 12 atlas categories, got ${atlasCats.length}`);
     assert.equal(craftingCats.length, 7, `Expected 7 crafting categories, got ${craftingCats.length}`);

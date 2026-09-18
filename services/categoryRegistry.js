@@ -5,15 +5,22 @@
  */
 
 const CATEGORY_GROUPS = {
-  general: { id: 'general', label: 'GENERAL', order: 1 },
-  gems: { id: 'gems', label: 'EQUIPMENT & GEMS', order: 2 },
-  atlas: { id: 'atlas', label: 'ATLAS', order: 3 },
-  crafting: { id: 'crafting', label: 'CRAFTING', order: 4 }
+  poe1: [
+    { id: 'general', label: 'GENERAL', order: 1 },
+    { id: 'gems', label: 'EQUIPMENT & GEMS', order: 2 },
+    { id: 'atlas', label: 'ATLAS', order: 3 },
+    { id: 'crafting', label: 'CRAFTING', order: 4 }
+  ],
+  poe2: [
+    { id: 'general', label: 'GENERAL', order: 1 },
+    { id: 'equipment', label: 'EQUIPMENT', order: 2 },
+    { id: 'atlas', label: 'ATLAS', order: 3 }
+  ]
 };
 
 const CATEGORY_REGISTRY = {
   poe1: [
-    // --- GENERAL (15 tabs) ---
+    // --- GENERAL (13 tabs, DjinnCoin & Incubator removed) ---
     { type: 'Currency', label: 'Currency', group: 'general', priority: true, iconClass: 'currency-ico', apiSource: 'exchange' },
     { type: 'Fragment', label: 'Fragments', group: 'general', priority: true, iconClass: 'fragment-ico', apiSource: 'exchange' },
     { type: 'Wombgift', label: 'Wombgifts', group: 'general', priority: false, iconClass: 'wombgift-ico', apiSource: 'stash' },
@@ -22,13 +29,11 @@ const CATEGORY_REGISTRY = {
     { type: 'Corpse', label: 'Corpses', group: 'general', priority: false, iconClass: 'corpse-ico', apiSource: 'stash' },
     { type: 'Tattoo', label: 'Tattoos', group: 'general', priority: false, iconClass: 'tattoo-ico', apiSource: 'exchange' },
     { type: 'Omen', label: 'Omens', group: 'general', priority: false, iconClass: 'omen-ico', apiSource: 'exchange' },
-    { type: 'DjinnCoin', label: 'Djinn Coins', group: 'general', priority: false, iconClass: 'djinn-ico', apiSource: 'exchange' },
     { type: 'Ducat', label: 'Ducats', group: 'general', priority: false, iconClass: 'ducat-ico', apiSource: 'exchange' },
     { type: 'EnshroudingCrystal', label: 'Enshrouding Crystals', group: 'general', priority: false, iconClass: 'crystal-ico', apiSource: 'exchange' },
     { type: 'DivinationCard', label: 'Divination Cards', group: 'general', priority: false, iconClass: 'card-ico', apiSource: 'exchange' },
     { type: 'Artifact', label: 'Artifacts', group: 'general', priority: false, iconClass: 'artifact-ico', apiSource: 'exchange' },
     { type: 'Oil', label: 'Oils', group: 'general', priority: false, iconClass: 'oil-ico', apiSource: 'exchange' },
-    { type: 'Incubator', label: 'Incubators', group: 'general', priority: false, iconClass: 'incubator-ico', apiSource: 'stash' },
 
     // --- EQUIPMENT & GEMS (12 tabs) ---
     { type: 'UniqueWeapon', label: 'Unique Weapons', group: 'gems', priority: false, iconClass: 'unique-weapon-ico', apiSource: 'stash' },
@@ -68,25 +73,34 @@ const CATEGORY_REGISTRY = {
     { type: 'Vial', label: 'Vials', group: 'crafting', priority: false, iconClass: 'vial-ico', apiSource: 'stash' }
   ],
   poe2: [
-    // --- GENERAL ---
+    // --- GENERAL (14 tabs, matching screenshot) ---
     { type: 'Currency', label: 'Currency', group: 'general', priority: true, iconClass: 'poe2-currency-ico', apiSource: 'exchange' },
     { type: 'Fragments', label: 'Fragments', group: 'general', priority: true, iconClass: 'fragment-ico', apiSource: 'exchange' },
+    { type: 'Abyss', label: 'Abyssal Bones', group: 'general', priority: false, iconClass: 'poe2-abyss-ico', apiSource: 'exchange' },
+    { type: 'UncutGems', label: 'Uncut Gems', group: 'general', priority: false, iconClass: 'poe2-gem-ico', apiSource: 'exchange' },
+    { type: 'LineageSupportGems', label: 'Lineage Gems', group: 'general', priority: false, iconClass: 'poe2-lineage-ico', apiSource: 'exchange' },
+    { type: 'Essences', label: 'Essences', group: 'general', priority: false, iconClass: 'essence-ico', apiSource: 'exchange' },
+    { type: 'SoulCores', label: 'Soul Cores', group: 'general', priority: false, iconClass: 'poe2-vaal-ico', apiSource: 'exchange' },
+    { type: 'Idols', label: 'Idols', group: 'general', priority: false, iconClass: 'poe2-idol-ico', apiSource: 'exchange' },
+    { type: 'Runes', label: 'Runes', group: 'general', priority: false, iconClass: 'poe2-rune-ico', apiSource: 'exchange' },
     { type: 'Ritual', label: 'Omens', group: 'general', priority: false, iconClass: 'omen-ico', apiSource: 'exchange' },
     { type: 'Expedition', label: 'Expedition', group: 'general', priority: false, iconClass: 'poe2-expedition-ico', apiSource: 'exchange' },
+    { type: 'Delirium', label: 'Liquid Emotions', group: 'general', priority: false, iconClass: 'poe2-delirium-ico', apiSource: 'exchange' },
+    { type: 'Breach', label: 'Catalysts', group: 'general', priority: false, iconClass: 'catalyst-ico', apiSource: 'exchange' },
+    { type: 'Verisium', label: 'Verisium', group: 'general', priority: false, iconClass: 'verisium-ico', apiSource: 'exchange' },
 
-    // --- EQUIPMENT & GEMS ---
-    { type: 'UncutGems', label: 'Uncut Gems', group: 'gems', priority: false, iconClass: 'poe2-gem-ico', apiSource: 'exchange' },
-    { type: 'LineageSupportGems', label: 'Lineage Gems', group: 'gems', priority: false, iconClass: 'poe2-lineage-ico', apiSource: 'exchange' },
-    { type: 'SoulCores', label: 'Soul Cores', group: 'gems', priority: false, iconClass: 'poe2-vaal-ico', apiSource: 'exchange' },
-    { type: 'Idols', label: 'Idols', group: 'gems', priority: false, iconClass: 'poe2-idol-ico', apiSource: 'exchange' },
-    { type: 'Runes', label: 'Runes', group: 'gems', priority: false, iconClass: 'poe2-rune-ico', apiSource: 'exchange' },
-    { type: 'Verisium', label: 'Verisium', group: 'gems', priority: false, iconClass: 'verisium-ico', apiSource: 'exchange' },
+    // --- EQUIPMENT (7 tabs, matching screenshot) ---
+    { type: 'UniqueWeapons', label: 'Unique Weapons', group: 'equipment', priority: false, iconClass: 'unique-weapon-ico', apiSource: 'stash' },
+    { type: 'UniqueArmours', label: 'Unique Armours', group: 'equipment', priority: false, iconClass: 'unique-armour-ico', apiSource: 'stash' },
+    { type: 'UniqueAccessories', label: 'Unique Accessories', group: 'equipment', priority: false, iconClass: 'unique-accessory-ico', apiSource: 'stash' },
+    { type: 'UniqueFlasks', label: 'Unique Flasks', group: 'equipment', priority: false, iconClass: 'unique-flask-ico', apiSource: 'stash' },
+    { type: 'UniqueCharms', label: 'Unique Charms', group: 'equipment', priority: false, iconClass: 'unique-charm-ico', apiSource: 'stash' },
+    { type: 'UniqueJewels', label: 'Unique Jewels', group: 'equipment', priority: false, iconClass: 'unique-jewel-ico', apiSource: 'stash' },
+    { type: 'UniqueSanctumRelics', label: 'Unique Relics', group: 'equipment', priority: false, iconClass: 'unique-relic-ico', apiSource: 'stash' },
 
-    // --- CRAFTING ---
-    { type: 'Essences', label: 'Essences', group: 'crafting', priority: false, iconClass: 'essence-ico', apiSource: 'exchange' },
-    { type: 'Breach', label: 'Catalysts', group: 'crafting', priority: false, iconClass: 'catalyst-ico', apiSource: 'exchange' },
-    { type: 'Delirium', label: 'Liquid Emotions', group: 'crafting', priority: false, iconClass: 'poe2-delirium-ico', apiSource: 'exchange' },
-    { type: 'Abyss', label: 'Abyssal Bones', group: 'crafting', priority: false, iconClass: 'poe2-abyss-ico', apiSource: 'exchange' }
+    // --- ATLAS (2 tabs, matching screenshot) ---
+    { type: 'UniqueTablets', label: 'Unique Tablets', group: 'atlas', priority: false, iconClass: 'unique-tablet-ico', apiSource: 'stash' },
+    { type: 'PrecursorTablets', label: 'Precursor Tablets', group: 'atlas', priority: false, iconClass: 'precursor-tablet-ico', apiSource: 'stash' }
   ]
 };
 
@@ -124,8 +138,11 @@ const CategoryRegistry = {
     return def ? def.group : 'general';
   },
 
-  getGroups() {
-    return Object.values(CATEGORY_GROUPS).sort((a, b) => a.order - b.order);
+  getGroups(game = 'poe1') {
+    if (CATEGORY_GROUPS[game]) {
+      return CATEGORY_GROUPS[game];
+    }
+    return CATEGORY_GROUPS.poe1;
   }
 };
 

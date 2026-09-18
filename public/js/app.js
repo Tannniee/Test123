@@ -378,12 +378,19 @@ function renderCurrentView() {
   updateCompareBadge();
 }
 
-const SIDEBAR_GROUPS = [
-  { id: 'general', label: 'GENERAL' },
-  { id: 'gems', label: 'EQUIPMENT & GEMS' },
-  { id: 'atlas', label: 'ATLAS' },
-  { id: 'crafting', label: 'CRAFTING' }
-];
+const SIDEBAR_GROUPS = {
+  poe1: [
+    { id: 'general', label: 'GENERAL' },
+    { id: 'gems', label: 'EQUIPMENT & GEMS' },
+    { id: 'atlas', label: 'ATLAS' },
+    { id: 'crafting', label: 'CRAFTING' }
+  ],
+  poe2: [
+    { id: 'general', label: 'GENERAL' },
+    { id: 'equipment', label: 'EQUIPMENT' },
+    { id: 'atlas', label: 'ATLAS' }
+  ]
+};
 
 let sidebarFilterQuery = '';
 
@@ -413,8 +420,13 @@ function renderSidebar() {
     return;
   }
 
-  for (const group of SIDEBAR_GROUPS) {
-    const groupCats = filteredCategories.filter(c => (c.group || 'general') === group.id);
+  const currentGroups = (state.currentGame === 'poe2' ? SIDEBAR_GROUPS.poe2 : SIDEBAR_GROUPS.poe1) || SIDEBAR_GROUPS.poe1;
+
+  for (const group of currentGroups) {
+    const groupCats = filteredCategories.filter(c => {
+      const g = c.group || 'general';
+      return g === group.id || (group.id === 'equipment' && g === 'gems') || (group.id === 'gems' && g === 'equipment');
+    });
     if (groupCats.length === 0) continue;
 
     const groupHeader = document.createElement('div');
@@ -442,7 +454,7 @@ function renderSidebar() {
 
       btn.innerHTML = `
         <span class="nav-icon ${cat.iconClass}"></span>
-        <span class="nav-label">${Render.escapeHtml(cat.label)}</span>
+        <span class="nav-label" title="${Render.escapeHtml(cat.label)}">${Render.escapeHtml(cat.label)}</span>
         <span class="nav-badge">${count}</span>
       `;
 
@@ -1202,6 +1214,19 @@ function handleItemAction(e) {
     dom.clearSearchBtn.classList.add('hidden');
     filterAndRender();
     dom.searchInput.focus();
+    return;
+  }
+
+  if (action === 'refresh-category-active') {
+    Clipboard.showToast(`Đang nạp dữ liệu cho "${state.activeCategory}"...`);
+    dom.resultsCount.textContent = `Đang nạp dữ liệu "${state.activeCategory}" từ poe.ninja...`;
+    try {
+      await Api.refreshCategory(state.currentGame, state.currentLeague, state.activeCategory);
+      await loadCategoriesAndData();
+      Clipboard.showToast(`Đã nạp dữ liệu cho "${state.activeCategory}" thành công!`, 'success');
+    } catch (e) {
+      Clipboard.showToast(`Lỗi: ${e.message}`, 'error');
+    }
     return;
   }
 

@@ -1869,6 +1869,10 @@ select:focus {
   display: none;
 }
 
+.btn-sidebar-close {
+  display: none;
+}
+
 @media (max-width: 900px) {
   .btn-mobile-menu {
     display: inline-flex;
@@ -1882,7 +1886,7 @@ select:focus {
   .app-sidebar {
     position: fixed !important;
     top: 0 !important;
-    left: -290px !important;
+    left: -300px !important;
     width: 280px !important;
     height: 100vh !important;
     z-index: 1050 !important;
@@ -1942,6 +1946,497 @@ select:focus {
   .header-tools {
     width: 100%;
     justify-content: space-between;
+  }
+}
+
+/* ==========================================================================
+   DOCK / SIDEBAR WEB PANEL OPTIMIZATION (max-width: 600px)
+   Ultra-compact, space-efficient layout for Brave/Edge/Chrome side panels
+   ========================================================================== */
+@media (max-width: 600px) {
+  .app-layout {
+    overflow-x: hidden;
+  }
+
+  .content-panel {
+    padding: 8px 10px 24px 10px !important;
+  }
+
+  /* 1. Header Toolbar (Row 1: Menu + Game Switcher + League Select + Refresh) */
+  .top-nav-bar {
+    padding: 8px 10px !important;
+    gap: 6px !important;
+    background: #0b0e16 !important;
+    border-bottom: 1px solid #241c10 !important;
+  }
+
+  .btn-mobile-menu {
+    width: 32px !important;
+    height: 32px !important;
+    margin-right: 0 !important;
+    padding: 0 !important;
+    font-size: 0.95rem !important;
+    flex-shrink: 0 !important;
+  }
+
+  .top-controls {
+    order: 1 !important;
+    width: calc(100% - 38px) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+  }
+
+  .segmented-control {
+    padding: 1px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .seg-btn {
+    padding: 3px 8px !important;
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+  }
+
+  .league-dropdown-wrap {
+    padding: 3px 6px !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+    max-width: 170px !important;
+    background: #090c14 !important;
+  }
+
+  .league-label {
+    display: none !important;
+  }
+
+  .league-select {
+    font-size: 0.75rem !important;
+    width: 100% !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+  }
+
+  .cache-status-wrap {
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+  }
+
+  .cache-status-pill {
+    display: none !important;
+  }
+
+  .btn-icon#btnRefreshAll {
+    width: 28px !important;
+    height: 28px !important;
+    background: #121826 !important;
+  }
+
+  /* Row 2: Search Input (Full width, sleek) */
+  .top-search-wrap {
+    order: 2 !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    margin: 2px 0 0 0 !important;
+  }
+
+  .top-search-input {
+    padding: 6px 36px 6px 32px !important;
+    font-size: 0.82rem !important;
+    height: 33px !important;
+  }
+
+  .top-search-icon {
+    left: 9px !important;
+    font-size: 0.8rem !important;
+  }
+
+  .shortcut-kbd {
+    display: none !important;
+  }
+
+  .search-clear-btn {
+    right: 8px !important;
+    font-size: 1rem !important;
+  }
+
+  /* Row 3: Live Rate Ticker in Dock Header */
+  .rates-ticker {
+    order: 3 !important;
+    width: 100% !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    background: rgba(0, 0, 0, 0.4) !important;
+    border: 1px solid rgba(242, 169, 59, 0.15) !important;
+    border-radius: 4px !important;
+    padding: 3px 8px !important;
+    margin-top: 1px !important;
+  }
+
+  .rate-chip {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    font-size: 0.72rem !important;
+  }
+
+  /* 2. Category Title & Fast Converter */
+  .breadcrumbs {
+    display: none !important;
+  }
+
+  .category-header-row {
+    flex-direction: column !important;
+    gap: 6px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .title-with-refresh {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+  }
+
+  .category-title {
+    font-size: 1.25rem !important;
+    letter-spacing: 0.3px !important;
+  }
+
+  .btn-refresh-category {
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 0.75rem !important;
+  }
+
+  .header-tools {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
+
+  .mini-converter {
+    padding: 2px 6px !important;
+    font-size: 0.72rem !important;
+    gap: 4px !important;
+    flex: 1 !important;
+    background: #090d16 !important;
+  }
+
+  .conv-input {
+    width: 48px !important;
+    padding: 2px 4px !important;
+    font-size: 0.75rem !important;
+    height: 22px !important;
+  }
+
+  .view-switch-btns {
+    flex-shrink: 0 !important;
+  }
+
+  .view-btn {
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 0.75rem !important;
+  }
+
+  /* 3. Filter Chips: Single-Row Swipeable (Zero Wrapping) */
+  .sub-filter-row {
+    margin-bottom: 6px !important;
+  }
+
+  .filter-chips-wrap {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    gap: 4px !important;
+    padding: 2px 0 4px 0 !important;
+    width: 100% !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .filter-chips-wrap::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .chip-btn {
+    padding: 3px 8px !important;
+    font-size: 0.72rem !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+  }
+
+  .results-stats {
+    font-size: 0.72rem !important;
+    margin-top: 1px !important;
+  }
+
+  /* 4. Compact Card View (Ergonomic Dense Horizontal Layout for Dock) */
+  .items-grid {
+    grid-template-columns: 1fr !important;
+    gap: 7px !important;
+    margin-top: 4px !important;
+  }
+
+  .item-grid-card {
+    padding: 8px 10px !important;
+    gap: 6px !important;
+    background: #0c101a !important;
+    border: 1px solid #292012 !important;
+    border-radius: var(--radius-sm) !important;
+  }
+
+  .card-header-bar {
+    gap: 4px !important;
+    margin-bottom: 2px !important;
+  }
+
+  .card-header-bar .star-btn {
+    font-size: 0.95rem !important;
+  }
+
+  .card-category,
+  .item-category-tag {
+    font-size: 0.65rem !important;
+  }
+
+  .card-body {
+    display: grid !important;
+    grid-template-columns: 42px 1fr auto !important;
+    grid-template-rows: auto auto !important;
+    align-items: center !important;
+    text-align: left !important;
+    gap: 2px 8px !important;
+    cursor: pointer;
+    padding: 0 !important;
+  }
+
+  .grid-item-thumb-wrapper {
+    grid-row: 1 / span 2 !important;
+    grid-column: 1 !important;
+    width: 40px !important;
+    height: 40px !important;
+    margin: 0 !important;
+    background: rgba(0, 0, 0, 0.4) !important;
+  }
+
+  .grid-item-thumb {
+    max-width: 32px !important;
+    max-height: 32px !important;
+  }
+
+  .grid-item-name {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    min-height: 0 !important;
+    justify-content: flex-start !important;
+    text-align: left !important;
+    line-height: 1.2 !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .grid-item-popular {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    font-size: 0.7rem !important;
+    color: #94a3b8 !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left !important;
+    margin: 0 !important;
+  }
+
+  .grid-item-popular .popular-tag {
+    display: none !important;
+  }
+
+  .grid-item-price {
+    grid-column: 3 !important;
+    grid-row: 1 !important;
+    border: none !important;
+    padding: 0 !important;
+    text-align: right !important;
+    line-height: 1.2 !important;
+  }
+
+  .grid-item-price .primary-val {
+    font-size: 0.92rem !important;
+    font-weight: 700 !important;
+  }
+
+  .grid-item-price .secondary-val {
+    font-size: 0.7rem !important;
+  }
+
+  .grid-item-trend {
+    grid-column: 3 !important;
+    grid-row: 2 !important;
+    justify-content: flex-end !important;
+    gap: 4px !important;
+  }
+
+  .grid-item-trend .sparkline-svg {
+    width: 42px !important;
+    height: 16px !important;
+  }
+
+  .trend-pill {
+    font-size: 0.65rem !important;
+    padding: 1px 4px !important;
+  }
+
+  .card-footer-actions {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 4px !important;
+    margin-top: 2px !important;
+    padding-top: 4px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.04) !important;
+  }
+
+  .btn-card-inspect,
+  .btn-card-wiki,
+  .btn-card-compare {
+    height: 24px !important;
+    padding: 2px 7px !important;
+    font-size: 0.7rem !important;
+  }
+
+  /* 5. Table View in Dock Mode */
+  .ninja-table-container {
+    border-radius: var(--radius-sm) !important;
+    min-height: 300px !important;
+  }
+
+  .ninja-table th,
+  .ninja-table td {
+    padding: 5px 6px !important;
+    font-size: 0.76rem !important;
+  }
+
+  .ninja-table th.col-volume,
+  .ninja-table td.col-volume,
+  .ninja-table th.col-popular,
+  .ninja-table td.col-popular {
+    display: none !important;
+  }
+
+  .ninja-table th.col-name,
+  .ninja-table td.col-name {
+    width: 50% !important;
+    min-width: 130px !important;
+  }
+
+  .ninja-table th.col-val,
+  .ninja-table td.col-val {
+    width: 26% !important;
+    min-width: 75px !important;
+  }
+
+  .ninja-table th.col-trend,
+  .ninja-table td.col-trend {
+    width: 14% !important;
+    min-width: 48px !important;
+  }
+
+  .ninja-table th.col-actions,
+  .ninja-table td.col-actions {
+    width: 10% !important;
+    min-width: 38px !important;
+  }
+
+  .table-item-thumb {
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  .action-quick-btn {
+    width: 22px !important;
+    height: 22px !important;
+    font-size: 0.7rem !important;
+  }
+
+  /* 6. Sidebar Drawer Close Button & Layout */
+  .btn-sidebar-close {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
+    width: 28px;
+    height: 28px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    margin-left: auto;
+    transition: all 0.15s ease;
+  }
+
+  .btn-sidebar-close:hover {
+    background: rgba(242, 169, 59, 0.15);
+    color: var(--text-gold);
+    border-color: var(--border-gold);
+  }
+
+  .sidebar-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+  }
+
+  /* 7. Inspection Modal on Narrow Dock */
+  .modal-card-inspect {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+    padding: 12px !important;
+    margin: 0 !important;
+  }
+
+  .inspect-body-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .inspect-hero-header {
+    gap: 10px !important;
+  }
+
+  .inspect-icon-frame {
+    width: 46px !important;
+    height: 46px !important;
+  }
+
+  .inspect-item-name {
+    font-size: 1.15rem !important;
+  }
+
+  .inspect-price-hero {
+    padding: 12px !important;
+  }
+
+  .inspect-main-val {
+    font-size: 1.8rem !important;
+  }
+
+  .inspect-actions-row {
+    grid-template-columns: 1fr 1fr !important;
   }
 }
 

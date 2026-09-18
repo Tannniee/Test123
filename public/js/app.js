@@ -57,6 +57,7 @@ function initDom() {
   // Mobile Drawer Navigation
   dom.btnMobileMenu = document.getElementById('btnMobileMenu');
   dom.sidebarBackdrop = document.getElementById('sidebarBackdrop');
+  dom.btnSidebarClose = document.getElementById('btnSidebarClose');
 
   // Calculator & Item Inspection Modal
   dom.itemInspectOverlay = document.getElementById('itemInspectOverlay');
@@ -747,6 +748,13 @@ function bindEvents() {
     });
 
     dom.sidebarBackdrop.addEventListener('click', () => {
+      dom.sidebar.classList.remove('mobile-open');
+      dom.sidebarBackdrop.classList.add('hidden');
+    });
+  }
+
+  if (dom.btnSidebarClose) {
+    dom.btnSidebarClose.addEventListener('click', () => {
       dom.sidebar.classList.remove('mobile-open');
       dom.sidebarBackdrop.classList.add('hidden');
     });

@@ -15,6 +15,7 @@ const dom = {};
 
 function initDom() {
   // Navigation & Game Selector
+  dom.sidebar = document.getElementById('sidebar');
   dom.sidebarNav = document.getElementById('sidebarNav');
   dom.btnPoe1 = document.getElementById('btnPoe1');
   dom.btnPoe2 = document.getElementById('btnPoe2');
@@ -589,28 +590,32 @@ function bindEvents() {
     const cat = btn.dataset.category;
     if (!cat) return;
 
-    // Reset search input & query so the category view updates immediately
-    dom.searchInput.value = '';
-    state.searchQuery = '';
-    dom.clearSearchBtn.classList.add('hidden');
+    try {
+      // Reset search input & query so the category view updates immediately
+      if (dom.searchInput) dom.searchInput.value = '';
+      state.searchQuery = '';
+      if (dom.clearSearchBtn) dom.clearSearchBtn.classList.add('hidden');
 
-    state.activeCategory = cat;
-    state.activeSubCategory = null;
-    state.onlyFavorites = false;
-    state.currentPage = 1;
+      state.activeCategory = cat;
+      state.activeSubCategory = null;
+      state.onlyFavorites = false;
+      state.currentPage = 1;
 
-    document.querySelectorAll('.chip-btn').forEach(c => c.classList.remove('active'));
-    document.querySelector('.chip-btn[data-filter="all"]')?.classList.add('active');
+      document.querySelectorAll('.chip-btn').forEach(c => c.classList.remove('active'));
+      document.querySelector('.chip-btn[data-filter="all"]')?.classList.add('active');
 
-    dom.sidebarNav.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+      dom.sidebarNav.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
 
-    dom.breadcrumbCategory.textContent = cat;
-    dom.currentCategoryTitle.textContent = cat;
+      if (dom.breadcrumbCategory) dom.breadcrumbCategory.textContent = cat;
+      if (dom.currentCategoryTitle) dom.currentCategoryTitle.textContent = cat;
 
-    // Close mobile drawer if open
-    dom.sidebar.classList.remove('mobile-open');
-    dom.sidebarBackdrop?.classList.add('hidden');
+      // Close mobile drawer if open
+      if (dom.sidebar) dom.sidebar.classList.remove('mobile-open');
+      if (dom.sidebarBackdrop) dom.sidebarBackdrop.classList.add('hidden');
+    } catch (err) {
+      console.warn('Sidebar delegation pre-render warning:', err);
+    }
 
     filterAndRender();
 

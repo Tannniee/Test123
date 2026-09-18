@@ -68,7 +68,7 @@ body {
   font-size: 14px;
   line-height: 1.4;
   min-height: 100vh;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* ==========================================================================
@@ -163,9 +163,10 @@ select:focus {
   min-height: 100vh;
   position: relative;
   z-index: 1;
+  align-items: flex-start;
 }
 
-/* LEFT SIDEBAR */
+/* LEFT SIDEBAR - Permanently Sticky on Viewport Scroll */
 .app-sidebar {
   width: 230px;
   min-width: 230px;
@@ -176,6 +177,8 @@ select:focus {
   height: 100vh;
   position: sticky;
   top: 0;
+  align-self: flex-start;
+  flex-shrink: 0;
   z-index: 50;
   user-select: none;
 }

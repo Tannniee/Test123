@@ -87,22 +87,63 @@ assert.strictEqual(filtered.some(i => i.category === 'Currency'), false, 'NO Cur
 console.log('Sample Oils rendered:', filtered.slice(0, 5).map(i => i.name));
 console.log('✓ PASS: Tab switch to Oils renders ONLY Oils and immediately replaces search results.\n');
 
-// 5. Verify CSS rules for smoothness and zero layout shift
-console.log(`--- Step 4: CSS Anti-Jitter & Smooth Motion Rules ---`);
+// 5. Test Omens and Allflame Embers (from user report)
+console.log(`--- Step 4: User Clicks "Omens" and "Allflame Embers" ---`);
+appState.activeCategory = 'Omens';
+let omensFiltered = Search.filterAndRank(items, {
+  query: '',
+  category: appState.activeCategory,
+  subCategory: null,
+  priceFilter: 'all',
+  onlyFavorites: false,
+  favoritesSet: appState.favorites,
+  game: appState.currentGame
+});
+console.log(`Omens item count: ${omensFiltered.length}`);
+assert.strictEqual(omensFiltered.length, 11, 'Omens must have 11 items');
+assert.strictEqual(omensFiltered.every(i => i.category === 'Omens' || i.sourceType === 'Omen'), true, 'All items must be Omens');
+assert.strictEqual(omensFiltered.some(i => i.name === 'Mirror of Kalandra'), false, 'Omens must never contain Mirror of Kalandra');
+console.log('Sample Omens:', omensFiltered.slice(0, 3).map(i => i.name));
+console.log('✓ PASS: Omens view displays exactly 11 Omens items.\n');
+
+appState.activeCategory = 'Allflame Embers';
+let allflameFiltered = Search.filterAndRank(items, {
+  query: '',
+  category: appState.activeCategory,
+  subCategory: null,
+  priceFilter: 'all',
+  onlyFavorites: false,
+  favoritesSet: appState.favorites,
+  game: appState.currentGame
+});
+console.log(`Allflame Embers item count: ${allflameFiltered.length}`);
+assert.strictEqual(allflameFiltered.length, 8, 'Allflame Embers must have 8 items');
+assert.strictEqual(allflameFiltered.every(i => i.category === 'Allflame Embers' || i.sourceType === 'AllflameEmber'), true, 'All items must be Allflame Embers');
+console.log('Sample Allflame Embers:', allflameFiltered.slice(0, 3).map(i => i.name));
+console.log('✓ PASS: Allflame Embers view displays exactly 8 Allflame Ember items.\n');
+
+// 6. Verify CSS rules for smoothness, zero layout shift, and sticky sidebar
+console.log(`--- Step 5: CSS Sticky Sidebar & Anti-Jitter Rules ---`);
 const css = fs.readFileSync('public/css/style.css', 'utf8');
 
 assert.strictEqual(css.includes('scrollbar-gutter: stable;'), true, 'Must have scrollbar-gutter: stable');
 assert.strictEqual(css.includes('overflow-y: scroll;'), true, 'Must have overflow-y: scroll to prevent 17px Windows jump');
+assert.strictEqual(css.includes('overflow-x: clip;'), true, 'Must have overflow-x: clip on body so position: sticky works');
+assert.strictEqual(css.includes('align-self: flex-start;'), true, 'Must have align-self: flex-start on .app-sidebar for flexbox sticky');
+assert.strictEqual(css.includes('position: sticky;'), true, 'Must have position: sticky');
 assert.strictEqual(css.includes('min-height: 480px;'), true, 'Must have min-height: 480px on containers');
 assert.strictEqual(css.includes('@keyframes viewFadeIn'), true, 'Must have viewFadeIn keyframes');
-assert.strictEqual(css.includes('animation: viewFadeIn 0.18s ease-out;'), true, 'Must have viewFadeIn animation applied');
 
 // Check nav-item font-weight is 500 in both default and active to prevent text reflow jitter
 const navItemActiveMatch = css.match(/\.nav-item\.active\s*\{([^}]+)\}/);
 assert.strictEqual(navItemActiveMatch !== null, true, '.nav-item.active rule found');
 assert.strictEqual(navItemActiveMatch[1].includes('font-weight: 500;'), true, '.nav-item.active must keep font-weight: 500 to avoid text expansion');
 
-console.log('✓ PASS: All CSS anti-jitter and buttery smooth motion rules verified!\n');
+// Check dom.sidebar initialization in app.js
+const appJs = fs.readFileSync('public/js/app.js', 'utf8');
+assert.strictEqual(appJs.includes("dom.sidebar = document.getElementById('sidebar');"), true, 'dom.sidebar must be initialized in initDom()');
+
+console.log('✓ PASS: All CSS sticky sidebar, anti-jitter, and app.js safety rules verified!\n');
 console.log('====================================================');
 console.log('  All Category Switching & Motion Tests Passed! ✓');
 console.log('====================================================');

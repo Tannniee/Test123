@@ -193,7 +193,14 @@ async function loadCategories() {
     currentAvailableCategories = res.categories || [];
 
     // Check if activeCategory is still available in this league
-    const stillValid = currentAvailableCategories.some(c => c.label === state.activeCategory || c.type === state.activeCategory);
+    const currentCatLower = (state.activeCategory || '').toLowerCase().trim();
+    const stillValid = currentAvailableCategories.some(c => {
+      const labelLower = c.label.toLowerCase().trim();
+      const typeLower = c.type.toLowerCase().trim();
+      return labelLower === currentCatLower ||
+             typeLower === currentCatLower ||
+             labelLower.replace(/s$/, '') === currentCatLower.replace(/s$/, '');
+    });
     if (!stillValid && currentAvailableCategories.length > 0) {
       state.activeCategory = currentAvailableCategories[0].label;
     }
@@ -338,11 +345,25 @@ function renderCurrentView() {
 function renderSidebar() {
   dom.sidebarNav.innerHTML = '';
 
+  const activeLower = (state.activeCategory || '').toLowerCase().trim();
+
   for (const cat of currentAvailableCategories) {
-    const count = state.items.filter(i => i.category === cat.label || i.sourceType === cat.type).length;
+    const catLabelLower = cat.label.toLowerCase().trim();
+    const catTypeLower = cat.type.toLowerCase().trim();
+
+    const count = state.items.filter(i => {
+      const itemCat = (i.category || '').toLowerCase().trim();
+      const itemSource = (i.sourceType || '').toLowerCase().trim();
+      return itemCat === catLabelLower || itemSource === catTypeLower ||
+             itemCat === catTypeLower || itemCat.replace(/s$/, '') === catLabelLower.replace(/s$/, '');
+    }).length;
+
+    const isActive = activeLower === catLabelLower || activeLower === catTypeLower || activeLower.replace(/s$/, '') === catLabelLower.replace(/s$/, '');
+
     const btn = document.createElement('button');
-    btn.className = `nav-item ${state.activeCategory === cat.label ? 'active' : ''}`;
+    btn.className = `nav-item ${isActive ? 'active' : ''}`;
     btn.dataset.category = cat.label;
+    btn.dataset.type = cat.type;
 
     btn.innerHTML = `
       <span class="nav-icon ${cat.iconClass}"></span>
@@ -568,8 +589,16 @@ function bindEvents() {
     const cat = btn.dataset.category;
     if (!cat) return;
 
+    // Reset search input & query so the category view updates immediately
+    dom.searchInput.value = '';
+    state.searchQuery = '';
+    dom.clearSearchBtn.classList.add('hidden');
+
     state.activeCategory = cat;
+    state.activeSubCategory = null;
     state.onlyFavorites = false;
+    state.currentPage = 1;
+
     document.querySelectorAll('.chip-btn').forEach(c => c.classList.remove('active'));
     document.querySelector('.chip-btn[data-filter="all"]')?.classList.add('active');
 
@@ -584,6 +613,11 @@ function bindEvents() {
     dom.sidebarBackdrop?.classList.add('hidden');
 
     filterAndRender();
+
+    // Smooth scroll content area to top
+    if (window.scrollY > 80) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   });
 
   // Search Input

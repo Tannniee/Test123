@@ -144,9 +144,22 @@ export const Search = {
         continue;
       }
 
-      // 2. Category filter
-      if (category !== 'All' && item.category !== category) {
-        continue;
+      // 2. Category filter (Robust matching for category label, sourceType, and singular/plural)
+      if (category !== 'All') {
+        const catTarget = category.toLowerCase().trim();
+        const itemCat = (item.category || '').toLowerCase().trim();
+        const itemSource = (item.sourceType || '').toLowerCase().trim();
+        const matchesCategory =
+          itemCat === catTarget ||
+          itemSource === catTarget ||
+          itemCat === catTarget.replace(/s$/, '') ||
+          itemCat + 's' === catTarget ||
+          itemSource === catTarget.replace(/s$/, '') ||
+          itemSource + 's' === catTarget;
+
+        if (!matchesCategory) {
+          continue;
+        }
       }
 
       if (subCategory && item.subCategory !== subCategory) {

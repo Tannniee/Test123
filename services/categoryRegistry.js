@@ -11,7 +11,7 @@ const CATEGORY_REGISTRY = {
     { type: 'DivinationCard', label: 'Divination Cards', priority: false, iconClass: 'card-ico' },
     { type: 'Essence', label: 'Essences', priority: false, iconClass: 'essence-ico' },
     { type: 'Fossil', label: 'Fossils', priority: false, iconClass: 'fossil-ico' },
-    { type: 'Resonator', label: 'Resonators', priority: false, iconClass: 'fossil-ico' },
+    { type: 'Resonator', label: 'Resonators', priority: false, iconClass: 'resonator-ico' },
     { type: 'Oil', label: 'Oils', priority: false, iconClass: 'oil-ico' },
     { type: 'DeliriumOrb', label: 'Delirium Orbs', priority: false, iconClass: 'delirium-ico' },
     { type: 'Artifact', label: 'Artifacts', priority: false, iconClass: 'artifact-ico' },
@@ -21,24 +21,24 @@ const CATEGORY_REGISTRY = {
     { type: 'Runegraft', label: 'Runegrafts', priority: false, iconClass: 'runegraft-ico' },
     { type: 'Ducat', label: 'Ducats', priority: false, iconClass: 'ducat-ico' },
     { type: 'EnshroudingCrystal', label: 'Enshrouding Crystals', priority: false, iconClass: 'crystal-ico' },
-    { type: 'Astrolabe', label: 'Astrolabes', priority: false, iconClass: 'crystal-ico' },
-    { type: 'DjinnCoin', label: 'Djinn Coins', priority: false, iconClass: 'ducat-ico' }
+    { type: 'Astrolabe', label: 'Astrolabes', priority: false, iconClass: 'astrolabe-ico' },
+    { type: 'DjinnCoin', label: 'Djinn Coins', priority: false, iconClass: 'djinn-ico' }
   ],
   poe2: [
     { type: 'Currency', label: 'Currency', priority: true, iconClass: 'poe2-currency-ico' },
     { type: 'Fragments', label: 'Fragments', priority: true, iconClass: 'fragment-ico' },
     { type: 'Ritual', label: 'Omens', priority: false, iconClass: 'omen-ico' },
     { type: 'Breach', label: 'Catalysts', priority: false, iconClass: 'catalyst-ico' },
-    { type: 'Delirium', label: 'Liquid Emotions', priority: false, iconClass: 'delirium-ico' },
-    { type: 'Abyss', label: 'Abyssal Bones', priority: false, iconClass: 'fossil-ico' },
+    { type: 'Delirium', label: 'Liquid Emotions', priority: false, iconClass: 'poe2-delirium-ico' },
+    { type: 'Abyss', label: 'Abyssal Bones', priority: false, iconClass: 'poe2-abyss-ico' },
     { type: 'Expedition', label: 'Expedition', priority: false, iconClass: 'poe2-expedition-ico' },
-    { type: 'UncutGems', label: 'Uncut Gems', priority: false, iconClass: 'poe2-ritual-ico' },
-    { type: 'LineageSupportGems', label: 'Lineage Gems', priority: false, iconClass: 'poe2-ritual-ico' },
+    { type: 'UncutGems', label: 'Uncut Gems', priority: false, iconClass: 'poe2-gem-ico' },
+    { type: 'LineageSupportGems', label: 'Lineage Gems', priority: false, iconClass: 'poe2-lineage-ico' },
     { type: 'Essences', label: 'Essences', priority: false, iconClass: 'essence-ico' },
     { type: 'SoulCores', label: 'Soul Cores', priority: false, iconClass: 'poe2-vaal-ico' },
-    { type: 'Idols', label: 'Idols', priority: false, iconClass: 'tattoo-ico' },
-    { type: 'Runes', label: 'Runes', priority: false, iconClass: 'runegraft-ico' },
-    { type: 'Verisium', label: 'Verisium', priority: false, iconClass: 'allflame-ico' }
+    { type: 'Idols', label: 'Idols', priority: false, iconClass: 'poe2-idol-ico' },
+    { type: 'Runes', label: 'Runes', priority: false, iconClass: 'poe2-rune-ico' },
+    { type: 'Verisium', label: 'Verisium', priority: false, iconClass: 'verisium-ico' }
   ]
 };
 

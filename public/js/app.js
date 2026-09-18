@@ -1201,7 +1201,7 @@ function bindEvents() {
 }
 
 // Action Dispatcher for Table and Grid items
-function handleItemAction(e) {
+async function handleItemAction(e) {
   const target = e.target.closest('[data-action]');
   if (!target) return;
 
@@ -1287,5 +1287,9 @@ function switchView(view) {
   renderCurrentView();
 }
 
-// Boot
-window.addEventListener('DOMContentLoaded', init);
+// Boot with readyState check (avoids missed DOMContentLoaded in deferred ES modules)
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}

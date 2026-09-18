@@ -8,108 +8,197 @@ import { Render } from './render.js';
 
 export const Modals = {
   // -----------------------------------------------------------------
-  // 1. Calculator Modal
+  // 1. POESTASH Item Inspection View
   // -----------------------------------------------------------------
-  openCalculator(item, state, elements) {
+  openItemInspection(item, state, elements) {
+    if (!item) return;
     state.activeModalItem = item;
     const isPoe2 = state.currentGame === 'poe2';
 
-    // Populate Item Header safely
-    elements.calcModalIcon.src = item.icon || '';
-    elements.calcModalName.textContent = item.name;
-    elements.calcModalCategory.textContent = item.category;
-
-    // Direct Wiki link
-    if (elements.calcWikiLink) {
-      const wikiUrl = isPoe2
-        ? `https://poe2db.tw/us/${encodeURIComponent(item.name)}`
-        : `https://www.poewiki.net/wiki/${encodeURIComponent(item.name.replace(/ /g, '_'))}`;
-      elements.calcWikiLink.href = wikiUrl;
-      elements.calcWikiLink.title = isPoe2 ? `Xem "${item.name}" trên poe2db.tw` : `Xem "${item.name}" trên poewiki.net`;
+    // 1. Breadcrumb & Meta
+    if (elements.inspectCategoryCrumb) {
+      elements.inspectCategoryCrumb.textContent = item.category || item.sourceType || 'Vật phẩm';
+    }
+    if (elements.inspectLeagueTag) {
+      elements.inspectLeagueTag.textContent = state.currentLeague || 'Standard';
+    }
+    if (elements.inspectTypeTag) {
+      elements.inspectTypeTag.textContent = item.category || item.sourceType || 'General';
     }
 
-    // Set Max Stack for Full Stack preset
-    const maxStack = this.determineMaxStack(item);
-    if (elements.btnPresetMax) {
-      elements.btnPresetMax.textContent = `Full (${maxStack})`;
-      elements.btnPresetMax.dataset.stack = maxStack;
+    // 2. Item Header
+    if (elements.inspectIcon) {
+      elements.inspectIcon.src = item.icon || Render.ICONS.chaos;
+      elements.inspectIcon.alt = item.name || '';
+    }
+    if (elements.inspectName) {
+      elements.inspectName.textContent = item.name || 'Unknown Item';
     }
 
-    // Default quantity = 1
-    elements.calcQtyInput.value = '1';
-    this.updateCalculatorValues(item, 1, state, elements);
+    // 3. Price Hero
+    const change = typeof item.change7d === 'number' ? item.change7d : 0;
+    const changeText = change > 0 ? `+${change.toFixed(1)}%` : `${change.toFixed(1)}%`;
+    const changeClass = change > 0 ? 'trend-up' : change < 0 ? 'trend-down' : 'trend-flat';
 
-    elements.calcModalOverlay.classList.remove('hidden');
-    elements.calcModalOverlay.removeAttribute('hidden');
-    elements.calcModalOverlay.style.display = 'flex';
-    elements.calcQtyInput.focus();
-    elements.calcQtyInput.select();
+    if (elements.inspectTrendBadge) {
+      elements.inspectTrendBadge.textContent = changeText;
+      elements.inspectTrendBadge.className = `inspect-trend-badge ${changeClass}`;
+    }
+
+    if (isPoe2) {
+      const divVal = typeof item.divineValue === 'number' ? item.divineValue : 0;
+      const exVal = typeof item.exaltedValue === 'number' ? item.exaltedValue : 0;
+
+      if (divVal >= 1) {
+        elements.inspectMainPrice.textContent = (divVal % 1 === 0 ? divVal.toLocaleString() : divVal.toFixed(1));
+        elements.inspectMainCur.textContent = 'Divine';
+        elements.inspectSubPrice.textContent = exVal > 0 ? `≈ ${exVal.toLocaleString()} Exalted` : '';
+      } else {
+        elements.inspectMainPrice.textContent = exVal > 0 ? (exVal % 1 === 0 ? exVal.toLocaleString() : exVal.toFixed(1)) : '0';
+        elements.inspectMainCur.textContent = 'Exalted';
+        elements.inspectSubPrice.textContent = divVal > 0 ? `≈ ${divVal.toFixed(3)} Divine` : '';
+      }
+      if (elements.inspectRateNote) {
+        elements.inspectRateNote.textContent = state.rates?.exalted ? `Tỷ giá: 1 Div = ${state.rates.exalted} Ex` : '';
+      }
+    } else {
+      const chaosVal = typeof item.chaosValue === 'number' ? item.chaosValue : 0;
+      const divVal = typeof item.divineValue === 'number' ? item.divineValue : 0;
+
+      if (divVal >= 1) {
+        elements.inspectMainPrice.textContent = (divVal % 1 === 0 ? divVal.toLocaleString() : divVal.toFixed(1));
+        elements.inspectMainCur.textContent = 'Divine';
+        elements.inspectSubPrice.textContent = chaosVal > 0 ? `≈ ${chaosVal.toLocaleString()} Chaos` : '';
+      } else {
+        elements.inspectMainPrice.textContent = (chaosVal % 1 === 0 ? chaosVal.toLocaleString() : chaosVal.toFixed(1));
+        elements.inspectMainCur.textContent = 'Chaos';
+        elements.inspectSubPrice.textContent = divVal > 0 ? `≈ ${divVal.toFixed(2)} Divine` : '';
+      }
+      if (elements.inspectRateNote) {
+        elements.inspectRateNote.textContent = state.divineChaosPrice ? `Tỷ giá: 1 Div = ${state.divineChaosPrice} C` : '';
+      }
+    }
+
+    // 4. Quick Actions (Wiki & Ninja Links)
+    if (elements.inspectWikiLink) {
+      elements.inspectWikiLink.href = Render.getWikiUrl(item, state.currentGame);
+      elements.inspectWikiLink.title = `Xem "${item.name}" trên PoE Wiki`;
+    }
+    if (elements.inspectNinjaLink) {
+      const ninjaType = encodeURIComponent(item.sourceType || item.category || 'currency');
+      const ninjaGame = state.currentGame === 'poe2' ? 'poe2' : 'poe1';
+      elements.inspectNinjaLink.href = `https://poe.ninja/${ninjaGame}/economy/${encodeURIComponent(state.currentLeague)}/${ninjaType.toLowerCase()}`;
+    }
+
+    // 5. Authentic PoE Card
+    if (elements.poeCardName) elements.poeCardName.textContent = item.name;
+    if (elements.poeCardType) {
+      elements.poeCardType.textContent = item.baseType || item.category || '';
+    }
+    if (elements.poeCardMods) {
+      if (item.explicitModifiers && item.explicitModifiers.length > 0) {
+        elements.poeCardMods.innerHTML = item.explicitModifiers.map(m => Render.escapeHtml(m)).join('<br>');
+      } else if (item.mapTier) {
+        elements.poeCardMods.innerHTML = `Map Tier: ${item.mapTier}<br>Item Quantity: +0%<br>Item Rarity: +0%`;
+      } else if (typeof window !== 'undefined' && window.PoeItemDescriptions && typeof window.PoeItemDescriptions.getPoEDescription === 'function') {
+        const desc = window.PoeItemDescriptions.getPoEDescription(item);
+        elements.poeCardMods.textContent = desc || 'Right-click to inspect or consume this item.';
+      } else {
+        elements.poeCardMods.textContent = 'Right-click to inspect or consume this item.';
+      }
+    }
+    if (elements.poeCardFlavour && elements.poeCardFlavourSep) {
+      if (item.flavourText) {
+        elements.poeCardFlavour.textContent = item.flavourText;
+        elements.poeCardFlavour.classList.remove('hidden');
+        elements.poeCardFlavourSep.classList.remove('hidden');
+      } else {
+        elements.poeCardFlavour.classList.add('hidden');
+        elements.poeCardFlavourSep.classList.add('hidden');
+      }
+    }
+
+    // 6. Right Column: 7-day Bezier Area Chart
+    if (elements.inspectChartContainer) {
+      elements.inspectChartContainer.innerHTML = Render.generateBezierAreaChart(item.sparkline, change, 480, 180);
+    }
+    if (elements.inspectChartSummary) {
+      elements.inspectChartSummary.textContent = `Biến động 7 ngày: ${changeText}`;
+    }
+
+    // 7. Right Column: Market Ranking & Position
+    const allItems = state.allItems || [];
+    const catItems = allItems.filter(i => (i.category === item.category || i.sourceType === item.sourceType));
+    const sortVal = (it) => isPoe2 ? (it.exaltedValue || it.divineValue || 0) : (it.chaosValue || it.divineValue || 0);
+    catItems.sort((a, b) => sortVal(b) - sortVal(a));
+    const rankIndex = catItems.findIndex(i => i.id === item.id);
+    const rank = rankIndex !== -1 ? rankIndex + 1 : 1;
+    const total = catItems.length || 1;
+    const percentile = Math.max(1, Math.round((rank / total) * 100));
+
+    if (elements.inspectRankText) {
+      elements.inspectRankText.textContent = `Xếp hạng #${rank} trong ${total} vật phẩm (${item.category || item.sourceType})`;
+    }
+    if (elements.inspectRankPercentile) {
+      elements.inspectRankPercentile.textContent = `Top ${percentile}%`;
+    }
+    if (elements.inspectRankBar) {
+      elements.inspectRankBar.style.width = `${Math.min(100, Math.max(5, 105 - percentile))}%`;
+    }
+    if (elements.inspectVolumeStat) {
+      elements.inspectVolumeStat.textContent = item.volume ? item.volume.toLocaleString() : 'N/A';
+    }
+    if (elements.inspectAvgStat) {
+      const avg = total > 0 ? Math.round(catItems.reduce((acc, it) => acc + sortVal(it), 0) / total) : 0;
+      elements.inspectAvgStat.textContent = isPoe2 ? `${avg.toLocaleString()} Ex` : `${avg.toLocaleString()} C`;
+    }
+
+    // 8. Right Column: Related Items in Category
+    if (elements.inspectRelatedList) {
+      const related = catItems.filter(i => i.id !== item.id).slice(0, 4);
+      if (related.length > 0) {
+        elements.inspectRelatedList.innerHTML = related.map(rel => {
+          const relVal = isPoe2 
+            ? (rel.divineValue >= 1 ? `${rel.divineValue} Div` : `${rel.exaltedValue || 0} Ex`)
+            : (rel.divineValue >= 1 ? `${rel.divineValue} Div` : `${rel.chaosValue || 0} C`);
+          return `
+            <div class="inspect-related-row" data-action="inspect-related" data-id="${Render.escapeHtml(rel.id)}">
+              <div class="inspect-related-info">
+                <img src="${Render.escapeHtml(rel.icon || Render.ICONS.chaos)}" alt="" class="inspect-related-thumb" />
+                <span>${Render.escapeHtml(rel.name)}</span>
+              </div>
+              <span class="inspect-related-val">${relVal}</span>
+            </div>
+          `;
+        }).join('');
+      } else {
+        elements.inspectRelatedList.innerHTML = '<div style="color: #64748b; font-size: 0.8rem; padding: 6px 0;">Không có vật phẩm tương tự.</div>';
+      }
+    }
+
+    // 9. Show Modal Overlay
+    if (elements.itemInspectOverlay) {
+      elements.itemInspectOverlay.classList.remove('hidden');
+      elements.itemInspectOverlay.removeAttribute('hidden');
+      elements.itemInspectOverlay.style.display = 'flex';
+    }
+  },
+
+  closeItemInspection(elements) {
+    if (elements.itemInspectOverlay) {
+      elements.itemInspectOverlay.classList.add('hidden');
+      elements.itemInspectOverlay.setAttribute('hidden', '');
+      elements.itemInspectOverlay.style.display = 'none';
+    }
+  },
+
+  // Backward compatibility alias for calculator modal calls
+  openCalculator(item, state, elements) {
+    this.openItemInspection(item, state, elements);
   },
 
   closeCalculator(elements) {
-    elements.calcModalOverlay.classList.add('hidden');
-    elements.calcModalOverlay.setAttribute('hidden', '');
-    elements.calcModalOverlay.style.display = 'none';
-  },
-
-  determineMaxStack(item) {
-    if (item.category === 'Divination Cards' || item.subCategory === 'DivinationCard') {
-      const match = (item.name || '').match(/(\d+)/);
-      return match ? parseInt(match[0], 10) : 8;
-    }
-    if (item.category === 'Currency') {
-      const name = (item.name || '').toLowerCase();
-      if (name.includes('mirror') || name.includes('divine')) return 10;
-      if (name.includes('chaos') || name.includes('exalted')) return 20;
-      if (name.includes('chromatic') || name.includes('jeweller') || name.includes('alteration')) return 20;
-      return 20;
-    }
-    if (item.category === 'Scarabs') return 20;
-    if (item.category === 'Essences') return 9;
-    if (item.category === 'Fossils') return 20;
-    if (item.category === 'Oils') return 10;
-    if (item.category === 'Catalysts') return 10;
-    return 10;
-  },
-
-  updateCalculatorValues(item, qty, state, elements) {
-    if (!item) return;
-    const isPoe2 = state.currentGame === 'poe2';
-    const quantity = Math.max(1, parseInt(qty, 10) || 1);
-
-    if (isPoe2) {
-      if (elements.calcUnitPrimaryLbl) elements.calcUnitPrimaryLbl.textContent = 'Đơn giá Exalted';
-      const unitDiv = item.divineValue || 0;
-      const unitEx = item.exaltedValue || 0;
-      const totalDiv = +(unitDiv * quantity).toFixed(3);
-      const totalEx = +(unitEx * quantity).toFixed(1);
-
-      elements.calcUnitChaos.textContent = `${unitEx} Ex`;
-      elements.calcUnitDivine.textContent = unitDiv >= 1 ? `${unitDiv} Div` : `${unitEx} Ex`;
-
-      elements.calcTotalChaos.textContent = totalEx.toLocaleString();
-      elements.calcTotalChaosSym.textContent = 'Ex';
-      elements.calcTotalDivine.textContent = totalDiv.toLocaleString();
-      elements.calcTotalDivineSym.textContent = 'Div';
-
-      elements.calcSummaryText.textContent = `${quantity}x ${item.name} = ${totalEx.toLocaleString()} Ex (${totalDiv.toLocaleString()} Div)`;
-    } else {
-      if (elements.calcUnitPrimaryLbl) elements.calcUnitPrimaryLbl.textContent = 'Đơn giá Chaos';
-      const unitChaos = item.chaosValue || 0;
-      const unitDiv = item.divineValue || 0;
-      const totalChaos = +(unitChaos * quantity).toFixed(1);
-      const totalDiv = +(unitDiv * quantity).toFixed(2);
-
-      elements.calcUnitChaos.textContent = `${unitChaos} C`;
-      elements.calcUnitDivine.textContent = `${unitDiv} Div`;
-
-      elements.calcTotalChaos.textContent = totalChaos.toLocaleString();
-      elements.calcTotalChaosSym.textContent = 'C';
-      elements.calcTotalDivine.textContent = totalDiv.toLocaleString();
-      elements.calcTotalDivineSym.textContent = 'Div';
-
-      elements.calcSummaryText.textContent = `${quantity}x ${item.name} = ${totalChaos.toLocaleString()} C (${totalDiv.toLocaleString()} Div)`;
-    }
+    this.closeItemInspection(elements);
   },
 
   // -----------------------------------------------------------------

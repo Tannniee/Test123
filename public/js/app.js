@@ -58,24 +58,41 @@ function initDom() {
   dom.btnMobileMenu = document.getElementById('btnMobileMenu');
   dom.sidebarBackdrop = document.getElementById('sidebarBackdrop');
 
-  // Calculator Modal
-  dom.calcModalOverlay = document.getElementById('calcModalOverlay');
-  dom.closeCalcModal = document.getElementById('closeCalcModal');
-  dom.calcModalIcon = document.getElementById('calcModalIcon');
-  dom.calcModalName = document.getElementById('calcModalName');
-  dom.calcModalCategory = document.getElementById('calcModalCategory');
-  dom.calcWikiLink = document.getElementById('calcWikiLink');
-  dom.calcQtyInput = document.getElementById('calcQtyInput');
-  dom.calcUnitPrimaryLbl = document.getElementById('calcUnitPrimaryLbl');
-  dom.calcUnitChaos = document.getElementById('calcUnitChaos');
-  dom.calcUnitDivine = document.getElementById('calcUnitDivine');
-  dom.calcTotalChaos = document.getElementById('calcTotalChaos');
-  dom.calcTotalChaosSym = document.getElementById('calcTotalChaosSym');
-  dom.calcTotalDivine = document.getElementById('calcTotalDivine');
-  dom.calcTotalDivineSym = document.getElementById('calcTotalDivineSym');
-  dom.calcSummaryText = document.getElementById('calcSummaryText');
-  dom.btnCopyCalcWhisper = document.getElementById('btnCopyCalcWhisper');
-  dom.btnPresetMax = document.getElementById('btnPresetMax');
+  // Calculator & Item Inspection Modal
+  dom.itemInspectOverlay = document.getElementById('itemInspectOverlay');
+  dom.closeInspectModal = document.getElementById('closeInspectModal');
+  dom.btnInspectBack = document.getElementById('btnInspectBack');
+  dom.inspectCategoryCrumb = document.getElementById('inspectCategoryCrumb');
+  dom.inspectIcon = document.getElementById('inspectIcon');
+  dom.inspectName = document.getElementById('inspectName');
+  dom.inspectLeagueTag = document.getElementById('inspectLeagueTag');
+  dom.inspectTypeTag = document.getElementById('inspectTypeTag');
+  dom.inspectMainPrice = document.getElementById('inspectMainPrice');
+  dom.inspectMainCur = document.getElementById('inspectMainCur');
+  dom.inspectTrendBadge = document.getElementById('inspectTrendBadge');
+  dom.inspectSubPrice = document.getElementById('inspectSubPrice');
+  dom.inspectRateNote = document.getElementById('inspectRateNote');
+  dom.btnInspectWhisper = document.getElementById('btnInspectWhisper');
+  dom.inspectWikiLink = document.getElementById('inspectWikiLink');
+  dom.inspectNinjaLink = document.getElementById('inspectNinjaLink');
+  dom.poeCardName = document.getElementById('poeCardName');
+  dom.poeCardType = document.getElementById('poeCardType');
+  dom.poeCardMods = document.getElementById('poeCardMods');
+  dom.poeCardFlavourSep = document.getElementById('poeCardFlavourSep');
+  dom.poeCardFlavour = document.getElementById('poeCardFlavour');
+  dom.inspectChartSummary = document.getElementById('inspectChartSummary');
+  dom.inspectChartContainer = document.getElementById('inspectChartContainer');
+  dom.inspectRankText = document.getElementById('inspectRankText');
+  dom.inspectRankPercentile = document.getElementById('inspectRankPercentile');
+  dom.inspectRankBar = document.getElementById('inspectRankBar');
+  dom.inspectVolumeStat = document.getElementById('inspectVolumeStat');
+  dom.inspectAvgStat = document.getElementById('inspectAvgStat');
+  dom.inspectRelatedList = document.getElementById('inspectRelatedList');
+  dom.sidebarCategoryFilter = document.getElementById('sidebarCategoryFilter');
+
+  // Backward compatibility dom elements
+  dom.calcModalOverlay = dom.itemInspectOverlay;
+  dom.closeCalcModal = dom.closeInspectModal;
 
   // Quick Currency Converter
   dom.convChaosInput = document.getElementById('convChaosInput');
@@ -340,39 +357,76 @@ function renderCurrentView() {
   updateCompareBadge();
 }
 
+const SIDEBAR_GROUPS = [
+  { id: 'general', label: 'GENERAL' },
+  { id: 'atlas', label: 'ATLAS & MAPS' },
+  { id: 'gems', label: 'EQUIPMENT & GEMS' },
+  { id: 'crafting', label: 'CRAFTING' }
+];
+
+let sidebarFilterQuery = '';
+
 // ==========================================================================
-// UI Updates & Dynamic Sidebar
+// UI Updates & Dynamic Sidebar Grouping (POESTASH style)
 // ==========================================================================
 function renderSidebar() {
+  if (!dom.sidebarNav) return;
   dom.sidebarNav.innerHTML = '';
 
   const activeLower = (state.activeCategory || '').toLowerCase().trim();
+  const filterQuery = (sidebarFilterQuery || '').toLowerCase().trim();
 
-  for (const cat of currentAvailableCategories) {
-    const catLabelLower = cat.label.toLowerCase().trim();
-    const catTypeLower = cat.type.toLowerCase().trim();
+  const filteredCategories = filterQuery
+    ? currentAvailableCategories.filter(c => 
+        (c.label || '').toLowerCase().includes(filterQuery) || 
+        (c.type || '').toLowerCase().includes(filterQuery)
+      )
+    : currentAvailableCategories;
 
-    const count = state.items.filter(i => {
-      const itemCat = (i.category || '').toLowerCase().trim();
-      const itemSource = (i.sourceType || '').toLowerCase().trim();
-      return itemCat === catLabelLower || itemSource === catTypeLower ||
-             itemCat === catTypeLower || itemCat.replace(/s$/, '') === catLabelLower.replace(/s$/, '');
-    }).length;
-
-    const isActive = activeLower === catLabelLower || activeLower === catTypeLower || activeLower.replace(/s$/, '') === catLabelLower.replace(/s$/, '');
-
-    const btn = document.createElement('button');
-    btn.className = `nav-item ${isActive ? 'active' : ''}`;
-    btn.dataset.category = cat.label;
-    btn.dataset.type = cat.type;
-
-    btn.innerHTML = `
-      <span class="nav-icon ${cat.iconClass}"></span>
-      <span class="nav-label">${Render.escapeHtml(cat.label)}</span>
-      <span class="nav-badge">${count}</span>
+  if (filteredCategories.length === 0) {
+    dom.sidebarNav.innerHTML = `
+      <div style="padding: 16px 8px; color: #64748b; font-size: 0.78rem; text-align: center;">
+        Không tìm thấy danh mục phù hợp
+      </div>
     `;
+    return;
+  }
 
-    dom.sidebarNav.appendChild(btn);
+  for (const group of SIDEBAR_GROUPS) {
+    const groupCats = filteredCategories.filter(c => (c.group || 'general') === group.id);
+    if (groupCats.length === 0) continue;
+
+    const groupHeader = document.createElement('div');
+    groupHeader.className = 'nav-group-header';
+    groupHeader.innerHTML = `<span>${group.label}</span>`;
+    dom.sidebarNav.appendChild(groupHeader);
+
+    for (const cat of groupCats) {
+      const catLabelLower = cat.label.toLowerCase().trim();
+      const catTypeLower = cat.type.toLowerCase().trim();
+
+      const count = state.items.filter(i => {
+        const itemCat = (i.category || '').toLowerCase().trim();
+        const itemSource = (i.sourceType || '').toLowerCase().trim();
+        return itemCat === catLabelLower || itemSource === catTypeLower ||
+               itemCat === catTypeLower || itemCat.replace(/s$/, '') === catLabelLower.replace(/s$/, '');
+      }).length;
+
+      const isActive = activeLower === catLabelLower || activeLower === catTypeLower || activeLower.replace(/s$/, '') === catLabelLower.replace(/s$/, '');
+
+      const btn = document.createElement('button');
+      btn.className = `nav-item ${isActive ? 'active' : ''}`;
+      btn.dataset.category = cat.label;
+      btn.dataset.type = cat.type;
+
+      btn.innerHTML = `
+        <span class="nav-icon ${cat.iconClass}"></span>
+        <span class="nav-label">${Render.escapeHtml(cat.label)}</span>
+        <span class="nav-badge">${count}</span>
+      `;
+
+      dom.sidebarNav.appendChild(btn);
+    }
   }
 }
 
@@ -912,53 +966,45 @@ function bindEvents() {
     if (e.target.id === 'diagnosticsModalOverlay') Modals.closeDiagnostics();
   });
 
-  // Calculator Modal Events
-  dom.closeCalcModal.addEventListener('click', () => Modals.closeCalculator(dom));
-  dom.calcModalOverlay.addEventListener('click', (e) => {
-    if (e.target === dom.calcModalOverlay) Modals.closeCalculator(dom);
-  });
-  dom.calcQtyInput.addEventListener('input', () => {
-    Modals.updateCalculatorValues(state.activeModalItem, dom.calcQtyInput.value, state, dom);
+  // Sidebar Category Filter
+  dom.sidebarCategoryFilter?.addEventListener('input', (e) => {
+    sidebarFilterQuery = e.target.value;
+    renderSidebar();
   });
 
-  // Calculator Presets Delegation
-  document.querySelector('.calc-presets-row')?.addEventListener('click', (e) => {
-    const btn = e.target.closest('.preset-btn');
-    if (!btn) return;
-
-    let qty = parseInt(dom.calcQtyInput.value, 10) || 0;
-    const preset = btn.dataset.preset;
-
-    if (preset === '1') qty = 1;
-    else if (preset === '5') qty += 5;
-    else if (preset === '10') qty += 10;
-    else if (preset === '20') qty += 20;
-    else if (preset === 'max') qty = parseInt(btn.dataset.stack, 10) || 10;
-    else if (preset === 'reset') qty = 1;
-
-    dom.calcQtyInput.value = Math.max(1, qty);
-    Modals.updateCalculatorValues(state.activeModalItem, dom.calcQtyInput.value, state, dom);
+  // POESTASH Item Inspection Modal Events
+  dom.closeInspectModal?.addEventListener('click', () => Modals.closeItemInspection(dom));
+  dom.btnInspectBack?.addEventListener('click', () => Modals.closeItemInspection(dom));
+  dom.itemInspectOverlay?.addEventListener('click', (e) => {
+    if (e.target === dom.itemInspectOverlay) Modals.closeItemInspection(dom);
   });
 
-  // Calculator Copy Price Button
-  dom.btnCopyCalcWhisper.addEventListener('click', async () => {
+  // Copy Whisper Action from Inspection Modal
+  dom.btnInspectWhisper?.addEventListener('click', async () => {
     if (!state.activeModalItem) return;
-    const qty = parseInt(dom.calcQtyInput.value, 10) || 1;
     const isPoe2 = state.currentGame === 'poe2';
-    const priceText = isPoe2 ? 
-      `${dom.calcTotalChaos.textContent} Ex (${dom.calcTotalDivine.textContent} Div)` : 
-      `${dom.calcTotalChaos.textContent} C`;
-
-    const whisper = Clipboard.formatWhisper(state.activeModalItem, qty, priceText);
+    const priceText = isPoe2
+      ? (state.activeModalItem.divineValue >= 1 ? `${state.activeModalItem.divineValue} Div` : `${state.activeModalItem.exaltedValue || 0} Ex`)
+      : (state.activeModalItem.divineValue >= 1 ? `${state.activeModalItem.divineValue} Div` : `${state.activeModalItem.chaosValue || 0} C`);
+    const whisper = Clipboard.formatWhisper(state.activeModalItem, 1, priceText);
     const success = await Clipboard.copyText(whisper);
     if (success) {
-      dom.btnCopyCalcWhisper.innerHTML = '<i class="fa-solid fa-check"></i> Đã sao chép!';
-      dom.btnCopyCalcWhisper.classList.add('copied');
+      dom.btnInspectWhisper.innerHTML = '<i class="fa-solid fa-check"></i> Đã sao chép!';
       setTimeout(() => {
-        dom.btnCopyCalcWhisper.innerHTML = '<i class="fa-solid fa-copy"></i> Sao chép whisper';
-        dom.btnCopyCalcWhisper.classList.remove('copied');
+        dom.btnInspectWhisper.innerHTML = '<i class="fa-solid fa-copy"></i> Sao chép whisper';
       }, 1800);
-      Clipboard.showToast(`Đã sao chép tin nhắn whisper!`, 'success');
+      Clipboard.showToast(`Đã sao chép câu lệnh whisper!`, 'success');
+    }
+  });
+
+  // Related Items Click Delegation in Inspection Modal
+  dom.inspectRelatedList?.addEventListener('click', (e) => {
+    const row = e.target.closest('[data-action="inspect-related"]');
+    if (!row) return;
+    const id = row.dataset.id;
+    const item = state.items.find(i => i.id === id);
+    if (item) {
+      Modals.openItemInspection(item, state, dom);
     }
   });
 
@@ -1036,8 +1082,18 @@ function handleItemAction(e) {
   const item = state.items.find(i => i.id === id);
   if (!item) return;
 
-  if (action === 'open-calc') {
-    Modals.openCalculator(item, state, dom);
+  if (action === 'open-inspect' || action === 'open-calc') {
+    Modals.openItemInspection(item, state, dom);
+  } else if (action === 'copy-whisper') {
+    e.stopPropagation();
+    const isPoe2 = state.currentGame === 'poe2';
+    const priceText = isPoe2
+      ? (item.divineValue >= 1 ? `${item.divineValue} Div` : `${item.exaltedValue || 0} Ex`)
+      : (item.divineValue >= 1 ? `${item.divineValue} Div` : `${item.chaosValue || 0} C`);
+    const whisper = Clipboard.formatWhisper(item, 1, priceText);
+    Clipboard.copyText(whisper).then(ok => {
+      if (ok) Clipboard.showToast(`Đã sao chép whisper cho "${item.name}"!`, 'success');
+    });
   } else if (action === 'toggle-fav') {
     e.stopPropagation();
     const isFav = state.toggleFavorite(item.id);

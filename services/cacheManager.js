@@ -292,6 +292,7 @@ class CacheManager {
         available.push({
           type: reg.type,
           label: reg.label,
+          group: reg.group || 'general',
           priority: reg.priority,
           iconClass: reg.iconClass,
           count: count > 0 ? count : (info?.count || 0)
@@ -300,6 +301,7 @@ class CacheManager {
         available.push({
           type: reg.type,
           label: reg.label,
+          group: reg.group || 'general',
           priority: reg.priority,
           iconClass: reg.iconClass,
           count: 0
@@ -311,6 +313,7 @@ class CacheManager {
       return registry.filter(r => r.priority).map(r => ({
         type: r.type,
         label: r.label,
+        group: r.group || 'general',
         priority: r.priority,
         iconClass: r.iconClass,
         count: 0
@@ -590,6 +593,66 @@ class CacheManager {
     return results;
   }
 
+  normalizeStashItemData(raw, type, game, league, validatedRates = {}) {
+    if (!raw || !raw.lines) return [];
+
+    const results = [];
+    for (const line of raw.lines) {
+      if (!line || !line.name) continue;
+
+      let icon = line.icon || '';
+      if (icon && !icon.startsWith('http')) {
+        icon = `https://web.poecdn.com${icon}`;
+      }
+
+      const chaosVal = typeof line.chaosValue === 'number' ? line.chaosValue : 0;
+      let divineVal = typeof line.divineValue === 'number' ? line.divineValue : 0;
+      if (divineVal === 0 && validatedRates.divine > 0) {
+        divineVal = +(chaosVal * validatedRates.divine).toFixed(2);
+      }
+      const exaltedVal = typeof line.exaltedValue === 'number' ? line.exaltedValue : 0;
+
+      const sparklineData = line.sparkLine?.data || line.sparkline?.data || [];
+      const change7d = line.sparkLine?.totalChange ?? line.sparkline?.totalChange ?? 0;
+      const volume = line.listingCount || line.count || 0;
+
+      let category = CategoryRegistry.getLabel(game, type);
+      let subCategory = line.baseType || type;
+      if (line.mapTier) {
+        subCategory = `Tier ${line.mapTier}`;
+      }
+
+      results.push({
+        id: `${game}_${line.id || line.detailsId}_${type}`,
+        key: String(line.id || line.detailsId),
+        name: line.name,
+        category: category,
+        subCategory: subCategory,
+        sourceType: type,
+        icon: icon,
+        chaosValue: chaosVal,
+        divineValue: divineVal,
+        exaltedValue: exaltedVal,
+        primaryCurrency: 'chaos',
+        change7d: change7d,
+        sparkline: sparklineData,
+        volume: volume,
+        baseType: line.baseType || line.name,
+        mapTier: line.mapTier || null,
+        variant: line.variant || '',
+        itemClass: line.itemClass || null,
+        explicitModifiers: Array.isArray(line.explicitModifiers) ? line.explicitModifiers : [],
+        flavourText: line.flavourText || '',
+        detailsId: line.detailsId || String(line.id),
+        game,
+        league,
+        source: 'stash'
+      });
+    }
+
+    return results;
+  }
+
   // =========================================================================
   // Incremental Batch Sync with Source Locks & Per-League Merge Mutex
   // =========================================================================
@@ -630,11 +693,19 @@ class CacheManager {
     try {
       // 3. Parallel/stepped network fetches
       for (const type of typesToFetch) {
-        const url = `https://poe.ninja/${game}/api/economy/exchange/current/overview?league=${encodeURIComponent(league)}&type=${type}`;
+        const def = CategoryRegistry.getDefinition(game, type);
+        const apiSource = def?.apiSource || 'exchange';
+        let url;
+        if (apiSource === 'stash') {
+          url = `https://poe.ninja/${game}/api/economy/stash/current/item/overview?league=${encodeURIComponent(league)}&type=${type}`;
+        } else {
+          url = `https://poe.ninja/${game}/api/economy/exchange/current/overview?league=${encodeURIComponent(league)}&type=${type}`;
+        }
         const res = await this.fetchJson(url);
 
         rawResults.push({
           type,
+          apiSource,
           url,
           res
         });
@@ -741,7 +812,14 @@ class CacheManager {
             }
           }
 
-          const normalized = this.normalizeExchangeData(data, type, game, league, currentRates);
+          const def = CategoryRegistry.getDefinition(game, type);
+          const apiSource = def?.apiSource || 'exchange';
+          let normalized;
+          if (apiSource === 'stash') {
+            normalized = this.normalizeStashItemData(data, type, game, league, currentRates);
+          } else {
+            normalized = this.normalizeExchangeData(data, type, game, league, currentRates);
+          }
           newlyNormalizedItems.push(...normalized);
 
           // 4-tier status taxonomy

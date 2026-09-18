@@ -34,9 +34,11 @@
 
       <!-- Categories List -->
       <div class="sidebar-nav-container">
-        <div class="nav-section-title">GENERAL</div>
+        <div class="sidebar-filter-wrap">
+          <input type="text" id="sidebarCategoryFilter" class="sidebar-category-filter" placeholder="🔍 Lọc danh mục..." autocomplete="off" />
+        </div>
         <nav class="sidebar-nav" id="sidebarNav">
-          <!-- Rendered dynamically -->
+          <!-- Rendered dynamically grouped by section -->
         </nav>
       </div>
 
@@ -198,16 +200,19 @@
             <thead class="items-table-header" id="itemsTableHeader">
               <tr>
                 <th class="col-name sortable sortable-th" data-sort="name">
-                  Name <span class="sort-indicator sort-arrow"></span>
-                </th>
-                <th class="col-val text-right sortable sortable-th sorted sorted-desc" data-sort="value">
-                  Value <span class="info-tip" title="Tỷ giá hối đoái Faustus Exchange">ⓘ</span> <span class="sort-indicator sort-arrow">▼</span>
+                  Item <span class="sort-indicator sort-arrow"></span>
                 </th>
                 <th class="col-trend text-center sortable sortable-th" data-sort="change7d">
-                  Last 7 days <span class="sort-indicator sort-arrow"></span>
+                  Trend (7d) <span class="sort-indicator sort-arrow"></span>
+                </th>
+                <th class="col-val text-right sortable sortable-th sorted sorted-desc" data-sort="value">
+                  Chaos / Exalted <span class="info-tip" title="Giá trị thị trường quy đổi">ⓘ</span> <span class="sort-indicator sort-arrow">▼</span>
+                </th>
+                <th class="col-divine text-right sortable sortable-th hide-xs" data-sort="divine">
+                  Divine <span class="sort-indicator sort-arrow"></span>
                 </th>
                 <th class="col-volume text-right hide-sm sortable sortable-th" data-sort="volume">
-                  Volume / 24h <span class="info-tip" title="Khối lượng giao dịch 24 giờ qua">ⓘ</span> <span class="sort-indicator sort-arrow"></span>
+                  Listings / Volume <span class="info-tip" title="Khối lượng giao dịch hoặc số lượng niêm yết">ⓘ</span> <span class="sort-indicator sort-arrow"></span>
                 </th>
                 <th class="col-actions text-center">Thao tác</th>
               </tr>
@@ -237,68 +242,129 @@
   <!-- Mobile Sidebar Backdrop -->
   <div class="sidebar-backdrop hidden" id="sidebarBackdrop"></div>
 
-  <!-- CALCULATOR MODAL -->
-  <div class="modal-overlay hidden" id="calcModalOverlay">
-    <div class="modal-card">
-      <button class="modal-close" id="closeCalcModal" title="Đóng modal">&times;</button>
+  <!-- POESTASH ITEM INSPECTION VIEW -->
+  <div class="modal-overlay hidden" id="itemInspectOverlay">
+    <div class="modal-card modal-card-inspect">
+      <button class="modal-close" id="closeInspectModal" title="Đóng">&times;</button>
       
-      <div class="modal-header">
-        <div class="modal-item-thumb-wrap">
-          <img id="calcModalIcon" src="" alt="Item Icon" />
-        </div>
-        <div class="modal-item-title-group">
-          <h2 id="calcModalName" class="modal-item-name">Item Name</h2>
-          <div class="modal-item-sub" id="calcModalCategory">Category</div>
-        </div>
+      <!-- Top navigation inside modal: Back link & category trail -->
+      <div class="inspect-top-nav">
+        <button class="btn-inspect-back" id="btnInspectBack">
+          <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách
+        </button>
+        <div class="inspect-category-crumb" id="inspectCategoryCrumb">Currency</div>
       </div>
 
-      <div class="modal-body">
-        <!-- Price Stats Grid -->
-        <div class="modal-stats-grid">
-          <div class="stat-box">
-            <span class="stat-label" id="calcUnitPrimaryLbl">Đơn giá Chaos</span>
-            <span class="stat-value" id="calcUnitChaos">0 C</span>
-          </div>
-          <div class="stat-box">
-            <span class="stat-label">Đơn giá Divine</span>
-            <span class="stat-value divine-glow" id="calcUnitDivine">0 Div</span>
-          </div>
-        </div>
-
-        <!-- Quick Quantity Presets -->
-        <div class="calc-section">
-          <label for="calcQtyInput" class="calc-label">Số lượng tính giá:</label>
-          <div class="calc-input-row">
-            <input type="number" id="calcQtyInput" value="1" min="1" max="999999" class="calc-qty-field">
-            <div class="calc-result-summary">
-              <span>Tổng: <strong id="calcTotalChaos">0</strong> <span id="calcTotalChaosSym">C</span></span>
-              <span class="calc-divider">•</span>
-              <span><strong id="calcTotalDivine">0</strong> <span id="calcTotalDivineSym">Div</span></span>
+      <div class="inspect-body-grid">
+        <!-- LEFT COLUMN: Item Hero, Price, Whisper, Authentic PoE Card -->
+        <div class="inspect-col-left">
+          <div class="inspect-hero-header">
+            <div class="inspect-icon-frame">
+              <img id="inspectIcon" src="" alt="Item Icon" />
+            </div>
+            <div class="inspect-title-wrap">
+              <div class="inspect-meta-tags">
+                <span class="inspect-league-tag" id="inspectLeagueTag">Standard</span>
+                <span class="inspect-type-tag" id="inspectTypeTag">Currency</span>
+              </div>
+              <h2 id="inspectName" class="inspect-item-name">Item Name</h2>
             </div>
           </div>
-          
-          <div class="calc-presets-row">
-            <button type="button" class="preset-btn" data-preset="1">1</button>
-            <button type="button" class="preset-btn" data-preset="5">+5</button>
-            <button type="button" class="preset-btn" data-preset="10">+10</button>
-            <button type="button" class="preset-btn" data-preset="20">+20</button>
-            <button type="button" class="preset-btn" id="btnPresetMax" data-preset="max" data-stack="10">Full Stack</button>
-            <button type="button" class="preset-btn preset-reset" data-preset="reset">Reset</button>
+
+          <!-- Price Highlight Hero Card -->
+          <div class="inspect-price-hero">
+            <div class="inspect-price-main-row">
+              <div class="inspect-price-lead">
+                <span class="inspect-main-val" id="inspectMainPrice">0</span>
+                <span class="inspect-main-cur" id="inspectMainCur">Chaos</span>
+              </div>
+              <div class="inspect-trend-badge" id="inspectTrendBadge">+0%</div>
+            </div>
+            <div class="inspect-sub-price-row" id="inspectSubPriceRow">
+              <span class="inspect-sub-price" id="inspectSubPrice">≈ 0 Divine</span>
+              <span class="inspect-rate-note" id="inspectRateNote">Tỷ giá hiện tại</span>
+            </div>
+          </div>
+
+          <!-- Action Buttons (No calculator inputs per user constraint!) -->
+          <div class="inspect-actions-row">
+            <button class="btn-inspect-action btn-inspect-whisper" id="btnInspectWhisper" title="Sao chép câu lệnh thì thầm ingame">
+              <i class="fa-solid fa-copy"></i> Sao chép whisper
+            </button>
+            <a id="inspectWikiLink" href="#" target="_blank" rel="noopener" class="btn-inspect-action btn-inspect-wiki" title="Xem thông tin trên PoE Wiki">
+              <i class="fa-solid fa-book-open"></i> PoE Wiki ↗
+            </a>
+            <a id="inspectNinjaLink" href="#" target="_blank" rel="noopener" class="btn-inspect-action btn-inspect-ninja" title="Xem trên poe.ninja">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i> poe.ninja ↗
+            </a>
+          </div>
+
+          <!-- Authentic PoE In-Game Item Card -->
+          <div class="poe-item-card" id="inspectPoECard">
+            <div class="poe-card-header">
+              <div class="poe-card-name" id="poeCardName">Item Name</div>
+              <div class="poe-card-type" id="poeCardType">Base Type</div>
+            </div>
+            <div class="poe-card-separator"></div>
+            <div class="poe-card-mods" id="poeCardMods">
+              <!-- Explicit mods / Map stats -->
+            </div>
+            <div class="poe-card-separator hidden" id="poeCardFlavourSep"></div>
+            <div class="poe-card-flavour" id="poeCardFlavour">
+              <!-- Flavor text -->
+            </div>
           </div>
         </div>
 
-        <div class="calc-summary-banner" id="calcSummaryText">
-          1x Item = 0 C
-        </div>
-      </div>
+        <!-- RIGHT COLUMN: 7-day Bezier Area Chart, Market Ranking, Related Items -->
+        <div class="inspect-col-right">
+          <!-- 7-Day History Chart Card -->
+          <div class="inspect-panel inspect-chart-panel">
+            <div class="inspect-panel-header">
+              <div class="inspect-panel-title">
+                <i class="fa-solid fa-chart-area"></i> Lịch sử giá 7 ngày qua
+              </div>
+              <span class="inspect-chart-summary" id="inspectChartSummary">7 ngày gần nhất</span>
+            </div>
+            <div class="inspect-chart-wrap" id="inspectChartContainer">
+              <!-- Smooth cubic Bezier SVG area chart rendered dynamically -->
+            </div>
+          </div>
 
-      <div class="modal-footer">
-        <a id="calcWikiLink" href="#" target="_blank" rel="noopener" class="btn-wiki-link">
-          <i class="fa-solid fa-book-open"></i> Tra cứu Wiki ↗
-        </a>
-        <button class="btn-action-copy" id="btnCopyCalcWhisper">
-          <i class="fa-solid fa-copy"></i> Sao chép whisper
-        </button>
+          <!-- "Where it sits" Ranking Card -->
+          <div class="inspect-panel inspect-rank-panel">
+            <div class="inspect-panel-header">
+              <div class="inspect-panel-title">
+                <i class="fa-solid fa-ranking-star"></i> Vị thế trong danh mục
+              </div>
+            </div>
+            <div class="inspect-rank-body">
+              <div class="inspect-rank-metric">
+                <span class="inspect-rank-label" id="inspectRankText">Xếp hạng #-- trong danh mục</span>
+                <span class="inspect-rank-percentile" id="inspectRankPercentile">Top --%</span>
+              </div>
+              <div class="inspect-rank-track">
+                <div class="inspect-rank-bar" id="inspectRankBar" style="width: 50%;"></div>
+              </div>
+              <div class="inspect-rank-stats" id="inspectRankStats">
+                <span>Khối lượng: <strong id="inspectVolumeStat">0</strong></span>
+                <span>Giá trung bình: <strong id="inspectAvgStat">0 C</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Related / Alternative Items in Category -->
+          <div class="inspect-panel inspect-related-panel">
+            <div class="inspect-panel-header">
+              <div class="inspect-panel-title">
+                <i class="fa-solid fa-layer-group"></i> Vật phẩm cùng phân khúc
+              </div>
+            </div>
+            <div class="inspect-related-list" id="inspectRelatedList">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

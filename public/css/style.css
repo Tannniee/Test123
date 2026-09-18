@@ -316,6 +316,9 @@ select:focus {
 .crystal-ico { background-image: url('https://web.poecdn.com/gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvTGVnaW9uL0ltcGVyaWFsRW5zaHJvdWRpbmdDcnlzdGFsIiwic2NhbGUiOjF9XQ/4cff71674a/ImperialEnshroudingCrystal.png'); }
 .astrolabe-ico { background-image: url('https://web.poecdn.com/gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvTGVnaW9uL0ltcGVyaWFsRW5zaHJvdWRpbmdDcnlzdGFsIiwic2NhbGUiOjF9XQ/4cff71674a/ImperialEnshroudingCrystal.png'); }
 .djinn-ico { background-image: url('https://web.poecdn.com/gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvRGVlcHdhdGVyL0R1Y2F0UGFudGhlb24iLCJzY2FsZSI6MX1d/98f288b9d4/DucatPantheon.png'); }
+.map-ico { background-image: url('https://web.poecdn.com/gen/image/WzI4LDE0LHsiZiI6IjJESXRlbXMvTWFwcy9BdGxhczJNYXBzL05ldy9VYmVyUHJpbW9yZGlhbEJsb2NrcyIsInNjYWxlIjoxfV0/18e23d2705/UberPrimordialBlocks.png'); }
+.blight-map-ico { background-image: url('https://web.poecdn.com/gen/image/WzI4LDE0LHsiZiI6IjJESXRlbXMvTWFwcy9BdGxhczJNYXBzL05ldy9VYmVyUHJpbW9yZGlhbEJsb2NrcyIsInNjYWxlIjoxfV0/18e23d2705/UberPrimordialBlocks.png'); }
+.unique-map-ico { background-image: url('https://web.poecdn.com/gen/image/WzI4LDE0LHsiZiI6IjJESXRlbXMvTWFwcy9UcmlhbG1hc3Rlck1hcCIsInNjYWxlIjoxfV0/89b9cc2c90/TrialmasterMap.png'); }
 
 /* Category Icons - PoE 2 (100% Verified Active URLs) */
 .poe2-currency-ico { background-image: url('https://web.poecdn.com/gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvQ3VycmVuY3lNb2RWYWx1ZXMiLCJzY2FsZSI6MSwicmVhbG0iOiJwb2UyIn1d/2986e220b3/CurrencyModValues.png'); }
@@ -2431,5 +2434,547 @@ select:focus {
 .pg-dots {
   color: var(--text-muted);
   padding: 0 4px;
+}
+
+/* ==========================================================================
+   POESTASH SIDEBAR GROUPING & IN-MEMORY FILTER
+   ========================================================================== */
+.sidebar-filter-wrap {
+  padding: 2px 4px 10px 4px;
+}
+
+.sidebar-category-filter {
+  width: 100%;
+  background: #0d111a;
+  border: 1px solid rgba(212, 158, 67, 0.2);
+  border-radius: var(--radius-sm);
+  color: #e2e8f0;
+  font-size: 0.8rem;
+  font-family: var(--font-body);
+  padding: 7px 10px;
+  outline: none;
+  transition: all 0.2s ease;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.sidebar-category-filter::placeholder {
+  color: #64748b;
+  font-size: 0.76rem;
+}
+
+.sidebar-category-filter:focus {
+  border-color: var(--border-active);
+  box-shadow: 0 0 10px rgba(242, 169, 59, 0.25), inset 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.nav-group-header {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: #7d8b9e;
+  text-transform: uppercase;
+  padding: 12px 8px 4px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  margin-top: 6px;
+}
+
+.nav-group-header:first-of-type {
+  border-top: none;
+  margin-top: 0;
+  padding-top: 4px;
+}
+
+.item-subtext {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 2px;
+  display: block;
+}
+
+/* ==========================================================================
+   POESTASH ITEM INSPECTION VIEW (REPLACING OLD CALCULATOR MODAL)
+   ========================================================================== */
+.modal-card-inspect {
+  max-width: 1020px;
+  width: 95vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #0b0e16;
+  border: 1px solid rgba(212, 158, 67, 0.35);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.95), 0 0 35px rgba(212, 158, 67, 0.18);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  color: #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.inspect-top-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.btn-inspect-back {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #94a3b8;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.btn-inspect-back:hover {
+  background: rgba(242, 169, 59, 0.12);
+  color: #fff;
+  border-color: rgba(242, 169, 59, 0.4);
+}
+
+.inspect-category-crumb {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.inspect-body-grid {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .inspect-body-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* LEFT COLUMN */
+.inspect-col-left {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.inspect-hero-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.inspect-icon-frame {
+  width: 58px;
+  height: 58px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(212, 158, 67, 0.35);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.7);
+}
+
+.inspect-icon-frame img {
+  max-width: 46px;
+  max-height: 46px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.9));
+}
+
+.inspect-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.inspect-meta-tags {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.inspect-league-tag,
+.inspect-type-tag {
+  font-size: 0.68rem;
+  padding: 1px 7px;
+  border-radius: 3px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.inspect-league-tag {
+  background: rgba(148, 163, 184, 0.12);
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.inspect-type-tag {
+  background: rgba(242, 169, 59, 0.12);
+  color: var(--text-gold);
+  border: 1px solid rgba(242, 169, 59, 0.3);
+}
+
+.inspect-item-name {
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.25;
+  margin: 0;
+}
+
+/* PRICE HERO CARD */
+.inspect-price-hero {
+  background: linear-gradient(135deg, rgba(25, 30, 44, 0.8) 0%, rgba(13, 16, 26, 0.95) 100%);
+  border: 1px solid rgba(212, 158, 67, 0.3);
+  border-radius: var(--radius-sm);
+  padding: 16px 18px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.inspect-price-main-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.inspect-price-lead {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.inspect-main-val {
+  font-size: 2.2rem;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  color: #f3ba2f;
+  letter-spacing: -0.5px;
+  text-shadow: 0 0 20px rgba(243, 186, 47, 0.3);
+}
+
+.inspect-main-cur {
+  font-size: 1.05rem;
+  color: #cbd5e1;
+  font-weight: 600;
+}
+
+.inspect-trend-badge {
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+}
+
+.inspect-sub-price-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.82rem;
+}
+
+.inspect-sub-price {
+  color: #a5b4fc;
+  font-weight: 600;
+}
+
+.inspect-rate-note {
+  color: #64748b;
+  font-size: 0.75rem;
+}
+
+/* ACTIONS ROW */
+.inspect-actions-row {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  gap: 8px;
+}
+
+.btn-inspect-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-inspect-whisper {
+  background: #192032;
+  border: 1px solid rgba(212, 158, 67, 0.4);
+  color: var(--text-gold);
+}
+
+.btn-inspect-whisper:hover {
+  background: #24304d;
+  color: #fff;
+  border-color: var(--text-gold);
+  box-shadow: 0 0 10px rgba(242, 169, 59, 0.25);
+}
+
+.btn-inspect-wiki,
+.btn-inspect-ninja {
+  background: #111522;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+}
+
+.btn-inspect-wiki:hover,
+.btn-inspect-ninja:hover {
+  background: #1b2135;
+  color: #f1f5f9;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* AUTHENTIC POE IN-GAME ITEM CARD */
+.poe-item-card {
+  background: #0c0f16;
+  border: 1px solid #7a5d28;
+  border-radius: 4px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.85);
+  padding: 14px;
+  font-family: var(--font-body);
+}
+
+.poe-card-header {
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.poe-card-name {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #af6025;
+  line-height: 1.25;
+}
+
+.poe-card-type {
+  font-size: 0.8rem;
+  color: #aa9e82;
+  margin-top: 3px;
+}
+
+.poe-card-separator {
+  width: 70%;
+  height: 1px;
+  background: #443722;
+  margin: 8px auto;
+}
+
+.poe-card-mods {
+  color: #8888ff;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  text-align: center;
+  white-space: pre-line;
+}
+
+.poe-card-flavour {
+  color: #af6025;
+  font-style: italic;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  text-align: center;
+  white-space: pre-line;
+}
+
+/* RIGHT COLUMN PANELS */
+.inspect-col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.inspect-panel {
+  background: #10141f;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+}
+
+.inspect-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.inspect-panel-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.inspect-panel-title i {
+  color: var(--text-gold);
+}
+
+.inspect-chart-summary {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* SVG BEZIER CHART */
+.inspect-chart-wrap {
+  width: 100%;
+  height: 200px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inspect-svg-chart {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.chart-grid-line {
+  stroke: rgba(255, 255, 255, 0.05);
+  stroke-dasharray: 4 4;
+}
+
+.chart-label-text {
+  fill: #64748b;
+  font-size: 10px;
+  font-family: var(--font-mono);
+}
+
+/* RANKING CARD */
+.inspect-rank-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.inspect-rank-metric {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.inspect-rank-label {
+  color: #cbd5e1;
+}
+
+.inspect-rank-percentile {
+  color: var(--text-gold);
+  font-family: var(--font-mono);
+  background: rgba(242, 169, 59, 0.1);
+  border: 1px solid rgba(242, 169, 59, 0.25);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.inspect-rank-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.inspect-rank-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981 0%, #f59e0b 50%, #ef4444 100%);
+  border-radius: 4px;
+  transition: width 0.5s ease-out;
+}
+
+.inspect-rank-stats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.inspect-rank-stats strong {
+  color: #cbd5e1;
+}
+
+/* RELATED ITEMS */
+.inspect-related-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.inspect-related-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.inspect-related-row:hover {
+  background: rgba(242, 169, 59, 0.08);
+  border-color: rgba(242, 169, 59, 0.25);
+}
+
+.inspect-related-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: #cbd5e1;
+}
+
+.inspect-related-thumb {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.inspect-related-val {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: var(--text-gold);
 }
 

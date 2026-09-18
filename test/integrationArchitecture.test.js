@@ -38,12 +38,14 @@ async function it(desc, fn) {
   // ----------------------------------------------------
   console.log('--- Suite 1: Category Registry & LineageSupportGems ---');
 
-  await it('should have Category Registry for PoE 1 (18 types) and PoE 2 (14 types)', () => {
+  await it('should have Category Registry for PoE 1 (21 types) and PoE 2 (14 types)', () => {
     const p1 = CategoryRegistry.getRegistry('poe1');
     const p2 = CategoryRegistry.getRegistry('poe2');
-    assert.strictEqual(p1.length, 18, 'PoE 1 must have exactly 18 exchange types');
+    assert.strictEqual(p1.length, 21, 'PoE 1 must have 21 types (including Maps)');
     assert.strictEqual(p2.length, 14, 'PoE 2 must have exactly 14 exchange types (including LineageSupportGems)');
 
+    assert(CategoryRegistry.isValid('poe1', 'Map'));
+    assert.strictEqual(CategoryRegistry.getGroup('poe1', 'Map'), 'atlas');
     assert(CategoryRegistry.isValid('poe2', 'LineageSupportGems'));
     assert.strictEqual(CategoryRegistry.getLabel('poe2', 'LineageSupportGems'), 'Lineage Gems');
   });

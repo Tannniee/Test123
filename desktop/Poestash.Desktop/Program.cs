@@ -12,7 +12,8 @@ static class Program
 
         if (initialized)
         {
-            Application.Run();
+            var dashboard = controller.CreateDashboardForm();
+            Application.Run(dashboard);
         }
     }
 }

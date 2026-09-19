@@ -15,19 +15,22 @@ public class TrayManager : IDisposable
     private readonly string _serverUrl;
     private readonly Action _onExitRequested;
     private readonly Action? _onQuickInspectRequested;
+    private readonly Action? _onShowDashboardRequested;
 
     public TrayManager(
         string serverUrl,
         AppSettings settings,
         SettingsStore store,
         Action onExitRequested,
-        Action? onQuickInspectRequested = null)
+        Action? onQuickInspectRequested = null,
+        Action? onShowDashboardRequested = null)
     {
         _serverUrl = serverUrl;
         _settings = settings;
         _store = store;
         _onExitRequested = onExitRequested;
         _onQuickInspectRequested = onQuickInspectRequested;
+        _onShowDashboardRequested = onShowDashboardRequested;
 
         _contextMenu = new ContextMenuStrip();
         _notifyIcon = new NotifyIcon
@@ -38,7 +41,13 @@ public class TrayManager : IDisposable
             ContextMenuStrip = _contextMenu
         };
 
-        _notifyIcon.DoubleClick += (_, _) => OpenWebUi();
+        _notifyIcon.DoubleClick += (_, _) =>
+        {
+            if (_onShowDashboardRequested != null)
+                _onShowDashboardRequested();
+            else
+                OpenWebUi();
+        };
         BuildContextMenu();
     }
 
@@ -60,11 +69,14 @@ public class TrayManager : IDisposable
             ForeColor = Color.FromArgb(34, 197, 94)
         };
 
-        // 3. Open Web UI (Default Action)
-        var openItem = new ToolStripMenuItem("Open POESTASH Web UI", null, (_, _) => OpenWebUi())
+        // 2. Control Panel
+        var dashboardItem = new ToolStripMenuItem("Bảng điều khiển (Control Panel)", null, (_, _) => _onShowDashboardRequested?.Invoke())
         {
             Font = new Font("Segoe UI", 9f, FontStyle.Bold)
         };
+
+        // 3. Open Web UI
+        var openItem = new ToolStripMenuItem("Mở Web App", null, (_, _) => OpenWebUi());
 
         // 4. Quick Inspect (Phase 5)
         var quickInspectText = string.IsNullOrWhiteSpace(_settings.QuickInspectHotkey)
@@ -80,12 +92,13 @@ public class TrayManager : IDisposable
         var settingsItem = new ToolStripMenuItem("Settings...", null, (_, _) => OpenSettings());
 
         // 6. Exit
-        var exitItem = new ToolStripMenuItem("Exit", null, (_, _) => _onExitRequested());
+        var exitItem = new ToolStripMenuItem("Thoát hoàn toàn (Exit)", null, (_, _) => _onExitRequested());
 
         _contextMenu.Items.AddRange([
             titleItem,
             statusItem,
             new ToolStripSeparator(),
+            dashboardItem,
             openItem,
             quickInspectItem,
             settingsItem,

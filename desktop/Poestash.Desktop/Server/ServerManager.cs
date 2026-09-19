@@ -5,14 +5,37 @@ namespace Poestash.Desktop.Server;
 public class ServerManager : IDisposable
 {
     private Process? _nodeProcess;
+    private int? _reusedPid;
     private readonly HealthClient _healthClient;
     private bool _isDisposed;
 
-    public bool IsProcessManagedByHost => _nodeProcess != null && !_nodeProcess.HasExited;
-    public int? ProcessId => _nodeProcess?.Id;
+    public bool IsProcessManagedByHost => (_nodeProcess != null && !_nodeProcess.HasExited) || IsReusedProcessActive();
+    public int? ProcessId => _nodeProcess?.Id ?? (_reusedPid.HasValue && IsReusedProcessActive() ? _reusedPid : null);
     public int BoundPort { get; private set; }
     public string BoundHost { get; private set; } = "127.0.0.1";
     public string ServerUrl => $"http://{BoundHost}:{BoundPort}";
+
+    public void AdoptExistingProcess(int pid, string host, int port)
+    {
+        _reusedPid = pid;
+        BoundHost = host;
+        BoundPort = port;
+    }
+
+    private bool IsReusedProcessActive()
+    {
+        if (!_reusedPid.HasValue) return false;
+        try
+        {
+            var p = Process.GetProcessById(_reusedPid.Value);
+            return !p.HasExited;
+        }
+        catch
+        {
+            _reusedPid = null;
+            return false;
+        }
+    }
 
     public ServerManager(HealthClient healthClient)
     {
@@ -136,7 +159,7 @@ public class ServerManager : IDisposable
         throw new TimeoutException($"Timed out waiting for POESTASH backend to respond on http://{host}:{port}/api/health.");
     }
 
-    public Task StopAsync()
+    public async Task StopAsync()
     {
         if (_nodeProcess != null && !_nodeProcess.HasExited)
         {
@@ -156,7 +179,45 @@ public class ServerManager : IDisposable
             }
         }
 
-        return Task.CompletedTask;
+        if (_reusedPid.HasValue)
+        {
+            try
+            {
+                var p = Process.GetProcessById(_reusedPid.Value);
+                if (!p.HasExited)
+                {
+                    p.Kill(entireProcessTree: true);
+                    p.WaitForExit(3000);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[ServerManager] Error terminating reused Node process: {ex.Message}");
+            }
+            finally
+            {
+                _reusedPid = null;
+            }
+        }
+
+        // Final safety net: if BoundPort is set, probe /api/health to see if a poestash-server is still lingering
+        if (BoundPort > 0)
+        {
+            try
+            {
+                var health = await _healthClient.CheckHealthAsync(BoundHost, BoundPort).ConfigureAwait(false);
+                if (health.IsReachable && health.IsPoestashService && health.Data?.Pid.HasValue == true)
+                {
+                    var p = Process.GetProcessById(health.Data.Pid.Value);
+                    if (!p.HasExited)
+                    {
+                        p.Kill(entireProcessTree: true);
+                        p.WaitForExit(3000);
+                    }
+                }
+            }
+            catch {}
+        }
     }
 
     public void Dispose()

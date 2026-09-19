@@ -26,10 +26,17 @@ public class AppController : IDisposable
 
     private AppSettings? _settings;
     private TrayManager? _trayManager;
+    private DashboardForm? _dashboardForm;
     private string _activeHost = "127.0.0.1";
     private int _activePort = 3000;
     private string _activeServerUrl = "http://127.0.0.1:3000";
     private bool _isDisposed;
+
+    public bool IsServerRunning => _serverManager.IsProcessManagedByHost;
+    public int ActivePort => _activePort;
+    public string ActiveHost => _activeHost;
+    public string ActiveServerUrl => _activeServerUrl;
+    public int? ServerPid => _serverManager.ProcessId;
 
     public AppController()
     {
@@ -99,6 +106,10 @@ public class AppController : IDisposable
         if (resolution.Mode == PortResolutionMode.ReuseExistingServer)
         {
             Debug.WriteLine($"[AppController] Reusing existing POESTASH server at {_activeServerUrl}");
+            if (resolution.ExistingServerHealth?.Data?.Pid.HasValue == true)
+            {
+                _serverManager.AdoptExistingProcess(resolution.ExistingServerHealth.Data.Pid.Value, resolution.Host, resolution.Port);
+            }
         }
         else
         {
@@ -138,7 +149,8 @@ public class AppController : IDisposable
             _settings,
             _settingsStore,
             Shutdown,
-            OnQuickInspectTriggered);
+            OnQuickInspectTriggered,
+            ShowDashboard);
 
         // 7. Open Web UI if configured
         if (_settings.AutoOpenBrowserOnLaunch)
@@ -237,6 +249,55 @@ public class AppController : IDisposable
     public async Task<BridgeStatusResponse?> GetBridgeStatusAsync(CancellationToken ct = default)
     {
         return await _bridgeClient.GetStatusAsync(_activeHost, _activePort, ct).ConfigureAwait(false);
+    }
+
+    public DashboardForm CreateDashboardForm()
+    {
+        _dashboardForm = new DashboardForm(this);
+        return _dashboardForm;
+    }
+
+    public void ShowDashboard()
+    {
+        if (_dashboardForm != null && !_dashboardForm.IsDisposed)
+        {
+            _dashboardForm.Show();
+            _dashboardForm.WindowState = FormWindowState.Normal;
+            _dashboardForm.BringToFront();
+        }
+        else
+        {
+            _dashboardForm = new DashboardForm(this);
+            _dashboardForm.Show();
+        }
+    }
+
+    public void OpenWebUi()
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = _activeServerUrl,
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[AppController] Error opening browser: {ex.Message}");
+        }
+    }
+
+    public async Task<bool> StartServerAsync()
+    {
+        if (IsServerRunning) return true;
+        var started = await _serverManager.StartAsync(_activeHost, _activePort).ConfigureAwait(true);
+        return started;
+    }
+
+    public async Task StopServerAsync()
+    {
+        await _serverManager.StopAsync().ConfigureAwait(true);
     }
 
     public void Shutdown()

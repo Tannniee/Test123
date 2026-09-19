@@ -24,3 +24,6 @@ scratch/
 [Bb]in/
 [Oo]bj/
 *.user
+
+# Local reference folders
+Exile-UI-*/

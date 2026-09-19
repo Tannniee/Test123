@@ -4836,4 +4836,24 @@ select:focus {
   font-size: 0.86rem;
 }
 
+.exile-chip-roll {
+  background: rgba(16, 185, 129, 0.2) !important;
+  color: #34d399 !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
+  font-weight: 800;
+}
+
+.exile-mod-divider {
+  height: 1px;
+  background: #334155;
+  margin: 3px 0;
+  border: none;
+}
+
+.exile-mod-divider.affix-split {
+  height: 2px;
+  background: #475569;
+  box-shadow: 0 0 3px rgba(100, 116, 139, 0.5);
+}
+
 

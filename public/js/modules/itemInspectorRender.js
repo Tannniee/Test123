@@ -214,6 +214,7 @@ export const ItemInspectorRender = {
           ${properties.ward > 0 ? `<div class="exile-base-chip exile-chip-ward"><i class="fa-solid fa-sun"></i> Ward: ${this.formatNumber(properties.ward)}</div>` : ''}
           ${dps && dps.isWeapon ? `<div class="exile-base-chip exile-chip-dps"><i class="fa-solid fa-swords"></i> ${dps.totalDps} DPS</div>` : ''}
           ${properties.quality > 0 ? `<div class="exile-base-chip"><i class="fa-solid fa-sparkles"></i> +${properties.quality}% Q</div>` : ''}
+          ${analysis.base && typeof analysis.base.baseDefencePercentile === 'number' ? `<div class="exile-base-chip exile-chip-roll"><i class="fa-solid fa-dice-d20"></i> Base Roll: ${Math.round(analysis.base.baseDefencePercentile * 100)}%</div>` : ''}
         </div>
       `;
     }
@@ -222,8 +223,13 @@ export const ItemInspectorRender = {
     html += '<div class="exile-affix-list">';
 
     // Implicits
-    for (const m of implicits) {
-      html += this.renderExileModBar(m, 'implicit', isUnique);
+    if (implicits.length > 0) {
+      for (const m of implicits) {
+        html += this.renderExileModBar(m, 'implicit', isUnique);
+      }
+      if (fractured.length > 0 || explicits.length > 0 || crafted.length > 0) {
+        html += '<div class="exile-mod-divider"></div>';
+      }
     }
 
     // Fractured
@@ -231,9 +237,26 @@ export const ItemInspectorRender = {
       html += this.renderExileModBar(m, 'fractured', isUnique);
     }
 
-    // Explicits
-    for (const m of explicits) {
-      html += this.renderExileModBar(m, 'explicit', isUnique);
+    // Explicits (split into Prefixes and Suffixes if matched)
+    if (!isUnique && explicits.some(m => m.type === 'prefix') && explicits.some(m => m.type === 'suffix')) {
+      const prefixes = explicits.filter(m => m.type === 'prefix');
+      const suffixes = explicits.filter(m => m.type === 'suffix');
+      const others = explicits.filter(m => m.type !== 'prefix' && m.type !== 'suffix');
+
+      for (const m of prefixes) {
+        html += this.renderExileModBar(m, 'explicit', isUnique);
+      }
+      html += '<div class="exile-mod-divider affix-split"></div>';
+      for (const m of suffixes) {
+        html += this.renderExileModBar(m, 'explicit', isUnique);
+      }
+      for (const m of others) {
+        html += this.renderExileModBar(m, 'explicit', isUnique);
+      }
+    } else {
+      for (const m of explicits) {
+        html += this.renderExileModBar(m, 'explicit', isUnique);
+      }
     }
 
     // Crafted

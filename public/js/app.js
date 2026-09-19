@@ -275,7 +275,7 @@ async function init() {
       state.searchQuery = match.name;
       filterAndRender();
 
-      Modals.openCalculator(match, state, dom);
+      Modals.openItemInspection(match, state, dom);
       return;
     }
 
@@ -290,10 +290,11 @@ async function init() {
         sparkline: m.sparkline || null,
         icon: m.icon || null,
         category: classification.displayLabel || 'Currency',
-        count: m.count || 0
+        count: m.count || 0,
+        change7d: m.sparkline?.totalChange || 0
       };
       Clipboard.showToast(`[Bridge] ${synthItem.name}: ${synthItem.divineValue >= 1 ? `${synthItem.divineValue} Div` : `${synthItem.chaosValue} C`}`, 'success');
-      Modals.openCalculator(synthItem, state, dom);
+      Modals.openItemInspection(synthItem, state, dom);
       return;
     }
 

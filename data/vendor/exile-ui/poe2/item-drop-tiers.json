@@ -1,7 +1,3194 @@
 {
   "Crown of the Victor": {
-    "tier": "0",
+    "tier": "2",
+    "rawTier": "T2",
     "itemClass": "Helmets",
-    "baseType": "Expert Iron Crown"
+    "baseType": "Expert Iron Crown",
+    "flavour": ""
+  },
+  "Ab Aeterno": {
+    "tier": "boss",
+    "rawTier": "Boss",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Adonia's Ego": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Aerisvane's Wings": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Against the Darkness": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Alkem Eira": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Alpha's Howl": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Amor Mandragora": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Andvarius": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Apep's Supremacy": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Apron of Emiran": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Arakaali's Gift": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Arvil's Wheel": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Ashrend": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Asphyxia's Wrath": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Assailum": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Astramentis": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Atsak's Sight": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Atziri's Acuity": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Atziri's Contempt": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Atziri's Disdain": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Atziri's Rule": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Atziri's Splendour": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Atziri's Step": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Aurseize": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Beacon of Azis": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Beetlebite": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Beira's Anguish": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Belly of the Beast": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Berek's Grip": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Berek's Pass": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Berek's Respite": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Beyond Reach": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Bijouborne": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Birth of Fury": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Birthright Buckle": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Bitterbloom": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Black Sun Crest": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Blackbraid": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Blackflame": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Blackgleam": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Blackheart": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Blessed Bonds": {
+    "tier": "retired",
+    "rawTier": "Retired",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Blistering Bond": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Blood of the Warrior": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Blood Price": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Bloodbarrier": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Blueflame Bracers": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Bluetongue": {
+    "tier": "retired",
+    "rawTier": "Retired",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Bones of Ullr": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Brain Rattler": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Bramblejack": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Breath of the Mountains": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Briarpatch": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Briskwrap": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Bristleboar": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Bronzebeard": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Brutus' Lead Sprinkler": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Brynhand's Mark": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Bursting Decay": {
+    "tier": "boss",
+    "rawTier": "Boss",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Bushwhack": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Byrnabas": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Cadiro's Gambit": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Calgyra's Arc": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Call of the Brotherhood": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Candlemaker": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Carnage Heart": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Carrion Call": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Cat O' Nine Tails": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Chainsting": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Chernobog's Pillar": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Chober Chaber": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Choir of the Storm": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Clear Skies": {
+    "tier": "retired",
+    "rawTier": "Retired",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Cloak of Defiance": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Cloak of Flame": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Coat of Red": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Collapsing Horizon": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Constricting Command": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Controlled Metamorphosis": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Cornathaum": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Corona of the Red Sun": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Corpsewade": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Cospri's Will": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Couture of Crimson": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Coward's Legacy": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Cracklecreep": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Crest of Ardura": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Crown of Eyes": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Crown of the Pale King": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Crown of Thorns": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Cruel Hegemony": {
+    "tier": "retired",
+    "rawTier": "Retired",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Cursecarver": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Daevata's Wind": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Darkness Enthroned": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Darkray Vectors": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Death Articulated": {
+    "tier": "boss",
+    "rawTier": "Boss",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Death Rush": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Death's Harp": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Deathblow": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Deathrattle": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Decree of Acuity": {
+    "tier": "pinnacle",
+    "rawTier": "Pinnacle",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Decree of Flight": {
+    "tier": "pinnacle",
+    "rawTier": "Pinnacle",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Decree of Loyalty": {
+    "tier": "pinnacle",
+    "rawTier": "Pinnacle",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Defiance of Destiny": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Deidbell": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Demigod's Virtue": {
+    "tier": "retired",
+    "rawTier": "Retired",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Demon Stitcher": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Dionadair": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Doedre's Damning": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Doedre's Tenure": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Doomfletch": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Doomgate": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Doryani's Prototype": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Double Vision": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Dreadfist": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Dream Fragments": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Drillneck": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Duality": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Dunkelhalt": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Dusk Vigil": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Dustbloom": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Earthbound": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Edyrn's Tusks": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Effigy of Cruelty": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Elevore": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Empire's Grasp": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Enezun's Charge": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Enfolding Dawn": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Erian's Cobble": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Eshtera's Path": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Essentia Sanguis": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Eventide Petals": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Evergrasping Ring": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Eye of Chayula": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Eyes of the Runefather": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Ezomyte Peak": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Facebreaker": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Fairgraves' Curse": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Feathered Fortress": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Fireflower": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Fixation of Yix": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Flesh Crucible": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Font of Power": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "For Utopia": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Forbidden Gaze": {
+    "tier": "retired",
+    "rawTier": "Retired",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Forgotten By Time": {
+    "tier": "retired",
+    "rawTier": "Retired",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Forgotten Warden": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Forsaken Bangle": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Foxshade": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Freedom of Faith": {
+    "tier": "retired",
+    "rawTier": "Retired",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "From Nothing": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Frostbreath": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Fury of the King": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Gamblesprint": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Geofri's Sanctuary": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Ghostmarch": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Ghostwrithe": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Gifts from Above": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Glimpse of Chaos": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Gloamgown": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Gloomform": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Glowswarm": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Goldrim": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Goregirdle": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Grand Spectrum": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Gravebind": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Greed's Embrace": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Greymake": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Grip of Kulemak": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Grip of Winter": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Guiding Palm of the Eye": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Guiding Palm of the Heart": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Guiding Palm of the Mind": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Hand of Wisdom and Action": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Hateforge": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Headhunter": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Heart of the Well": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Heartbound Loop": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Heatshiver": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Heroic Tragedy": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Hinekora's Sight": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Hoghunt": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Horns of Bynden": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Horror's Flight": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Hrimnor's Hymn": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Hyrri's Ire": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Hysseg's Claw": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Icefang Orbit": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Icetomb": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Idle Hands": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Idol of Uldurn": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Igniferis": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Immaculate Adherence": {
+    "tier": "pinnacle",
+    "rawTier": "Pinnacle",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Indigon": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Infernoclasp": {
+    "tier": "retired",
+    "rawTier": "Retired",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Ingenuity": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Innsmouth": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Ironbound": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Irongrasp": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Ironride": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Jarngreipr": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Kalandra's Touch": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Kaltenhalt": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Kaom's Heart": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Keelhaul": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Keeper of the Arc": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Killjoy": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Kingsguard": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Kitoko's Current": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Lavianga's Spirits": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Leer Cast": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Legionstride": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Leopold's Applause": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Levinstone": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Lifesprig": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Lightning Coil": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Ligurium Talisman": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Liminal Coil": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Lioneye's Glare": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Lochtonial Caress": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Loreweave": {
+    "tier": "recipe",
+    "rawTier": "Recipe",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Luminous Pace": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Lycosidae": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Mageblood": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Mahuxotl's Machination": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Maligaro's Virtuosity": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Marohi Erqi": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Mask of the Sanguimancer": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Mask of the Stitched Demon": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Mastered Domain": {
+    "tier": "retired",
+    "rawTier": "Retired",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Matsya": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Megalomaniac": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Meginord's Girdle": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Melting Maelstrom": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Merit of Service": {
+    "tier": "retired",
+    "rawTier": "Retired",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Midnight Braid": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Mind of the Council": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Ming's Heart": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Mist Whisper": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Mjölner": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Morior Invictus": {
+    "tier": "boss",
+    "rawTier": "Boss",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Murkshaft": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Myris Uxor": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Nascent Hope": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Nazir's Judgement": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Nebuloch": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Necromantle": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Ngamahu's Chosen": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Nightfall": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Nightscale": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Nocturne": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Northpaw": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Oaksworn": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Obern's Bastion": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Olroth's Resolve": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Olrovasara": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Opportunity": {
+    "tier": "pinnacle",
+    "rawTier": "Pinnacle",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Original Sin": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Painter's Servant": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Palm of the Dreamer": {
+    "tier": "vaal",
+    "rawTier": "vaal",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Pariah's Embrace": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Perandus Seal": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Perfidy": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Periphery": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Pillar of the Caged God": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Plaguefinger": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Polcirkeln": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Powertread": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Pragmatism": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Prayers for Rain": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Prism Guardian": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Prism of Belief": {
+    "tier": "boss",
+    "rawTier": "Boss",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Prized Pain": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Quatl's Molt": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Quecholli": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Queen of the Forest": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Quill Rain": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Radiant Grief": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Rampart Raptor": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Rathpith Globe": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Rearguard": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Redbeak": {
+    "tier": "retired",
+    "rawTier": "Retired",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Redblade Banner": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Redemption": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Redflare Conduit": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Revered Resin": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Reverie": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Rise of the Phoenix": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Rite of Passage": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Rondel De Ezo": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Rondel of Fragility": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Runeseeker's Call": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Ryslatha's Coil": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Sacred Flame": {
+    "tier": "boss",
+    "rawTier": "Boss",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Sacrosanctum": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Sadist's Mercy": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Saffell's Frame": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Safrin's Resolve": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Saitha's Spear": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Sands of Silk": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Sandstorm Visage": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Sanguine Diviner": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Sanguis Heroum": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Scold's Bridle": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Sculpted Suffering": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Season of the Hunt": {
+    "tier": "retired",
+    "rawTier": "Retired",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Seed of Cataclysm": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Seeing Stars": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Serle's Grit": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Serpent's Egg": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Serpent's Lesson": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Shackles of the Wretched": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Shankgonne": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Shavronne's Satchel": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Shyaba": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Sierran Inheritance": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Silks of Veneration": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Silverthorne": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Sine Aequo": {
+    "tier": "boss",
+    "rawTier": "Boss",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Sire of Shards": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Skin of the Loyal": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Skysliver": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Slivertongue": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Snakebite": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Snakepit": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Solar Lance": {
+    "tier": "retired",
+    "rawTier": "Retired",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Solus Ipse": {
+    "tier": "boss",
+    "rawTier": "Boss",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Soul Mantle": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Soul Tether": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Spire of Ire": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Spiteful Floret": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Splinter of Lorrata": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Splinterheart": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Split Personality": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Starkonja's Head": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Stone of Lazhwar": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Strugglescream": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Sunsplinter": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Surefooted Sigil": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Surge of the Tide": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Svalinn": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Sylvan's Effigy": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Tabula Rasa": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Tangletongue": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Taryn's Shiver": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Temporalis": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Tetzlapokal's Desire": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Adorned": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Anvil": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Auspex": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Barrow Dweller": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Black Cat": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Black Doubt": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Black Insignia": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Blood Thorn": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Brass Dome": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Bringer of Rain": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Burden of Shadows": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Burrower": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Coming Calamity": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Covenant": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Dancing Dervish": {
+    "tier": "retired",
+    "rawTier": "Retired",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Dancing Mirage": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Dark Defiler": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Deepest Tower": {
+    "tier": "retired",
+    "rawTier": "Retired",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Devouring Diadem": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Empty Roar": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Eternal Spark": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Everlasting Gaze": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Fall of the Axe": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Fallen Formation": {
+    "tier": "retired",
+    "rawTier": "Retired",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Flesh Poppet": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Gnashing Sash": {
+    "tier": "boss",
+    "rawTier": "Boss",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Grand Project": {
+    "tier": "retired",
+    "rawTier": "Retired",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Hammer of Faith": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Hollow Mask": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Infinite Pursuit": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Knight-errant": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Last Lament": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Lethal Draw": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Mutable Star": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Ordained": {
+    "tier": "pinnacle",
+    "rawTier": "Pinnacle",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Pandemonius": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Prisoner's Manacles": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Rat Cage": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Raven's Flock": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Road Warrior": {
+    "tier": "retired",
+    "rawTier": "Retired",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Searing Touch": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Sentry": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Smiling Knight": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Sunken Vessel": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Surrender": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Taming": {
+    "tier": "recipe",
+    "rawTier": "Recipe",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Three Dragons": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Unborn Lich": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Unleashed": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Vertex": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Vile Knight": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Wailing Wall": {
+    "tier": "retired",
+    "rawTier": "Retired",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Whispering Ice": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "The Wicked Quill": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Thief's Torment": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Threaded Light": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Thrillsteel": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Thunderfist": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Thunderstep": {
+    "tier": "retired",
+    "rawTier": "Retired",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Tidebreaker": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Titanrot Cataphract": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Trampletoe": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Treefingers": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Trenchtimbre": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Trephina": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Twisted Empyrean": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Tyranny's Grip": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Uhtred's Chalice": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Umbilicus Immortalis": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Undying Hate": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Unforeseen Consequences": {
+    "tier": "retired",
+    "rawTier": "Retired",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Ungil's Harmony": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Valako's Roar": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Valako's Vice": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Veil of the Night": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Veilpiercer": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Venopuncture": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Ventor's Gamble": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Vestige of Darkness": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Vigilant View": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Vis Mortis": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Visage of Ayah": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Visions of Paradise": {
+    "tier": "retired",
+    "rawTier": "Retired",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Voices": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Voll's Protector": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Voltaxic Rift": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Waistgate": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Wake of Destruction": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Wandering Reliquary": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Wanderlust": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Waveshaper": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Whisper of the Brotherhood": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Widow's Reign": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Widowhail": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Window to Paradise": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Windscream": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Wings of Caelyn": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Winter's Bite": {
+    "tier": "retired",
+    "rawTier": "Retired",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Wondertrap": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Wraeclast Besieged": {
+    "tier": "retired",
+    "rawTier": "Retired",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Wulfsbane": {
+    "tier": "3",
+    "rawTier": "T3",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Wylund's Stake": {
+    "tier": "retired",
+    "rawTier": "Retired",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Xoph's Blood": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Yoke of Suffering": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Yriel's Fostering": {
+    "tier": "2",
+    "rawTier": "T2",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Zaida's Longevity": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Zerphi's Genesis": {
+    "tier": "league",
+    "rawTier": "League",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
+  },
+  "Zerphi's Serape": {
+    "tier": "1",
+    "rawTier": "T1",
+    "itemClass": null,
+    "baseType": null,
+    "flavour": ""
   }
 }

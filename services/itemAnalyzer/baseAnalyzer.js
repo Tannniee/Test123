@@ -49,6 +49,25 @@ class BaseAnalyzer {
       int: baseInfo.requiredInt || 0
     } : reqs;
 
+    // Compute base defences percentile
+    let baseDefencePercentile = null;
+    if (baseInfo && baseInfo.defences && canonicalItem.properties) {
+      const props = canonicalItem.properties;
+      const bDefs = baseInfo.defences;
+      const percentiles = [];
+      for (const defKey of ['armour', 'evasion', 'energyShield', 'ward']) {
+        const itemVal = props[defKey] || 0;
+        const bDef = bDefs[defKey];
+        if (itemVal > 0 && bDef && bDef.max > 0 && bDef.max > bDef.min) {
+          const pct = Math.min(1.0, Math.max(0, (itemVal - bDef.min) / (bDef.max - bDef.min)));
+          percentiles.push(pct);
+        }
+      }
+      if (percentiles.length > 0) {
+        baseDefencePercentile = parseFloat((percentiles.reduce((a, b) => a + b, 0) / percentiles.length).toFixed(2));
+      }
+    }
+
     return {
       baseType,
       itemClass: baseInfo ? baseInfo.itemClass : (canonicalItem.identity ? canonicalItem.identity.itemClass : null),
@@ -59,6 +78,7 @@ class BaseAnalyzer {
         base: baseReqs
       },
       baseDefences: baseInfo && baseInfo.defences ? baseInfo.defences : null,
+      baseDefencePercentile,
       baseWeapon: baseInfo && baseInfo.weapon ? baseInfo.weapon : null,
       affixCapacity: {
         rarity,

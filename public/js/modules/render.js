@@ -534,10 +534,14 @@ export const Render = {
               <button class="star-btn ${isFav ? 'active' : ''}" data-action="toggle-fav" data-id="${this.escapeHtml(item.id)}" title="${isFav ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích'}">★</button>
               <img src="${this.escapeHtml(iconUrl)}" alt="" class="table-item-icon" loading="lazy" data-action="open-inspect">
               <div class="table-name-wrap">
-                <span class="item-link-name ${rarityClass}" data-action="open-inspect" data-id="${this.escapeHtml(item.id)}">${this.escapeHtml(item.name)}</span>
-                ${subtitle ? `<span class="item-subtext">${this.escapeHtml(subtitle)}</span>` : ''}
-                ${showCategoryBadge ? `<span class="table-cat-badge">${this.escapeHtml(item.category || item.sourceType)}</span>` : ''}
-                <a href="${wikiUrl}" target="_blank" rel="noopener" class="wiki-badge" title="Tra cứu PoE Wiki">WIKI ↗</a>
+                <div class="table-name-primary-row">
+                  <span class="item-link-name ${rarityClass}" data-action="open-inspect" data-id="${this.escapeHtml(item.id)}">${this.escapeHtml(item.name)}</span>
+                </div>
+                <div class="table-name-secondary-row">
+                  ${subtitle ? `<span class="item-subtext">${this.escapeHtml(subtitle)}</span>` : ''}
+                  ${showCategoryBadge ? `<span class="table-cat-badge">${this.escapeHtml(item.category || item.sourceType)}</span>` : ''}
+                  <a href="${wikiUrl}" target="_blank" rel="noopener" class="wiki-badge" title="Tra cứu PoE Wiki">WIKI ↗</a>
+                </div>
               </div>
             </div>
           </td>

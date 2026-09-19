@@ -74,8 +74,8 @@ function startServer(options = {}) {
       const url = `http://${actualHost}:${actualPort}`;
 
       console.log('=======================================================');
-      console.log('  POESTASH Local Price Companion v2.0.1');
-      console.log(`  Loopback Address : http://${actualHost}:${actualPort}`);
+      console.log('  POESTASH Local Price Companion v2.0.2');
+      console.log(`  Loopback Address : ${url}`);
       console.log(`  Process ID (PID) : ${process.pid}`);
       console.log(`  Security Mode    : Localhost Loopback Only (${actualHost})`);
       console.log('=======================================================');

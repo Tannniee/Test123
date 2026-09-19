@@ -1141,16 +1141,55 @@ select:focus {
 
 .table-name-wrap {
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.table-name-primary-row {
+  display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
+  flex-wrap: wrap;
+  line-height: 1.25;
+  min-width: 0;
+}
+
+.table-name-secondary-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.table-cat-badge {
+  font-size: 0.68rem;
+  padding: 1px 5px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
+  color: #94a3b8;
+  letter-spacing: 0.3px;
+}
+
+.item-subtext {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  font-family: var(--font-mono);
 }
 
 .item-link-name {
   color: #fff;
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: color 0.15s ease;
+  word-break: break-word;
+  line-height: 1.25;
 }
 .item-link-name:hover {
   color: var(--text-gold);
@@ -2088,6 +2127,29 @@ select:focus {
     background: #121826 !important;
   }
 
+  .bridge-status-wrap {
+    display: none !important;
+  }
+
+  .btn-item-inspector {
+    height: 28px !important;
+    padding: 0 8px !important;
+    font-size: 0.72rem !important;
+    gap: 4px !important;
+    flex-shrink: 0 !important;
+  }
+
+  @media (max-width: 440px) {
+    .btn-item-inspector span {
+      display: none !important;
+    }
+    .btn-item-inspector {
+      width: 28px !important;
+      padding: 0 !important;
+      justify-content: center !important;
+    }
+  }
+
   /* Row 2: Search Input (Full width, sleek) */
   .top-search-wrap {
     order: 2 !important;
@@ -2367,58 +2429,245 @@ select:focus {
     font-size: 0.7rem !important;
   }
 
-  /* 5. Table View in Dock Mode */
+  /* 5. Modern High-Density 2-Row Layout in Dock / Narrow Mode */
   .ninja-table-container {
     border-radius: var(--radius-sm) !important;
-    min-height: 300px !important;
+    min-height: 200px !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
   }
 
-  .ninja-table th,
-  .ninja-table td {
-    padding: 5px 6px !important;
-    font-size: 0.76rem !important;
+  .ninja-table {
+    display: block !important;
+    width: 100% !important;
+    border: none !important;
+    background: transparent !important;
   }
 
-  .ninja-table th.col-volume,
-  .ninja-table td.col-volume,
-  .ninja-table th.col-popular,
-  .ninja-table td.col-popular {
+  .ninja-table thead {
     display: none !important;
   }
 
-  .ninja-table th.col-name,
-  .ninja-table td.col-name {
-    width: 50% !important;
-    min-width: 130px !important;
+  .ninja-table tbody {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+    width: 100% !important;
   }
 
-  .ninja-table th.col-val,
-  .ninja-table td.col-val {
-    width: 26% !important;
-    min-width: 75px !important;
+  /* Two-row companion card row */
+  tr.item-table-row {
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    grid-template-rows: auto auto !important;
+    gap: 6px 8px !important;
+    padding: 8px 10px !important;
+    margin: 0 !important;
+    background: #0d111c !important;
+    border: 1px solid rgba(242, 169, 59, 0.18) !important;
+    border-radius: 6px !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease !important;
   }
 
-  .ninja-table th.col-trend,
-  .ninja-table td.col-trend {
-    width: 14% !important;
-    min-width: 48px !important;
+  tr.item-table-row:hover {
+    border-color: rgba(242, 169, 59, 0.45) !important;
+    background: #131826 !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6) !important;
   }
 
-  .ninja-table th.col-actions,
-  .ninja-table td.col-actions {
-    width: 10% !important;
-    min-width: 38px !important;
+  tr.item-table-row.row-comparing {
+    border-color: #38bdf8 !important;
+    background: rgba(56, 189, 248, 0.08) !important;
   }
 
-  .table-item-thumb {
-    width: 24px !important;
-    height: 24px !important;
+  /* Row 1, Column 1: Item Identity (Star + Icon + 2-Line Name & Badges) */
+  tr.item-table-row td.col-name {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    display: flex !important;
+    align-items: flex-start !important;
+  }
+
+  .table-name-cell {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .table-name-cell .star-btn {
+    padding: 2px 0 !important;
+    margin-top: 1px !important;
+    font-size: 0.95rem !important;
+    flex-shrink: 0 !important;
+  }
+
+  .table-item-icon {
+    width: 30px !important;
+    height: 30px !important;
+    flex-shrink: 0 !important;
+    margin-top: 1px !important;
+  }
+
+  .table-name-wrap {
+    flex: 1 !important;
+    min-width: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+  }
+
+  .table-name-primary-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    flex-wrap: wrap !important;
+  }
+
+  .item-link-name {
+    font-size: 0.86rem !important;
+    font-weight: 600 !important;
+    line-height: 1.25 !important;
+    word-break: break-word !important;
+    white-space: normal !important;
+  }
+
+  .table-name-secondary-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    flex-wrap: wrap !important;
+    margin-top: 1px !important;
+  }
+
+  .item-subtext {
+    font-size: 0.68rem !important;
+    color: #94a3b8 !important;
+  }
+
+  .table-cat-badge {
+    font-size: 0.64rem !important;
+    padding: 1px 4px !important;
+  }
+
+  .wiki-badge {
+    font-size: 0.62rem !important;
+    padding: 1px 4px !important;
+  }
+
+  /* Row 1, Column 2: Action Buttons */
+  tr.item-table-row td.col-actions {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    width: auto !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    justify-self: end !important;
+    align-self: start !important;
+  }
+
+  .table-actions-group {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
   }
 
   .action-quick-btn {
-    width: 22px !important;
-    height: 22px !important;
-    font-size: 0.7rem !important;
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 0.72rem !important;
+    border-radius: 4px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+
+  /* Row 2, Column 1: Value & Exchange Details */
+  tr.item-table-row td.col-val {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    text-align: left !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    gap: 1px !important;
+  }
+
+  tr.item-table-row td.col-val .exchange-pair {
+    justify-content: flex-start !important;
+    font-size: 0.82rem !important;
+    gap: 4px !important;
+  }
+
+  tr.item-table-row td.col-val .val-sub {
+    text-align: left !important;
+    font-size: 0.68rem !important;
+  }
+
+  /* Row 2, Column 2: Trend & Sparkline */
+  tr.item-table-row td.col-trend {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    width: auto !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    justify-self: end !important;
+    align-self: center !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  .trend-cell-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
+
+  .trend-cell-wrapper .sparkline-svg {
+    width: 44px !important;
+    height: 18px !important;
+  }
+
+  .trend-badge {
+    font-size: 0.68rem !important;
+    padding: 2px 5px !important;
+    font-weight: 700 !important;
+    border-radius: 4px !important;
+  }
+
+  /* Hidden columns in dock mode */
+  tr.item-table-row td.col-volume,
+  tr.item-table-row td.col-popular {
+    display: none !important;
+  }
+
+  /* Full-width empty state when search returns 0 items */
+  tr.item-table-row:has(.empty-table-cell),
+  tr:has(.empty-table-cell) {
+    display: block !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+  }
+
+  td.empty-table-cell {
+    display: block !important;
+    width: 100% !important;
+    padding: 24px 12px !important;
   }
 
   /* 6. Sidebar Drawer Close Button & Layout */
@@ -4590,33 +4839,64 @@ select:focus {
   display: flex;
   align-items: stretch;
   background: #000000;
-  border: 1px solid #2a313d;
-  height: 26px;
-  margin-bottom: 4px;
+  border: 1px solid #1f2228;
+  border-bottom: none;
+  height: 27px;
+  margin-bottom: 0;
   overflow: hidden;
   box-sizing: border-box;
+}
+
+.exile-base-row.no-defences {
+  justify-content: flex-end !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+.exile-base-row.no-defences .exile-base-cell {
+  border: 1px solid #1f2228 !important;
+  background: #000000 !important;
+}
+
+.exile-base-row.no-defences .exile-base-cell.exile-base-title {
+  border: none !important;
+  background: transparent !important;
+  padding-right: 6px !important;
+  padding-left: 0 !important;
 }
 
 .exile-base-cell {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 0 6px;
-  background: #0a0c10;
-  border-right: 1px solid #1f2530;
-  font-size: 0.76rem;
+  gap: 5px;
+  padding: 0 8px;
+  background: #000000;
+  border-right: 1px solid #1f2228;
+  font-size: 0.82rem;
   font-weight: 700;
-  color: #e2e8f0;
+  color: #ffffff;
   white-space: nowrap;
+  box-sizing: border-box;
 }
 
 .exile-base-cell.exile-base-title {
   background: #000000;
-  font-weight: 900;
+  font-weight: 800;
   color: #ffffff;
-  padding: 0 8px;
-  letter-spacing: 0.5px;
+  padding: 0 12px;
+  text-transform: lowercase;
+  font-size: 0.86rem;
+  letter-spacing: 0.3px;
+}
+
+.exile-base-cell .exile-badge-green {
+  background: #00ff38 !important;
+  color: #000000 !important;
+  font-weight: 900;
+  padding: 1px 5px;
+  border-radius: 0;
+  font-size: 0.82rem;
 }
 
 .exile-base-cell.cell-highlight {
@@ -4624,64 +4904,101 @@ select:focus {
 }
 
 .exile-base-icon {
-  width: 18px;
-  height: 18px;
+  width: 17px;
+  height: 17px;
   object-fit: contain;
   display: block;
 }
 
 .exile-ilvl-cell .ilvl-high {
-  color: #facc15;
-  font-weight: 800;
+  color: #ffffff;
+  font-weight: 700;
 }
 
 /* 3. Exile-UI Affix List & Rows (Authentic Exile-UI Image 1 & Image 2) */
+.exile-affix-container {
+  display: flex;
+  flex-direction: column;
+  background: #000000;
+  border: 1px solid #1f2228;
+  box-sizing: border-box;
+  margin-top: 4px;
+}
+
 .exile-affix-list {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  background: #000000;
+}
+
+.exile-section-divider {
+  height: 2px !important;
+  background: #ffffff !important;
+  margin: 0 !important;
+  border: none !important;
+  opacity: 1 !important;
+  box-shadow: 0 0 3px rgba(255, 255, 255, 0.8) !important;
 }
 
 .exile-mod-row {
   display: flex;
   align-items: stretch;
   background: #000000;
-  border: 1px solid #1e2430;
-  height: 28px;
+  border-bottom: 1px solid #1c2028;
+  min-height: 27px;
+  height: auto;
   overflow: hidden;
   box-sizing: border-box;
 }
 
-/* Horizontal Progress Roll Bar */
-.exile-mod-bar {
+.exile-mod-row:last-child {
+  border-bottom: none;
+}
+
+.exile-mod-row.mod-speed-tint {
+  background: #383b64 !important;
+}
+
+.exile-mod-row.mod-speed-tint .exile-mod-bar {
+  background: #383b64 !important;
+}
+
+/* Horizontal Progress Roll Bar - override any legacy .roll-track 6px capsule constraints */
+.exile-mod-bar.roll-track {
   flex: 1;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #000000;
-  overflow: hidden;
-  min-width: 0;
+  min-height: 27px !important;
+  height: auto !important;
+  align-self: stretch !important;
+  border-radius: 0 !important;
+  background: #000000 !important;
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
 }
 
-.exile-mod-fill {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 1;
-  pointer-events: none;
-  transition: width 0.3s ease;
+.exile-mod-fill.roll-bar-fill {
+  position: absolute !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  height: 100% !important;
+  border-radius: 0 !important;
+  background: #4c4c4c !important;
+  z-index: 1 !important;
+  pointer-events: none !important;
+  transition: width 0.25s ease !important;
+  box-shadow: none !important;
 }
 
-/* Authentic Exile-UI Roll Fills:
-   - Unique: #994C00 (Amber/Brown)
-   - Rare / Non-unique: #404040 (Dark Slate Gray)
-   - Implicit: #303060 (Purple-tinted Navy)
-   - Crafted: #1e3a5f (Blue-tinted Navy)
-*/
 .exile-mod-fill.fill-rare {
-  background: #404040 !important;
+  background: #4c4c4c !important;
 }
 
 .exile-mod-fill.fill-unique {
@@ -4689,146 +5006,182 @@ select:focus {
 }
 
 .exile-mod-fill.fill-implicit {
-  background: #303060 !important;
+  background: #282846 !important;
 }
 
 .exile-mod-fill.fill-crafted {
   background: #1e3a5f !important;
 }
 
-/* Centered Uppercase Mod Text */
+/* Centered Lowercase Mod Text - full height flex centering with clean 2-line wrapping */
 .exile-mod-text {
-  position: relative;
-  z-index: 2;
-  width: 100%;
-  text-align: center;
-  font-size: 0.77rem;
-  font-weight: 700;
-  color: #ffffff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95), 0 0 1px rgba(0, 0, 0, 0.9);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  padding: 0 6px;
+  position: relative !important;
+  z-index: 2 !important;
+  width: 100% !important;
+  min-height: 27px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  font-size: 0.84rem !important;
+  font-weight: 600 !important;
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95), 0 0 2px #000000 !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+  text-transform: lowercase !important;
+  letter-spacing: 0.2px !important;
+  padding: 2px 8px !important;
+  margin: 0 !important;
+  line-height: 1.15 !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  box-sizing: border-box !important;
 }
 
 /* 4. Indicator Accent Strip */
 .exile-mod-indicator {
-  width: 4px;
-  min-width: 4px;
-  height: 100%;
-  border-left: 1px solid #000000;
+  width: 2px;
+  min-width: 2px;
+  min-height: 27px;
+  height: auto;
+  align-self: stretch;
   background: #000000;
   box-sizing: border-box;
 }
 
 .exile-mod-indicator.indicator-good {
-  background: #00FF00 !important;
+  background: #00b050 !important;
 }
 
-/* 5. Tier Box (26px Square) */
-.exile-tier-box {
-  width: 26px;
-  min-width: 26px;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.76rem;
-  font-weight: 800;
-  border-left: 1px solid #000000;
-  box-sizing: border-box;
+/* 5. Tier Box (Solid square, full height matching Image 2) */
+.exile-tier-box.tier-badge {
+  width: 26px !important;
+  min-width: 26px !important;
+  min-height: 27px !important;
+  height: auto !important;
+  align-self: stretch !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 0.95rem !important;
+  font-weight: 800 !important;
+  border-left: 1px solid #1a1a1e !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  letter-spacing: 0 !important;
 }
 
-/* Authentic Exile-UI Tier Colors */
+/* Authentic Exile-UI Tier Colors matching All 5 Screenshots */
 .exile-tier-box.tier-t1 {
-  background: #00FF00 !important;
+  background: #00ff38 !important;
   color: #000000 !important;
-}
-
-.exile-tier-box.tier-t1-white {
-  background: #ffffff !important;
-  color: #dc2626 !important;
-  font-weight: 900;
+  font-weight: 800;
 }
 
 .exile-tier-box.tier-t2 {
-  background: #006600 !important;
-  color: #ffffff !important;
+  background: #00b050 !important;
+  color: #000000 !important;
+  font-weight: 800;
 }
 
 .exile-tier-box.tier-t3 {
-  background: #FFFF00 !important;
+  background: #ffff00 !important;
   color: #000000 !important;
+  font-weight: 800;
 }
 
-.exile-tier-box.tier-t4 {
-  background: #FF8000 !important;
+.exile-tier-box.tier-t4,
+.exile-tier-box.tier-eldritch-4 {
+  background: #ff9800 !important;
   color: #000000 !important;
+  font-weight: 800;
+}
+
+.exile-tier-box.tier-eldritch-5 {
+  background: #ffd700 !important;
+  color: #000000 !important;
+  font-weight: 800;
 }
 
 .exile-tier-box.tier-t5 {
-  background: #FF3333 !important;
-  color: #ffffff !important;
+  background: #ef4444 !important;
+  color: #000000 !important;
+  font-weight: 800;
 }
 
 .exile-tier-box.tier-t6 {
-  background: #990000 !important;
-  color: #ffffff !important;
+  background: #991b1b !important;
+  color: #000000 !important;
+  font-weight: 800;
 }
 
 .exile-tier-box.tier-frac {
-  background: #00FFFF !important;
+  background: #00ffff !important;
   color: #000000 !important;
+  font-weight: 800;
+  font-size: 0.95rem !important;
 }
 
 .exile-tier-box.tier-essence {
-  background: #00FFFF !important;
-  color: #000000 !important;
-  font-size: 0.68rem;
+  background: #000000 !important;
+  color: #38bdf8 !important;
+  font-size: 0.95rem !important;
+  font-weight: 800;
 }
 
 .exile-tier-box.tier-craft {
-  background: #3399FF !important;
-  color: #ffffff !important;
-  font-size: 0.65rem;
+  background: #38bdf8 !important;
+  color: #000000 !important;
+  font-size: 0.95rem !important;
+  font-weight: 800;
 }
 
 .exile-tier-box.tier-imp {
   background: #7c3aed !important;
   color: #ffffff !important;
+  font-weight: 800;
 }
 
+.exile-tier-box.tier-empty,
 .exile-tier-box.tier-tnone {
-  background: #1e2430 !important;
-  color: #94a3b8 !important;
+  background: #000000 !important;
+  color: transparent !important;
 }
 
 /* 6. Icon Box (26px Square with Exile-UI PNG Icon) */
 .exile-icon-box {
-  width: 26px;
-  min-width: 26px;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #000000;
-  border-left: 1px solid #111111;
-  box-sizing: border-box;
+  width: 26px !important;
+  min-width: 26px !important;
+  min-height: 27px !important;
+  height: auto !important;
+  align-self: stretch !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #000000 !important;
+  border-left: 1px solid #1a1a1e !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.exile-icon-box.exile-icon-empty {
+  background: #000000 !important;
 }
 
 .exile-mod-icon {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   object-fit: contain;
   display: block;
 }
 
 /* Mod Row Variants */
 .exile-mod-row.mod-implicit .exile-mod-bar {
-  background: #120b22;
+  background: #000000 !important;
 }
 
 .exile-mod-row.mod-crafted .exile-mod-text {
@@ -4837,6 +5190,49 @@ select:focus {
 
 .exile-mod-row.mod-fractured {
   border-color: #d97706 !important;
+}
+
+/* 7. Exile-UI Compound Mod Rows (Multi-line Hybrid Affixes spanning 1 merged Tier & Icon Box - Image 1) */
+.exile-mod-row.exile-compound-row {
+  height: auto !important;
+  min-height: 54px;
+}
+
+.exile-compound-bars {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+}
+
+.exile-compound-bars .exile-mod-bar.roll-track {
+  height: 27px !important;
+  min-height: 27px !important;
+  max-height: 27px !important;
+  border-bottom: 1px solid #1c2028;
+}
+
+.exile-compound-bars .exile-mod-bar.roll-track:last-child {
+  border-bottom: none;
+}
+
+.exile-compound-row .exile-tier-box.tier-badge {
+  height: auto !important;
+  min-height: 54px;
+  align-self: stretch;
+}
+
+.exile-compound-row .exile-icon-box {
+  height: auto !important;
+  min-height: 54px;
+  align-self: stretch;
+}
+
+.exile-compound-row .exile-mod-indicator {
+  height: auto !important;
+  min-height: 54px;
+  align-self: stretch;
 }
 
 /* 5. Exile-UI Summary Footer */
@@ -4911,5 +5307,65 @@ select:focus {
   background: #475569;
   box-shadow: 0 0 3px rgba(100, 116, 139, 0.5);
 }
+
+/* Responsive Dock / Narrow Companion Optimizations for Item Inspector */
+@media (max-width: 600px) {
+  .modal-card-inspector {
+    width: 98vw !important;
+    max-width: 100% !important;
+    margin: 4px auto !important;
+    padding: 8px 10px !important;
+  }
+
+  .exile-header-bar {
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  .exile-item-title-group {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 2px !important;
+    width: 100% !important;
+  }
+
+  .exile-item-name {
+    font-size: 0.95rem !important;
+    word-break: break-word !important;
+    line-height: 1.25 !important;
+  }
+
+  .exile-base-row {
+    height: 25px !important;
+  }
+
+  .exile-base-cell {
+    padding: 0 5px !important;
+    font-size: 0.76rem !important;
+  }
+
+  .exile-mod-row {
+    min-height: 28px !important;
+    height: auto !important;
+  }
+
+  .exile-mod-text {
+    font-size: 0.78rem !important;
+    padding: 3px 6px !important;
+    line-height: 1.2 !important;
+  }
+
+  .exile-tier-box.tier-badge {
+    width: 24px !important;
+    min-width: 24px !important;
+    font-size: 0.88rem !important;
+  }
+
+  .exile-icon-box {
+    width: 24px !important;
+    min-width: 24px !important;
+  }
+}
+
 
 

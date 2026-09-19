@@ -9,7 +9,7 @@ const POE1_ROTATION_INTERVAL_MS = 5 * 60 * 1000;  // 5 minutes for PoE 1 Rotatio
 const POE2_PRIORITY_INTERVAL_MS = 30 * 60 * 1000; // 30 minutes for PoE 2 Priority sync
 const POE2_ROTATION_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes for PoE 2 Rotational batches
 const LEAGUE_REFRESH_INTERVAL_MS = 60 * 60 * 1000; // 1 hour for League list refresh
-const USER_AGENT = 'PoE-QuickPriceChecker/2.0.1 (Local desktop tool)';
+const USER_AGENT = 'PoE-QuickPriceChecker/2.0.2 (Local desktop tool)';
 
 class CacheManager {
   constructor(options = {}) {

@@ -20,6 +20,9 @@ class ExileUiDataService {
     let bases = {};
     let mods = [];
     let dropTiers = {};
+    const classBests = {};
+    const templateIndex = new Map();
+    const affixIndex = new Map();
 
     try {
       const basesPath = path.join(gameDir, 'item-bases.json');
@@ -38,6 +41,21 @@ class ExileUiDataService {
         if (targetGame === 'poe1') {
           const classArr = rawExileBases._classes || [];
           const baseMap = rawExileBases._bases || {};
+
+          // Extract class bests for archetype defense and weapon scaling
+          for (const [key, val] of Object.entries(rawExileBases)) {
+            if (!key.startsWith('_') && typeof val === 'object' && val !== null) {
+              classBests[key] = {};
+              for (const [subKey, subVal] of Object.entries(val)) {
+                if (subVal && typeof subVal === 'object' && subVal._best !== undefined) {
+                  classBests[key][subKey] = subVal._best;
+                } else if (subKey === '_best') {
+                  classBests[key]._best = subVal;
+                }
+              }
+            }
+          }
+
           for (const [baseName, classIdStr] of Object.entries(baseMap)) {
             if (!bases[baseName]) {
               const classId = parseInt(classIdStr, 10) - 1;
@@ -46,37 +64,50 @@ class ExileUiDataService {
               let defences = null;
               let weapon = null;
               let tags = [];
-              if (catGroup) {
-                for (const [subCat, items] of Object.entries(catGroup)) {
-                  if (items && items[baseName]) {
-                    const itemData = items[baseName];
-                    tags = itemData._tags || [];
-                    if (itemData.Armour || itemData.Evasion || itemData.Energy || itemData.Ward) {
-                      const parseRange = (valStr) => {
-                        if (!valStr) return { min: 0, max: 0 };
-                        const parts = String(valStr).split('-');
-                        return { min: parseFloat(parts[0]) || 0, max: parseFloat(parts[1] || parts[0]) || 0 };
-                      };
-                      defences = {
-                        armour: parseRange(itemData.Armour),
-                        evasion: parseRange(itemData.Evasion),
-                        energyShield: parseRange(itemData.Energy),
-                        ward: parseRange(itemData.Ward)
-                      };
+              let subTypeName = null;
+
+              if (catGroup && typeof catGroup === 'object') {
+                // Check direct item first (e.g. Amulets['Agate Amulet'], Belts['Heavy Belt'])
+                let itemData = catGroup[baseName];
+                if (!itemData) {
+                  // Check nested subcategories (e.g. Boots['Armour/Energy']['Paladin Boots'])
+                  for (const [subCat, items] of Object.entries(catGroup)) {
+                    if (items && typeof items === 'object' && items[baseName]) {
+                      itemData = items[baseName];
+                      subTypeName = subCat;
+                      break;
                     }
-                    if (itemData.phys || itemData.speed || itemData.crit) {
-                      weapon = {
-                        physical: parseFloat(itemData.phys) || 0,
-                        speed: parseFloat(itemData.speed) || 0,
-                        crit: parseFloat(itemData.crit) || 0
-                      };
-                    }
-                    break;
+                  }
+                }
+
+                if (itemData) {
+                  tags = itemData._tags || [];
+                  if (itemData.Armour || itemData.Evasion || itemData.Energy || itemData.Ward) {
+                    const parseRange = (valStr) => {
+                      if (!valStr) return { min: 0, max: 0 };
+                      const parts = String(valStr).split('-');
+                      return { min: parseFloat(parts[0]) || 0, max: parseFloat(parts[1] || parts[0]) || 0 };
+                    };
+                    defences = {
+                      armour: parseRange(itemData.Armour),
+                      evasion: parseRange(itemData.Evasion),
+                      energyShield: parseRange(itemData.Energy),
+                      ward: parseRange(itemData.Ward)
+                    };
+                  }
+                  if (itemData.phys || itemData.speed || itemData.crit) {
+                    weapon = {
+                      physical: parseFloat(itemData.phys) || 0,
+                      speed: parseFloat(itemData.speed) || 0,
+                      crit: parseFloat(itemData.crit) || 0
+                    };
                   }
                 }
               }
+
               bases[baseName] = {
                 itemClass: className,
+                subType: subTypeName,
                 defences,
                 weapon,
                 tags
@@ -110,13 +141,97 @@ class ExileUiDataService {
       console.warn(`[ExileUiDataService] Failed to load exile-bases for ${targetGame}:`, err.message);
     }
 
+    // 1. Load curated mods from item-mods.json (maintains primary tier structures)
     try {
       const modsPath = path.join(gameDir, 'item-mods.json');
       if (fs.existsSync(modsPath)) {
-        mods = JSON.parse(fs.readFileSync(modsPath, 'utf8'));
+        const seedMods = JSON.parse(fs.readFileSync(modsPath, 'utf8'));
+        if (Array.isArray(seedMods)) {
+          for (const m of seedMods) {
+            mods.push(m);
+            const key = (m.template || '').toLowerCase().trim();
+            if (!templateIndex.has(key)) templateIndex.set(key, []);
+            templateIndex.get(key).push(m);
+            if (Array.isArray(m.tiers)) {
+              for (const t of m.tiers) {
+                if (t.name) {
+                  const affKey = t.name.toLowerCase().trim();
+                  if (!affixIndex.has(affKey)) affixIndex.set(affKey, []);
+                  affixIndex.get(affKey).push({ ...m, affix: t.name, name: t.name, matchedTier: t });
+                }
+              }
+            }
+          }
+        }
       }
     } catch (err) {
-      console.warn(`[ExileUiDataService] Failed to load mods for ${targetGame}:`, err.message);
+      console.warn(`[ExileUiDataService] Failed to load seed mods for ${targetGame}:`, err.message);
+    }
+
+    // 2. Load complete Exile-UI exile-mods.json (4,272 PoE 1 mods / 1,533 PoE 2 mod families) into affixIndex and exileMods
+    let exileMods = null;
+    try {
+      const exileModsPath = path.join(gameDir, 'exile-mods.json');
+      if (fs.existsSync(exileModsPath)) {
+        exileMods = JSON.parse(fs.readFileSync(exileModsPath, 'utf8'));
+        if (targetGame === 'poe1') {
+          for (const [catName, catItems] of Object.entries(exileMods)) {
+            if (typeof catItems === 'object' && catItems !== null) {
+              for (const [modKey, modData] of Object.entries(catItems)) {
+                if (typeof modData === 'object' && modData !== null) {
+                  const texts = Array.isArray(modData.texts) ? modData.texts : [modData.text || ''];
+                  const entry = {
+                    key: modKey,
+                    category: catName,
+                    affix: modData.affix || '',
+                    name: modData.affix || '',
+                    level: parseInt(modData.level, 10) || 1,
+                    tags: modData.tags || [],
+                    texts,
+                    type: (modData.type || 'prefix').toLowerCase(),
+                    weights: modData.weights || null
+                  };
+                  if (modData.affix) {
+                    const affKey = modData.affix.toLowerCase().trim();
+                    if (!affixIndex.has(affKey)) affixIndex.set(affKey, []);
+                    affixIndex.get(affKey).push(entry);
+                  }
+                }
+              }
+            }
+          }
+        } else {
+          // PoE 2 exile-mods.json format
+          for (const [catName, catItems] of Object.entries(exileMods)) {
+            if (typeof catItems === 'object' && catItems !== null) {
+              for (const [modKey, tierList] of Object.entries(catItems)) {
+                if (Array.isArray(tierList)) {
+                  tierList.forEach((tObj, idx) => {
+                    const calculatedTier = tierList.length - idx;
+                    const entry = {
+                      family: modKey,
+                      category: catName,
+                      tier: calculatedTier,
+                      affix: tObj.name || '',
+                      name: tObj.name || '',
+                      level: tObj.level || 1,
+                      weights: tObj.weights || [],
+                      text: tObj.text || []
+                    };
+                    if (tObj.name) {
+                      const affKey = tObj.name.toLowerCase().trim();
+                      if (!affixIndex.has(affKey)) affixIndex.set(affKey, []);
+                      affixIndex.get(affKey).push(entry);
+                    }
+                  });
+                }
+              }
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.warn(`[ExileUiDataService] Failed to load exile-mods for ${targetGame}:`, err.message);
     }
 
     try {
@@ -128,21 +243,14 @@ class ExileUiDataService {
       console.warn(`[ExileUiDataService] Failed to load drop tiers for ${targetGame}:`, err.message);
     }
 
-    // Build mod lookup index by template
-    const templateIndex = new Map();
-    for (const mod of mods) {
-      const key = (mod.template || '').toLowerCase().trim();
-      if (!templateIndex.has(key)) {
-        templateIndex.set(key, []);
-      }
-      templateIndex.get(key).push(mod);
-    }
-
     this._cache[targetGame] = {
       bases,
       mods,
       dropTiers,
-      templateIndex
+      classBests,
+      templateIndex,
+      affixIndex,
+      exileMods
     };
 
     return this._cache[targetGame];
@@ -164,11 +272,37 @@ class ExileUiDataService {
     return data.mods;
   }
 
+  getExileMods(game = 'poe1') {
+    const data = this._loadGameData(game);
+    return data.exileMods;
+  }
+
   getModCandidates(normalizedTemplate, game = 'poe1') {
     if (!normalizedTemplate) return [];
     const data = this._loadGameData(game);
     const key = normalizedTemplate.toLowerCase().trim();
     return data.templateIndex.get(key) || [];
+  }
+
+  getAffixCandidates(affixName, game = 'poe1') {
+    if (!affixName) return [];
+    const data = this._loadGameData(game);
+    const key = affixName.toLowerCase().trim();
+    return data.affixIndex.get(key) || [];
+  }
+
+  getClassBest(className, subType = null, game = 'poe1') {
+    const data = this._loadGameData(game);
+    if (!data.classBests || !className) return null;
+    const group = data.classBests[className];
+    if (!group) return null;
+    let res = null;
+    if (subType && group[subType] !== undefined) res = group[subType];
+    else res = group._best !== undefined ? group._best : group;
+    if (typeof res === 'string' && !isNaN(Number(res))) {
+      return Number(res);
+    }
+    return res;
   }
 
   getUniqueDropTier(name, game = 'poe1') {

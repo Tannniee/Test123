@@ -70,9 +70,32 @@ class ModMatcher {
 
     // Fast-path: If game explicitly provided affix metadata via Ctrl+Alt+C
     if (desc) {
-      const cand = candidates.find(c => c.type === desc.type) || candidates[0] || null;
+      let cand = candidates.find(c => c.type === desc.type) || candidates[0] || null;
+      if (!cand && desc.name) {
+        const affixCands = exileUiDataService.getAffixCandidates(desc.name, game);
+        if (affixCands.length > 0) {
+          cand = affixCands[0];
+        }
+      }
       let matchedTier = desc.tier;
       let matchedTierName = desc.name;
+
+      // Map Eldritch text tiers to standard numeric tiers (1-6)
+      const eldritchMap = {
+        'perfect': 1,
+        'exquisite': 2,
+        'exceptional': 3,
+        'grand': 4,
+        'greater': 5,
+        'lesser': 6
+      };
+      if (typeof matchedTier === 'string') {
+        const lowTier = matchedTier.toLowerCase();
+        if (eldritchMap[lowTier] !== undefined) {
+          if (!matchedTierName) matchedTierName = matchedTier;
+          matchedTier = eldritchMap[lowTier];
+        }
+      }
 
       if (cand && Array.isArray(cand.tiers) && desc.tier) {
         const tObj = cand.tiers.find(t => t.tier === desc.tier);
@@ -90,7 +113,7 @@ class ModMatcher {
       return {
         text: actualText,
         normalizedTemplate: template,
-        family: cand ? cand.family : (desc.tags && desc.tags[0] ? desc.tags[0].toLowerCase() : null),
+        family: cand ? (cand.family || cand.key) : (desc.tags && desc.tags[0] ? desc.tags[0].toLowerCase() : null),
         type: desc.type || (cand ? cand.type : 'explicit'),
         tier: matchedTier,
         tierName: matchedTierName,
@@ -98,7 +121,9 @@ class ModMatcher {
         isFractured: !!desc.isFractured,
         isCrafted: !!desc.isCrafted,
         isScourge: !!desc.isScourge,
-        icon: this.resolveExileIcon(actualText, desc.tags || [], cand ? cand.family : null),
+        isSecondary: !!desc.isSecondary,
+        primaryAffix: desc.primaryAffix || null,
+        icon: this.resolveExileIcon(actualText, desc.tags || [], cand ? (cand.family || cand.key) : null, desc),
         values: valueRanges,
         confidence: 1.0,
         status: 'matched',
@@ -140,11 +165,22 @@ class ModMatcher {
             }
           }
         }
+      } else if (Array.isArray(cand.ranges) && cand.ranges.length === 2) {
+        const min = cand.ranges[0];
+        const max = cand.ranges[1];
+        if (rawNumericValues.length > 0 && rawNumericValues[0] >= min && rawNumericValues[0] <= max) {
+          matchedTier = {
+            tier: cand.tier,
+            name: cand.name,
+            minLevel: cand.level,
+            ranges: [{ min, max }]
+          };
+        }
       }
 
       matchedCandidates.push({
-        family: cand.family,
-        type: cand.type,
+        family: cand.family || cand.key,
+        type: cand.type || 'explicit',
         tierObj: matchedTier
       });
     }
@@ -226,7 +262,13 @@ class ModMatcher {
     };
   }
 
-  resolveExileIcon(string = '', tags = [], family = null) {
+  resolveExileIcon(string = '', tags = [], family = null, desc = null) {
+    // Check descriptor first for Eldritch implicits
+    if (desc && desc.raw) {
+      if (/searing exarch/i.test(desc.raw)) return 'exarch';
+      if (/eater of worlds/i.test(desc.raw)) return 'eater';
+    }
+
     if (!string || typeof string !== 'string') return null;
     const str = string.toLowerCase();
 

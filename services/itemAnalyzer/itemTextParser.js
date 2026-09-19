@@ -131,8 +131,8 @@ class ItemTextParser {
       }
 
       // Single-flag Section (Corrupted, Mirrored, Unidentified, etc.)
-      const flagFound = this._parseFlags(sec, flags);
-      if (flagFound) {
+      if (this._isPureFlagSection(sec)) {
+        this._parseFlags(sec, flags);
         continue;
       }
 
@@ -361,6 +361,39 @@ class ItemTextParser {
     return { sockets: result, maxLinks };
   }
 
+  static _isPureFlagLine(line) {
+    const trimmed = (line || '').trim();
+    if (!trimmed) return false;
+    return (
+      trimmed === 'Corrupted' ||
+      trimmed === 'Mirrored' ||
+      trimmed === 'Synthesised Item' ||
+      trimmed === 'Synthesised' ||
+      trimmed === 'Fractured Item' ||
+      trimmed === 'Fractured' ||
+      trimmed === 'Unidentified' ||
+      trimmed === 'Veiled' ||
+      trimmed === 'Split' ||
+      trimmed === 'Foil Unique' ||
+      trimmed === 'Relic Unique' ||
+      /^(Searing Exarch|Eater of Worlds|Shaper|Elder|Crusader|Redeemer|Hunter|Warlord)\s+Item$/i.test(trimmed)
+    );
+  }
+
+  static _isPureFlagSection(lines) {
+    if (!Array.isArray(lines) || lines.length === 0) return false;
+    return lines.every(l => this._isPureFlagLine(l));
+  }
+
+  static _isReminderText(line) {
+    const trimmed = (line || '').trim();
+    if (!trimmed.startsWith('(') || !trimmed.endsWith(')')) return false;
+    const inner = trimmed.slice(1, -1).trim();
+    if (/^[+-]?\d+(?:\.\d+)?\s*(?:-|to)\s*[+-]?\d+(?:\.\d+)?$/.test(inner)) return false;
+    if (/^augmented$/i.test(inner) || /^unmet$/i.test(inner)) return false;
+    return /^[A-Z]/.test(inner) && /\b(are|is|from|with|cannot|instead|applies|deals|also|effect|nearby|skills|damage|allies|enemies|charges)\b/i.test(inner);
+  }
+
   static _parseFlags(lines, flags) {
     let matched = false;
     if (!flags.influences) flags.influences = [];
@@ -430,6 +463,7 @@ class ItemTextParser {
 
   static _parseModifiersOrFlavour(lines, modifiers, flavour, flags = {}) {
     let currentDescriptor = null;
+    let descriptorLinesCount = 0;
 
     const isFlavourLine = (l) =>
       l.startsWith('"') ||
@@ -446,13 +480,22 @@ class ItemTextParser {
       const line = lines[idx].trim();
       if (!line) continue;
 
-      // 1. Check for standalone influence flag line
-      if (/^(Searing Exarch|Eater of Worlds|Shaper|Elder|Crusader|Redeemer|Hunter|Warlord)\s+Item$/i.test(line)) {
+      // 1. Check for standalone flag line (influence, corrupted, mirrored, etc.)
+      if (this._isPureFlagLine(line)) {
         this._parseFlags([line], flags);
+        currentDescriptor = null;
+        descriptorLinesCount = 0;
         continue;
       }
 
-      // 2. Check if line is an advanced affix descriptor: { ... }
+      // 2. Filter out PoE mechanic reminder text in parentheses
+      if (this._isReminderText(line)) {
+        // Explanatory reminder text, e.g. "(Elemental Ailments are Ignited...)"
+        // Do NOT add to modifiers, do NOT reset active descriptor
+        continue;
+      }
+
+      // 3. Check if line is an advanced affix descriptor: { ... }
       if (line.startsWith('{') && line.endsWith('}')) {
         const content = line.slice(1, -1).trim();
 
@@ -496,11 +539,12 @@ class ItemTextParser {
           isScourge,
           raw: line
         };
+        descriptorLinesCount = 0;
         // DO NOT add the descriptor line to modifiers list
         continue;
       }
 
-      // 3. Mod text processing
+      // 4. Mod text processing
       let cleanText = line
         .replace(/\s*\(enchant\)$/i, '')
         .replace(/\s*\(implicit\)$/i, '')
@@ -515,8 +559,13 @@ class ItemTextParser {
       }
 
       if (currentDescriptor) {
+        descriptorLinesCount++;
         if (!modifiers.descriptors) modifiers.descriptors = {};
-        modifiers.descriptors[cleanText] = currentDescriptor;
+        modifiers.descriptors[cleanText] = {
+          ...currentDescriptor,
+          isSecondary: descriptorLinesCount > 1,
+          primaryAffix: currentDescriptor.name
+        };
       }
 
       if (line.endsWith('(enchant)') || (currentDescriptor && currentDescriptor.type === 'enchant')) {
@@ -534,9 +583,6 @@ class ItemTextParser {
       } else {
         modifiers.explicits.push(cleanText);
       }
-
-      // Reset descriptor once consumed
-      currentDescriptor = null;
     }
 
     return true;

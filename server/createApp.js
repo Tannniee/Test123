@@ -64,7 +64,7 @@ function createApp(options = {}) {
     res.json({
       status: 'ok',
       service: 'poestash-server',
-      version: '2.0.1',
+      version: '2.0.2',
       pid: process.pid,
       uptime: process.uptime(),
       timestamp: new Date().toISOString()

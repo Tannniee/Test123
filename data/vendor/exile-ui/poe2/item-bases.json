@@ -1,0 +1,64 @@
+{
+  "Expert Sione's Quarterstaff": {
+    "itemClass": "Martial Staves",
+    "dropLevel": 65,
+    "requiredLevel": 65,
+    "requiredDex": 105,
+    "requiredInt": 105,
+    "requiredStr": 0,
+    "weapon": {
+      "damagePhysical": { "min": 45, "max": 80 },
+      "crit": 7.0,
+      "aps": 1.35
+    }
+  },
+  "Advanced Crossbow": {
+    "itemClass": "Crossbows",
+    "dropLevel": 60,
+    "requiredLevel": 60,
+    "requiredDex": 130,
+    "requiredStr": 0,
+    "requiredInt": 0,
+    "weapon": {
+      "damagePhysical": { "min": 30, "max": 70 },
+      "crit": 6.0,
+      "aps": 1.20
+    }
+  },
+  "Expert Hexer's Robe": {
+    "itemClass": "Body Armours",
+    "dropLevel": 68,
+    "requiredLevel": 68,
+    "requiredInt": 140,
+    "requiredStr": 0,
+    "requiredDex": 0,
+    "defences": {
+      "energyShield": { "min": 195, "max": 220 },
+      "armour": { "min": 0, "max": 0 },
+      "evasion": { "min": 0, "max": 0 },
+      "ward": { "min": 0, "max": 0 }
+    }
+  },
+  "Expert Iron Crown": {
+    "itemClass": "Helmets",
+    "dropLevel": 65,
+    "requiredLevel": 65,
+    "requiredStr": 120,
+    "requiredDex": 0,
+    "requiredInt": 0,
+    "defences": {
+      "armour": { "min": 280, "max": 320 },
+      "evasion": { "min": 0, "max": 0 },
+      "energyShield": { "min": 0, "max": 0 },
+      "ward": { "min": 0, "max": 0 }
+    }
+  },
+  "Waystone": {
+    "itemClass": "Waystones",
+    "dropLevel": 68,
+    "requiredLevel": 68,
+    "requiredStr": 0,
+    "requiredDex": 0,
+    "requiredInt": 0
+  }
+}

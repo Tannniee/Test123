@@ -1,0 +1,154 @@
+[
+  {
+    "family": "MaximumLife",
+    "template": "+# to maximum Life",
+    "type": "prefix",
+    "tiers": [
+      { "tier": 1, "name": "Rapturous", "minLevel": 81, "ranges": [{ "min": 80, "max": 89 }] },
+      { "tier": 2, "name": "Virile", "minLevel": 73, "ranges": [{ "min": 70, "max": 79 }] },
+      { "tier": 3, "name": "Athlete's", "minLevel": 64, "ranges": [{ "min": 60, "max": 69 }] },
+      { "tier": 4, "name": "Fecund", "minLevel": 54, "ranges": [{ "min": 50, "max": 59 }] },
+      { "tier": 5, "name": "Vigorous", "minLevel": 44, "ranges": [{ "min": 40, "max": 49 }] },
+      { "tier": 6, "name": "Robust", "minLevel": 34, "ranges": [{ "min": 30, "max": 39 }] },
+      { "tier": 7, "name": "Stout", "minLevel": 24, "ranges": [{ "min": 20, "max": 29 }] },
+      { "tier": 8, "name": "Hale", "minLevel": 11, "ranges": [{ "min": 10, "max": 19 }] }
+    ]
+  },
+  {
+    "family": "FireResistance",
+    "template": "+#% to Fire Resistance",
+    "type": "suffix",
+    "tiers": [
+      { "tier": 1, "name": "of the Magma", "minLevel": 84, "ranges": [{ "min": 46, "max": 48 }] },
+      { "tier": 2, "name": "of the Volcano", "minLevel": 72, "ranges": [{ "min": 42, "max": 45 }] },
+      { "tier": 3, "name": "of the Furnace", "minLevel": 60, "ranges": [{ "min": 36, "max": 41 }] },
+      { "tier": 4, "name": "of the Kiln", "minLevel": 48, "ranges": [{ "min": 30, "max": 35 }] },
+      { "tier": 5, "name": "of the Hearth", "minLevel": 36, "ranges": [{ "min": 24, "max": 29 }] },
+      { "tier": 6, "name": "of the Spark", "minLevel": 24, "ranges": [{ "min": 18, "max": 23 }] },
+      { "tier": 7, "name": "of the Ember", "minLevel": 12, "ranges": [{ "min": 12, "max": 17 }] }
+    ]
+  },
+  {
+    "family": "ColdResistance",
+    "template": "+#% to Cold Resistance",
+    "type": "suffix",
+    "tiers": [
+      { "tier": 1, "name": "of the Ice", "minLevel": 84, "ranges": [{ "min": 46, "max": 48 }] },
+      { "tier": 2, "name": "of the Glacier", "minLevel": 72, "ranges": [{ "min": 42, "max": 45 }] },
+      { "tier": 3, "name": "of the Blizzard", "minLevel": 60, "ranges": [{ "min": 36, "max": 41 }] },
+      { "tier": 4, "name": "of the Polar Bear", "minLevel": 48, "ranges": [{ "min": 30, "max": 35 }] },
+      { "tier": 5, "name": "of the Penguin", "minLevel": 36, "ranges": [{ "min": 24, "max": 29 }] },
+      { "tier": 6, "name": "of the Seal", "minLevel": 24, "ranges": [{ "min": 18, "max": 23 }] }
+    ]
+  },
+  {
+    "family": "LightningResistance",
+    "template": "+#% to Lightning Resistance",
+    "type": "suffix",
+    "tiers": [
+      { "tier": 1, "name": "of the Lightning", "minLevel": 84, "ranges": [{ "min": 46, "max": 48 }] },
+      { "tier": 2, "name": "of the Storm", "minLevel": 72, "ranges": [{ "min": 42, "max": 45 }] },
+      { "tier": 3, "name": "of the Gale", "minLevel": 60, "ranges": [{ "min": 36, "max": 41 }] },
+      { "tier": 4, "name": "of the Cloud", "minLevel": 48, "ranges": [{ "min": 30, "max": 35 }] },
+      { "tier": 5, "name": "of the Squall", "minLevel": 36, "ranges": [{ "min": 24, "max": 29 }] }
+    ]
+  },
+  {
+    "family": "ChaosResistance",
+    "template": "+#% to Chaos Resistance",
+    "type": "suffix",
+    "tiers": [
+      { "tier": 1, "name": "of the Lost", "minLevel": 81, "ranges": [{ "min": 31, "max": 35 }] },
+      { "tier": 2, "name": "of Banishment", "minLevel": 65, "ranges": [{ "min": 26, "max": 30 }] },
+      { "tier": 3, "name": "of Eviction", "minLevel": 50, "ranges": [{ "min": 21, "max": 25 }] },
+      { "tier": 4, "name": "of Expulsion", "minLevel": 35, "ranges": [{ "min": 16, "max": 20 }] }
+    ]
+  },
+  {
+    "family": "MovementSpeed",
+    "template": "#% increased Movement Speed",
+    "type": "prefix",
+    "tiers": [
+      { "tier": 1, "name": "Cheetah's", "minLevel": 86, "ranges": [{ "min": 35, "max": 35 }] },
+      { "tier": 2, "name": "Gazelle's", "minLevel": 55, "ranges": [{ "min": 30, "max": 30 }] },
+      { "tier": 3, "name": "Antelope's", "minLevel": 40, "ranges": [{ "min": 25, "max": 25 }] },
+      { "tier": 4, "name": "Deer's", "minLevel": 20, "ranges": [{ "min": 20, "max": 20 }] },
+      { "tier": 5, "name": "Runner's", "minLevel": 1, "ranges": [{ "min": 10, "max": 15 }] }
+    ]
+  },
+  {
+    "family": "FlatEnergyShield",
+    "template": "+# to maximum Energy Shield",
+    "type": "prefix",
+    "tiers": [
+      { "tier": 1, "name": "Incandescent", "minLevel": 75, "ranges": [{ "min": 49, "max": 55 }] },
+      { "tier": 2, "name": "Resplendent", "minLevel": 69, "ranges": [{ "min": 44, "max": 48 }] },
+      { "tier": 3, "name": "Dazzling", "minLevel": 60, "ranges": [{ "min": 38, "max": 43 }] },
+      { "tier": 4, "name": "Luminescent", "minLevel": 51, "ranges": [{ "min": 31, "max": 37 }] }
+    ]
+  },
+  {
+    "family": "EnergyShieldPercent",
+    "template": "#% increased Energy Shield",
+    "type": "prefix",
+    "tiers": [
+      { "tier": 1, "name": "Unassailable", "minLevel": 78, "ranges": [{ "min": 101, "max": 110 }] },
+      { "tier": 2, "name": "Indomitable", "minLevel": 72, "ranges": [{ "min": 92, "max": 100 }] },
+      { "tier": 3, "name": "Impregnable", "minLevel": 60, "ranges": [{ "min": 80, "max": 91 }] },
+      { "tier": 4, "name": "Sanctified", "minLevel": 44, "ranges": [{ "min": 68, "max": 79 }] }
+    ]
+  },
+  {
+    "family": "PhysicalDamagePercent",
+    "template": "#% increased Physical Damage",
+    "type": "prefix",
+    "tiers": [
+      { "tier": 1, "name": "Merciless", "minLevel": 83, "ranges": [{ "min": 170, "max": 179 }] },
+      { "tier": 2, "name": "Dictator's", "minLevel": 73, "ranges": [{ "min": 150, "max": 169 }] },
+      { "tier": 3, "name": "Dauntless", "minLevel": 62, "ranges": [{ "min": 130, "max": 149 }] },
+      { "tier": 4, "name": "Bloodthirsty", "minLevel": 51, "ranges": [{ "min": 110, "max": 129 }] },
+      { "tier": 5, "name": "Cruel", "minLevel": 40, "ranges": [{ "min": 90, "max": 109 }] }
+    ]
+  },
+  {
+    "family": "FlatPhysicalDamage",
+    "template": "Adds # to # Physical Damage to Attacks",
+    "type": "prefix",
+    "tiers": [
+      { "tier": 1, "name": "Flaring", "minLevel": 77, "ranges": [{ "min": 21, "max": 27 }, { "min": 42, "max": 51 }] },
+      { "tier": 2, "name": "Tempered", "minLevel": 65, "ranges": [{ "min": 17, "max": 22 }, { "min": 35, "max": 41 }] },
+      { "tier": 3, "name": "Razor-sharp", "minLevel": 54, "ranges": [{ "min": 13, "max": 17 }, { "min": 26, "max": 32 }] },
+      { "tier": 4, "name": "Annealed", "minLevel": 42, "ranges": [{ "min": 10, "max": 13 }, { "min": 20, "max": 25 }] }
+    ]
+  },
+  {
+    "family": "AttackSpeed",
+    "template": "#% increased Attack Speed",
+    "type": "suffix",
+    "tiers": [
+      { "tier": 1, "name": "of Celebration", "minLevel": 77, "ranges": [{ "min": 26, "max": 27 }] },
+      { "tier": 2, "name": "of Fame", "minLevel": 60, "ranges": [{ "min": 23, "max": 25 }] },
+      { "tier": 3, "name": "of Infamy", "minLevel": 45, "ranges": [{ "min": 20, "max": 22 }] },
+      { "tier": 4, "name": "of Renown", "minLevel": 30, "ranges": [{ "min": 16, "max": 19 }] }
+    ]
+  },
+  {
+    "family": "CriticalStrikeChance",
+    "template": "#% increased Critical Strike Chance",
+    "type": "suffix",
+    "tiers": [
+      { "tier": 1, "name": "of Incineration", "minLevel": 73, "ranges": [{ "min": 35, "max": 38 }] },
+      { "tier": 2, "name": "of Destruction", "minLevel": 59, "ranges": [{ "min": 30, "max": 34 }] },
+      { "tier": 3, "name": "of Ruin", "minLevel": 44, "ranges": [{ "min": 25, "max": 29 }] }
+    ]
+  },
+  {
+    "family": "HybridArmourAndLife",
+    "template": "+# to Armour, +# to maximum Life",
+    "type": "prefix",
+    "tiers": [
+      { "tier": 1, "name": "Mammoth's", "minLevel": 78, "ranges": [{ "min": 150, "max": 180 }, { "min": 35, "max": 40 }] },
+      { "tier": 2, "name": "Rhino's", "minLevel": 64, "ranges": [{ "min": 110, "max": 149 }, { "min": 28, "max": 34 }] }
+    ]
+  }
+]

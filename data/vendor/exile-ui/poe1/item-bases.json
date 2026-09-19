@@ -1,0 +1,283 @@
+{
+  "Hubris Circlet": {
+    "itemClass": "Helmets",
+    "dropLevel": 69,
+    "requiredLevel": 69,
+    "requiredInt": 154,
+    "requiredStr": 0,
+    "requiredDex": 0,
+    "defences": {
+      "energyShield": { "min": 70, "max": 76 },
+      "armour": { "min": 0, "max": 0 },
+      "evasion": { "min": 0, "max": 0 },
+      "ward": { "min": 0, "max": 0 }
+    }
+  },
+  "Royal Burgonet": {
+    "itemClass": "Helmets",
+    "dropLevel": 65,
+    "requiredLevel": 65,
+    "requiredStr": 148,
+    "requiredDex": 0,
+    "requiredInt": 0,
+    "defences": {
+      "armour": { "min": 350, "max": 394 },
+      "evasion": { "min": 0, "max": 0 },
+      "energyShield": { "min": 0, "max": 0 },
+      "ward": { "min": 0, "max": 0 }
+    }
+  },
+  "Lion Pelt": {
+    "itemClass": "Helmets",
+    "dropLevel": 70,
+    "requiredLevel": 70,
+    "requiredDex": 150,
+    "requiredStr": 0,
+    "requiredInt": 0,
+    "defences": {
+      "evasion": { "min": 340, "max": 384 },
+      "armour": { "min": 0, "max": 0 },
+      "energyShield": { "min": 0, "max": 0 },
+      "ward": { "min": 0, "max": 0 }
+    }
+  },
+  "Bone Helmet": {
+    "itemClass": "Helmets",
+    "dropLevel": 73,
+    "requiredLevel": 73,
+    "requiredStr": 76,
+    "requiredInt": 76,
+    "requiredDex": 0,
+    "defences": {
+      "armour": { "min": 215, "max": 238 },
+      "energyShield": { "min": 44, "max": 49 },
+      "evasion": { "min": 0, "max": 0 },
+      "ward": { "min": 0, "max": 0 }
+    }
+  },
+  "Vaal Regalia": {
+    "itemClass": "Body Armours",
+    "dropLevel": 68,
+    "requiredLevel": 68,
+    "requiredInt": 194,
+    "requiredStr": 0,
+    "requiredDex": 0,
+    "defences": {
+      "energyShield": { "min": 160, "max": 171 },
+      "armour": { "min": 0, "max": 0 },
+      "evasion": { "min": 0, "max": 0 },
+      "ward": { "min": 0, "max": 0 }
+    }
+  },
+  "Astral Plate": {
+    "itemClass": "Body Armours",
+    "dropLevel": 62,
+    "requiredLevel": 62,
+    "requiredStr": 180,
+    "requiredDex": 0,
+    "requiredInt": 0,
+    "defences": {
+      "armour": { "min": 710, "max": 781 },
+      "evasion": { "min": 0, "max": 0 },
+      "energyShield": { "min": 0, "max": 0 },
+      "ward": { "min": 0, "max": 0 }
+    }
+  },
+  "Assassin's Garb": {
+    "itemClass": "Body Armours",
+    "dropLevel": 68,
+    "requiredLevel": 68,
+    "requiredDex": 183,
+    "requiredStr": 0,
+    "requiredInt": 0,
+    "defences": {
+      "evasion": { "min": 700, "max": 770 },
+      "armour": { "min": 0, "max": 0 },
+      "energyShield": { "min": 0, "max": 0 },
+      "ward": { "min": 0, "max": 0 }
+    }
+  },
+  "Sorcerer Gloves": {
+    "itemClass": "Gloves",
+    "dropLevel": 69,
+    "requiredLevel": 69,
+    "requiredInt": 97,
+    "requiredStr": 0,
+    "requiredDex": 0,
+    "defences": {
+      "energyShield": { "min": 45, "max": 51 },
+      "armour": { "min": 0, "max": 0 },
+      "evasion": { "min": 0, "max": 0 },
+      "ward": { "min": 0, "max": 0 }
+    }
+  },
+  "Titan Gauntlets": {
+    "itemClass": "Gloves",
+    "dropLevel": 69,
+    "requiredLevel": 69,
+    "requiredStr": 98,
+    "requiredDex": 0,
+    "requiredInt": 0,
+    "defences": {
+      "armour": { "min": 220, "max": 242 },
+      "evasion": { "min": 0, "max": 0 },
+      "energyShield": { "min": 0, "max": 0 },
+      "ward": { "min": 0, "max": 0 }
+    }
+  },
+  "Sorcerer Boots": {
+    "itemClass": "Boots",
+    "dropLevel": 67,
+    "requiredLevel": 67,
+    "requiredInt": 123,
+    "requiredStr": 0,
+    "requiredDex": 0,
+    "defences": {
+      "energyShield": { "min": 44, "max": 49 },
+      "armour": { "min": 0, "max": 0 },
+      "evasion": { "min": 0, "max": 0 },
+      "ward": { "min": 0, "max": 0 }
+    }
+  },
+  "Titan Greaves": {
+    "itemClass": "Boots",
+    "dropLevel": 68,
+    "requiredLevel": 68,
+    "requiredStr": 120,
+    "requiredDex": 0,
+    "requiredInt": 0,
+    "defences": {
+      "armour": { "min": 230, "max": 254 },
+      "evasion": { "min": 0, "max": 0 },
+      "energyShield": { "min": 0, "max": 0 },
+      "ward": { "min": 0, "max": 0 }
+    }
+  },
+  "Titanium Spirit Shield": {
+    "itemClass": "Shields",
+    "dropLevel": 68,
+    "requiredLevel": 68,
+    "requiredInt": 159,
+    "requiredStr": 0,
+    "requiredDex": 0,
+    "defences": {
+      "energyShield": { "min": 95, "max": 108 },
+      "armour": { "min": 0, "max": 0 },
+      "evasion": { "min": 0, "max": 0 },
+      "ward": { "min": 0, "max": 0 }
+    }
+  },
+  "Colossus Mallet": {
+    "itemClass": "Two Hand Maces",
+    "dropLevel": 68,
+    "requiredLevel": 68,
+    "requiredStr": 212,
+    "requiredDex": 0,
+    "requiredInt": 0,
+    "weapon": {
+      "damagePhysical": { "min": 120, "max": 180 },
+      "crit": 5.0,
+      "aps": 1.15
+    }
+  },
+  "Karui Chopper": {
+    "itemClass": "Two Hand Axes",
+    "dropLevel": 58,
+    "requiredLevel": 58,
+    "requiredStr": 151,
+    "requiredDex": 43,
+    "requiredInt": 0,
+    "weapon": {
+      "damagePhysical": { "min": 115, "max": 188 },
+      "crit": 5.0,
+      "aps": 1.05
+    }
+  },
+  "Jewelled Foil": {
+    "itemClass": "One Hand Thrusting Swords",
+    "dropLevel": 68,
+    "requiredLevel": 68,
+    "requiredDex": 212,
+    "requiredStr": 0,
+    "requiredInt": 0,
+    "weapon": {
+      "damagePhysical": { "min": 32, "max": 60 },
+      "crit": 5.5,
+      "aps": 1.60
+    }
+  },
+  "Spine Bow": {
+    "itemClass": "Bows",
+    "dropLevel": 64,
+    "requiredLevel": 64,
+    "requiredDex": 212,
+    "requiredStr": 0,
+    "requiredInt": 0,
+    "weapon": {
+      "damagePhysical": { "min": 35, "max": 105 },
+      "crit": 6.5,
+      "aps": 1.40
+    }
+  },
+  "Thicket Bow": {
+    "itemClass": "Bows",
+    "dropLevel": 56,
+    "requiredLevel": 56,
+    "requiredDex": 179,
+    "requiredStr": 0,
+    "requiredInt": 0,
+    "weapon": {
+      "damagePhysical": { "min": 27, "max": 81 },
+      "crit": 5.0,
+      "aps": 1.50
+    }
+  },
+  "Heavy Belt": {
+    "itemClass": "Belts",
+    "dropLevel": 8,
+    "requiredLevel": 8,
+    "requiredStr": 0,
+    "requiredDex": 0,
+    "requiredInt": 0
+  },
+  "Leather Belt": {
+    "itemClass": "Belts",
+    "dropLevel": 8,
+    "requiredLevel": 8,
+    "requiredStr": 0,
+    "requiredDex": 0,
+    "requiredInt": 0
+  },
+  "Stygian Vise": {
+    "itemClass": "Belts",
+    "dropLevel": 70,
+    "requiredLevel": 70,
+    "requiredStr": 0,
+    "requiredDex": 0,
+    "requiredInt": 0
+  },
+  "Amethyst Ring": {
+    "itemClass": "Rings",
+    "dropLevel": 30,
+    "requiredLevel": 30,
+    "requiredStr": 0,
+    "requiredDex": 0,
+    "requiredInt": 0
+  },
+  "Diamond Ring": {
+    "itemClass": "Rings",
+    "dropLevel": 20,
+    "requiredLevel": 20,
+    "requiredStr": 0,
+    "requiredDex": 0,
+    "requiredInt": 0
+  },
+  "Onyx Amulet": {
+    "itemClass": "Amulets",
+    "dropLevel": 20,
+    "requiredLevel": 20,
+    "requiredStr": 0,
+    "requiredDex": 0,
+    "requiredInt": 0
+  }
+}

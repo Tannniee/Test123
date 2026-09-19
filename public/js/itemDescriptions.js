@@ -706,10 +706,14 @@ var PoeItemDescriptions = {
 
   poedbCache: new Map(),
   poedbPending: new Set(),
-  callbacks: [],
+  callbacks: new Set(),
 
   onPoedbLoaded(cb) {
-    if (typeof cb === 'function') this.callbacks.push(cb);
+    if (typeof cb === 'function') {
+      this.callbacks.add(cb);
+      return () => this.callbacks.delete(cb);
+    }
+    return () => {};
   },
 
   /**
@@ -728,7 +732,20 @@ var PoeItemDescriptions = {
         const data = await res.json();
         if (data.success && data.description) {
           this.poedbCache.set(cleanKey, data.description);
-          this.callbacks.forEach(fn => fn(cleanKey, data.description));
+          const eventPayload = {
+            game,
+            itemName,
+            description: data.description,
+            key: cleanKey,
+            toString() { return this.itemName; }
+          };
+          this.callbacks.forEach(fn => {
+            try {
+              fn(eventPayload, data.description);
+            } catch (cbErr) {
+              console.error('[PoeItemDescriptions] callback error:', cbErr);
+            }
+          });
           return data.description;
         }
       }

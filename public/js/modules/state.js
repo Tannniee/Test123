@@ -100,6 +100,9 @@ class StateManager {
       condition: alert.condition || 'above',
       threshold: parseFloat(alert.threshold) || 0,
       currency: alert.currency || 'c',
+      isTriggered: false,
+      lastTriggeredAt: null,
+      lastPrice: null,
       createdAt: new Date().toISOString()
     });
     this.saveAlerts();
@@ -133,6 +136,7 @@ class StateManager {
 
   // --- Compare Mode ---
   toggleCompare(item) {
+    if (!item) return false;
     if (this.compareList.has(item.id)) {
       this.compareList.delete(item.id);
       return false;
@@ -140,7 +144,12 @@ class StateManager {
     if (this.compareList.size >= 5) {
       return 'limit_reached';
     }
-    this.compareList.set(item.id, item);
+    const itemWithContext = {
+      ...item,
+      game: item.game || this.currentGame,
+      league: item.league || this.currentLeague
+    };
+    this.compareList.set(item.id, itemWithContext);
     return true;
   }
 

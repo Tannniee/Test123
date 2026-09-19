@@ -128,6 +128,20 @@
             </button>
           </div>
 
+          <!-- Desktop Bridge Status Pill (Phase 4 / 18) -->
+          <div class="bridge-status-wrap" id="bridgeStatusWrap" title="Trạng thái kết nối Desktop Bridge (Quick Inspect)">
+            <div class="bridge-status-pill offline" id="bridgeStatusPill">
+              <span class="bridge-dot"></span>
+              <span id="bridgeStatusText">Bridge: Offline</span>
+            </div>
+          </div>
+
+          <!-- Item Inspector Button (Phase 16 & 17) -->
+          <button class="btn-item-inspector" id="btnOpenItemInspector" title="Soi đồ & Phân tích chuyên sâu (Ctrl+V để dán)">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span>Soi đồ (Inspect)</span>
+          </button>
+
           <!-- Compare Drawer Floating Button -->
           <button class="btn-compare-drawer hidden" id="btnCompareDrawer" title="Xem bảng so sánh vật phẩm">
             <i class="fa-solid fa-code-compare"></i>
@@ -466,6 +480,16 @@
       </div>
       <div class="modal-footer">
         <button class="btn-action-primary" id="btnSaveSettings">Lưu cài đặt</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEEP ITEM INSPECTOR MODAL (Phase 16 & 17) -->
+  <div class="modal-overlay hidden" id="deepItemInspectorOverlay">
+    <div class="modal-card modal-card-inspector" id="deepItemInspectorCard">
+      <button class="modal-close" id="closeDeepItemInspector" title="Đóng">&times;</button>
+      <div class="modal-body inspector-modal-body" id="deepItemInspectorBody">
+        <!-- Rendered dynamically by ItemInspectorRender or Paste Box -->
       </div>
     </div>
   </div>

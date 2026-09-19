@@ -2,11 +2,13 @@ const fs = require('fs');
 const path = require('path');
 
 class PoedbService {
-  constructor(cacheDir = path.join(__dirname, '../cache')) {
+  constructor(cacheDir = path.join(__dirname, '../data/cache'), options = {}) {
     this.cacheDir = cacheDir;
     this.cacheFilePath = path.join(this.cacheDir, 'poedb_descriptions.json');
     this.memoryCache = new Map();
     this.activeFetches = new Map();
+    this.saveTimer = null;
+    this.fetchImpl = options.fetchImpl || globalThis.fetch;
     this.initCache();
   }
 
@@ -15,6 +17,14 @@ class PoedbService {
       if (!fs.existsSync(this.cacheDir)) {
         fs.mkdirSync(this.cacheDir, { recursive: true });
       }
+      // Migrate from legacy ../cache/poedb_descriptions.json if needed
+      const legacyPath = path.join(__dirname, '../cache/poedb_descriptions.json');
+      if (!fs.existsSync(this.cacheFilePath) && fs.existsSync(legacyPath)) {
+        try {
+          fs.copyFileSync(legacyPath, this.cacheFilePath);
+        } catch (e) {}
+      }
+
       if (fs.existsSync(this.cacheFilePath)) {
         const raw = fs.readFileSync(this.cacheFilePath, 'utf8');
         const data = JSON.parse(raw);
@@ -39,17 +49,20 @@ class PoedbService {
   }
 
   saveCacheToDisk() {
-    try {
-      if (!fs.existsSync(this.cacheDir)) {
-        fs.mkdirSync(this.cacheDir, { recursive: true });
+    if (this.saveTimer) clearTimeout(this.saveTimer);
+    this.saveTimer = setTimeout(async () => {
+      try {
+        if (!fs.existsSync(this.cacheDir)) {
+          await fs.promises.mkdir(this.cacheDir, { recursive: true });
+        }
+        const obj = Object.fromEntries(this.memoryCache);
+        const tmpPath = `${this.cacheFilePath}.${Date.now()}.tmp`;
+        await fs.promises.writeFile(tmpPath, JSON.stringify(obj, null, 2), 'utf8');
+        await fs.promises.rename(tmpPath, this.cacheFilePath);
+      } catch (err) {
+        console.warn('[PoedbService] Error saving cache to disk:', err.message);
       }
-      const obj = Object.fromEntries(this.memoryCache);
-      const tmpPath = `${this.cacheFilePath}.tmp`;
-      fs.writeFileSync(tmpPath, JSON.stringify(obj, null, 2), 'utf8');
-      fs.renameSync(tmpPath, this.cacheFilePath);
-    } catch (err) {
-      console.warn('[PoedbService] Error saving cache to disk:', err.message);
-    }
+    }, 300);
   }
 
   getCacheKey(name, game = 'poe1') {
@@ -99,7 +112,7 @@ class PoedbService {
       const url = `${domain}/${encodeURIComponent(cleanSlug)}`;
 
       try {
-        const res = await fetch(url, {
+        const res = await this.fetchImpl(url, {
           headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -113,7 +126,7 @@ class PoedbService {
           if (res.status === 404 && name.includes("'")) {
             const altSlug = name.trim().replace(/\s+/g, '_');
             const altUrl = `${domain}/${encodeURIComponent(altSlug)}`;
-            const altRes = await fetch(altUrl, {
+            const altRes = await this.fetchImpl(altUrl, {
               headers: { 'User-Agent': 'Mozilla/5.0' },
               signal: AbortSignal.timeout(4000)
             });
@@ -232,4 +245,5 @@ class PoedbService {
 }
 
 const instance = new PoedbService();
+instance.PoedbService = PoedbService;
 module.exports = instance;

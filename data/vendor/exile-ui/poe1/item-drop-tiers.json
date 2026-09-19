@@ -1,0 +1,45 @@
+{
+  "Mageblood": {
+    "tier": "0",
+    "itemClass": "Belts",
+    "baseType": "Heavy Belt",
+    "flavour": "To achieve godhood, one must drink from the cup of perfection."
+  },
+  "Headhunter": {
+    "tier": "0",
+    "itemClass": "Belts",
+    "baseType": "Leather Belt",
+    "flavour": "A man's soul rises on a wind of fury and falls on a mountain of bones."
+  },
+  "Kalandra's Touch": {
+    "tier": "0",
+    "itemClass": "Rings",
+    "baseType": "Ring",
+    "flavour": "The greatest reflection is the one of which no trace remains."
+  },
+  "The Squire": {
+    "tier": "0",
+    "itemClass": "Shields",
+    "baseType": "Elegant Round Shield"
+  },
+  "Ashes of the Stars": {
+    "tier": "boss",
+    "itemClass": "Amulets",
+    "baseType": "Onyx Amulet"
+  },
+  "Crystallised Omniscience": {
+    "tier": "boss",
+    "itemClass": "Amulets",
+    "baseType": "Onyx Amulet"
+  },
+  "Shavronne's Wrappings": {
+    "tier": "1",
+    "itemClass": "Body Armours",
+    "baseType": "Occultist's Vestment"
+  },
+  "Tabula Rasa": {
+    "tier": "3",
+    "itemClass": "Body Armours",
+    "baseType": "Simple Robe"
+  }
+}

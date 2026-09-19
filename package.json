@@ -1,11 +1,14 @@
 {
   "name": "poe-quick-price-checker",
-  "version": "1.0.5",
+  "version": "2.0.0",
   "description": "Local fast price check app for PoE 1 and PoE 2 powered by PoE Ninja with 30m cache",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "node test/conversionMath.test.js && node test/frontendFeatures.mjs && node test/integrationArchitecture.test.js && node test/categorySwitchingTest.mjs && node test/verifyPoestashRedesign.mjs && node test/seniorAuditFixes.test.mjs && node --test test/fullPoe1CategoriesAndDescriptions.test.mjs && node --test test/poe2CategoriesAndLiveSync.test.mjs && node --test test/frontendAppSyntaxAndBoot.test.mjs"
+    "test": "node test/conversionMath.test.js && node test/frontendFeatures.mjs && node test/integrationArchitecture.test.js && node test/categorySwitchingTest.mjs && node test/verifyPoestashRedesign.mjs && node test/seniorAuditFixes.test.mjs && node --test test/fullPoe1CategoriesAndDescriptions.test.mjs && node --test test/poe2CategoriesAndLiveSync.test.mjs && node --test test/frontendAppSyntaxAndBoot.test.mjs && node --test test/pr1CacheIntegrityAndMarketRates.test.mjs && node --test test/pr2ConcurrencyTimeoutAndSchedulers.test.mjs && node --test test/pr3PoedbCompareAlertsAndDiskResilience.test.mjs && node --test test/pr4OfflineDeterministicRunner.test.mjs && node --test test/pr5ServerLifecycleAndSecurity.test.mjs && node --test test/pr6BridgeAndSseBroker.test.mjs && node --test test/pr7CanonicalItemModelAndParser.test.mjs && node --test test/pr8ItemAnalyzerEngine.test.mjs && node --test test/pr9WebItemInspectorIntegration.test.mjs",
+    "test:desktop": "dotnet test desktop/Poestash.Desktop.Tests/Poestash.Desktop.Tests.csproj",
+    "build:desktop": "dotnet build desktop/Poestash.Desktop/Poestash.Desktop.csproj",
+    "test:all": "npm test && npm run test:desktop"
   },
   "engines": {
     "node": ">=18.0.0"

@@ -9,7 +9,7 @@ const POE1_ROTATION_INTERVAL_MS = 5 * 60 * 1000;  // 5 minutes for PoE 1 Rotatio
 const POE2_PRIORITY_INTERVAL_MS = 30 * 60 * 1000; // 30 minutes for PoE 2 Priority sync
 const POE2_ROTATION_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes for PoE 2 Rotational batches
 const LEAGUE_REFRESH_INTERVAL_MS = 60 * 60 * 1000; // 1 hour for League list refresh
-const USER_AGENT = 'PoE-QuickPriceChecker/1.0.5 (Local desktop tool)';
+const USER_AGENT = 'PoE-QuickPriceChecker/2.0.0 (Local desktop tool)';
 
 class CacheManager {
   constructor(options = {}) {
@@ -36,8 +36,11 @@ class CacheManager {
       poe2: {}
     };
 
-    // Concurrency & Operation Tracking Sets
-    this.activeFetches = new Set();     // Key: `${game}:${league}:${type}`
+    this.timeoutMs = options.timeoutMs || 12000;
+
+    // Concurrency & Operation Tracking Maps / Sets
+    this.activeFetches = new Map();     // Key: `${game}:${league}:${type}` -> Promise (Single-flight)
+    this.refreshJobs = new Map();       // Key: `${game}:${league}` -> Promise (Single-flight)
     this.activeMerges = new Set();      // Key: `${game}:${league}`
     this.activeDiscoveries = new Set(); // Key: `${game}:${league}`
     this.activeRefreshAll = new Set();  // Key: jobId
@@ -91,6 +94,7 @@ class CacheManager {
     this.rotationIndices = {};
 
     // Schedulers & Timers
+    this.schedulersActive = false;
     this.poe1PriorityTimer = null;
     this.poe1RotationTimer = null;
     this.poe2PriorityTimer = null;
@@ -105,7 +109,9 @@ class CacheManager {
     // Initialize dynamic leagues and schedulers if autoStart is enabled
     if (this.autoStart) {
       this.initDynamicLeagues().then(() => {
-        this.startSchedulers();
+        if (this.autoStart) {
+          this.startSchedulers();
+        }
       });
     }
   }
@@ -401,57 +407,65 @@ class CacheManager {
           if (match) {
             const [, game, safeLeague] = match;
             const filePath = path.join(this.cacheDir, file);
-            const content = fs.readFileSync(filePath, 'utf-8');
-            const data = JSON.parse(content);
+            try {
+              const content = fs.readFileSync(filePath, 'utf-8');
+              const data = JSON.parse(content);
 
-            if (!this.memoryCache[game]) this.memoryCache[game] = {};
-            const actualLeague = data.league || safeLeague;
-            this.memoryCache[game][actualLeague] = data;
+              if (!this.memoryCache[game]) this.memoryCache[game] = {};
+              const actualLeague = data.league || safeLeague;
+              this.memoryCache[game][actualLeague] = data;
 
-            if (data.snapshots && Array.isArray(data.snapshots)) {
-              if (!this.snapshots[game]) this.snapshots[game] = {};
-              this.snapshots[game][actualLeague] = data.snapshots;
-            }
-
-            // Populate diagnostics from cached sources
-            if (data.sources) {
-              if (!this.diagnostics[game]) this.diagnostics[game] = {};
-              if (!this.diagnostics[game][actualLeague]) this.diagnostics[game][actualLeague] = {};
-              for (const [sType, sData] of Object.entries(data.sources)) {
-                this.diagnostics[game][actualLeague][sType] = {
-                  type: sType,
-                  httpCode: sData.status === 'unsupported' ? 404 : 200,
-                  latencyMs: sData.latencyMs || 100,
-                  itemsCount: sData.itemsCount || 0,
-                  status: sData.status || 'available',
-                  lastUpdated: sData.updatedAt || data.updatedAt
-                };
+              if (data.snapshots && Array.isArray(data.snapshots)) {
+                if (!this.snapshots[game]) this.snapshots[game] = {};
+                this.snapshots[game][actualLeague] = data.snapshots;
               }
+
+              // Populate diagnostics from cached sources
+              if (data.sources) {
+                if (!this.diagnostics[game]) this.diagnostics[game] = {};
+                if (!this.diagnostics[game][actualLeague]) this.diagnostics[game][actualLeague] = {};
+                for (const [sType, sData] of Object.entries(data.sources)) {
+                  this.diagnostics[game][actualLeague][sType] = {
+                    type: sType,
+                    httpCode: sData.status === 'unsupported' ? 404 : 200,
+                    latencyMs: sData.latencyMs || 100,
+                    itemsCount: sData.itemsCount || 0,
+                    status: sData.status || 'available',
+                    lastUpdated: sData.updatedAt || data.updatedAt
+                  };
+                }
+              }
+
+              this.initAvailabilityForLeague(game, actualLeague);
+
+              console.log(`[CacheManager] Loaded ${game} - ${actualLeague} (${data.items?.length || 0} items, updated: ${data.updatedAt})`);
+            } catch (fileErr) {
+              console.warn(`[CacheManager] Warning: Skipped corrupt cache file "${file}": ${fileErr.message}`);
             }
-
-            this.initAvailabilityForLeague(game, actualLeague);
-
-            console.log(`[CacheManager] Loaded ${game} - ${actualLeague} (${data.items?.length || 0} items, updated: ${data.updatedAt})`);
           }
         }
       }
     } catch (err) {
-      console.error('[CacheManager] Error loading cache from disk:', err.message);
+      console.error('[CacheManager] Error reading cache directory:', err.message);
     }
   }
 
-  saveToDisk(game, league, data) {
+  async saveToDisk(game, league, data) {
     const filePath = this.getCacheFilePath(game, league);
-    const tmpPath = `${filePath}.tmp`;
+    const tmpPath = `${filePath}.${Date.now()}.${Math.random().toString(36).slice(2, 6)}.tmp`;
     try {
-      fs.writeFileSync(tmpPath, JSON.stringify(data, null, 2), 'utf-8');
-      JSON.parse(fs.readFileSync(tmpPath, 'utf-8'));
-      fs.renameSync(tmpPath, filePath);
+      const payload = data !== undefined ? data : this.memoryCache[game]?.[league];
+      if (!payload) return;
+      const json = JSON.stringify(payload, null, 2);
+      await fs.promises.writeFile(tmpPath, json, 'utf-8');
+      await fs.promises.rename(tmpPath, filePath);
     } catch (err) {
-      console.error(`[CacheManager] Atomic write failed for ${game}/${league}:`, err.message);
-      if (fs.existsSync(tmpPath)) {
-        try { fs.unlinkSync(tmpPath); } catch (e) {}
-      }
+      console.error(`[CacheManager] Async atomic write failed for ${game}/${league}:`, err.message);
+      try {
+        if (fs.existsSync(tmpPath)) {
+          await fs.promises.unlink(tmpPath);
+        }
+      } catch (e) {}
     }
   }
 
@@ -462,11 +476,16 @@ class CacheManager {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  async fetchJson(url, retries = 2, delays = [500, 1500]) {
+  async fetchJson(url, retries = 2, delays = [1000, 2500]) {
     for (let attempt = 0; attempt <= retries; attempt++) {
       const start = Date.now();
       try {
+        const signal = typeof AbortSignal !== 'undefined' && AbortSignal.timeout
+          ? AbortSignal.timeout(this.timeoutMs || 12000)
+          : undefined;
+
         const response = await this.fetchImpl(url, {
+          signal,
           headers: {
             'User-Agent': USER_AGENT,
             'Accept': 'application/json'
@@ -475,6 +494,21 @@ class CacheManager {
         const latencyMs = Date.now() - start;
 
         if (!response.ok) {
+          // Handle HTTP 429 Too Many Requests with Retry-After or exponential backoff
+          if (response.status === 429 && attempt < retries) {
+            let delayMs = delays[attempt] || 2000;
+            const retryAfterHeader = response.headers?.get?.('retry-after');
+            if (retryAfterHeader) {
+              const parsedSec = parseInt(retryAfterHeader, 10);
+              if (!isNaN(parsedSec) && parsedSec > 0) {
+                delayMs = Math.min(parsedSec * 1000, 30000);
+              }
+            }
+            console.warn(`[CacheManager] HTTP 429 Rate Limit for ${url}. Backing off for ${delayMs}ms (attempt ${attempt + 1}/${retries})...`);
+            await this.sleep(delayMs);
+            continue;
+          }
+
           if (response.status >= 500 && attempt < retries) {
             console.warn(`[CacheManager] HTTP ${response.status} for ${url}. Retrying in ${delays[attempt]}ms...`);
             await this.sleep(delays[attempt]);
@@ -487,12 +521,13 @@ class CacheManager {
         return { data: json, httpCode: 200, latencyMs, error: null };
       } catch (err) {
         const latencyMs = Date.now() - start;
+        const isAbort = err.name === 'TimeoutError' || err.name === 'AbortError';
         if (attempt < retries) {
-          console.warn(`[CacheManager] Request error for ${url}: ${err.message}. Retrying in ${delays[attempt]}ms...`);
+          console.warn(`[CacheManager] Request error (${isAbort ? 'Timeout' : err.message}) for ${url}. Retrying in ${delays[attempt]}ms...`);
           await this.sleep(delays[attempt]);
           continue;
         }
-        return { data: null, httpCode: 0, latencyMs, error: err.message };
+        return { data: null, httpCode: isAbort ? 408 : 0, latencyMs, error: isAbort ? 'Request Timeout' : err.message };
       }
     }
     return { data: null, httpCode: 0, latencyMs, error: 'Max retries reached' };
@@ -670,6 +705,57 @@ class CacheManager {
   }
 
   // =========================================================================
+  // Single-Flight Category Fetcher (Deduplicates concurrent requests for the same source)
+  // =========================================================================
+  async fetchCategorySingleFlight(game, league, type) {
+    const fetchKey = `${game}:${league}:${type}`;
+    if (this.activeFetches.has(fetchKey)) {
+      console.log(`[CacheManager] Joining active single-flight fetch for "${fetchKey}"...`);
+      return await this.activeFetches.get(fetchKey);
+    }
+
+    const fetchPromise = (async () => {
+      const def = CategoryRegistry.getDefinition(game, type);
+      const apiSource = def?.apiSource || 'exchange';
+      let url;
+      if (apiSource === 'stash') {
+        url = `https://poe.ninja/${game}/api/economy/stash/current/item/overview?league=${encodeURIComponent(league)}&type=${type}`;
+      } else {
+        url = `https://poe.ninja/${game}/api/economy/exchange/current/overview?league=${encodeURIComponent(league)}&type=${type}`;
+      }
+      const res = await this.fetchJson(url);
+
+      // Record diagnostics
+      if (!this.diagnostics[game]) this.diagnostics[game] = {};
+      if (!this.diagnostics[game][league]) this.diagnostics[game][league] = {};
+      this.diagnostics[game][league][type] = {
+        type,
+        url,
+        status: res.httpCode === 200 ? 'ok' : 'error',
+        httpCode: res.httpCode,
+        latencyMs: res.latencyMs,
+        itemsCount: res.data?.lines?.length || 0,
+        lastUpdated: new Date().toISOString(),
+        error: res.error
+      };
+
+      return {
+        type,
+        apiSource,
+        url,
+        res
+      };
+    })();
+
+    this.activeFetches.set(fetchKey, fetchPromise);
+    try {
+      return await fetchPromise;
+    } finally {
+      this.activeFetches.delete(fetchKey);
+    }
+  }
+
+  // =========================================================================
   // Incremental Batch Sync with Source Locks & Per-League Merge Mutex
   // =========================================================================
   async syncCategoryBatch(game, league, types) {
@@ -688,65 +774,12 @@ class CacheManager {
       await this.syncCategoryBatch(game, league, ['Currency']);
     }
 
-    // 2. Filter out types currently locked by activeFetches
-    const typesToFetch = [];
-    for (const type of types) {
-      const fetchKey = `${game}:${league}:${type}`;
-      if (this.activeFetches.has(fetchKey)) {
-        console.log(`[CacheManager] Fetch for ${fetchKey} already active in parallel, skipping duplicate.`);
-      } else {
-        this.activeFetches.add(fetchKey);
-        typesToFetch.push(type);
-      }
-    }
-
-    if (typesToFetch.length === 0) {
-      return this.memoryCache[game]?.[league] || null;
-    }
-
+    // 2. Fetch all requested categories using Single-Flight Map
     const rawResults = [];
-
-    try {
-      // 3. Parallel/stepped network fetches
-      for (const type of typesToFetch) {
-        const def = CategoryRegistry.getDefinition(game, type);
-        const apiSource = def?.apiSource || 'exchange';
-        let url;
-        if (apiSource === 'stash') {
-          url = `https://poe.ninja/${game}/api/economy/stash/current/item/overview?league=${encodeURIComponent(league)}&type=${type}`;
-        } else {
-          url = `https://poe.ninja/${game}/api/economy/exchange/current/overview?league=${encodeURIComponent(league)}&type=${type}`;
-        }
-        const res = await this.fetchJson(url);
-
-        rawResults.push({
-          type,
-          apiSource,
-          url,
-          res
-        });
-
-        // Record diagnostics
-        if (!this.diagnostics[game]) this.diagnostics[game] = {};
-        if (!this.diagnostics[game][league]) this.diagnostics[game][league] = {};
-        this.diagnostics[game][league][type] = {
-          type,
-          url,
-          status: res.httpCode === 200 ? 'ok' : 'error',
-          httpCode: res.httpCode,
-          latencyMs: res.latencyMs,
-          itemsCount: res.data?.lines?.length || 0,
-          lastUpdated: new Date().toISOString(),
-          error: res.error
-        };
-
-        await this.sleep(150);
-      }
-    } finally {
-      // Release source fetch locks
-      for (const type of typesToFetch) {
-        this.activeFetches.delete(`${game}:${league}:${type}`);
-      }
+    for (const type of types) {
+      const singleFlightResult = await this.fetchCategorySingleFlight(game, league, type);
+      rawResults.push(singleFlightResult);
+      await this.sleep(50);
     }
 
     // 4. Critical: Serialize memory cache update and atomic disk write with Per-League Mutex!
@@ -780,13 +813,32 @@ class CacheManager {
       let mirrorRate = existingEntry.mirrorPriceInChaos || 0;
       let sourcesFreshness = { ...(existingEntry.sources || {}) };
 
-      const typesSet = new Set(typesToFetch);
-      const keptItems = existingItems.filter(it => !typesSet.has(it.sourceType));
-      const newlyNormalizedItems = [];
+      const typesSet = new Set(types);
+      
+      // Index previous items by sourceType to guarantee resilient per-category merging
+      const existingByType = new Map();
+      for (const it of existingItems) {
+        const srcType = it.sourceType || it.category;
+        if (!existingByType.has(srcType)) {
+          existingByType.set(srcType, []);
+        }
+        existingByType.get(srcType).push(it);
+      }
+
+      // Categories that were NOT fetched in this batch are strictly preserved
+      const preservedItems = [];
+      for (const [srcType, items] of existingByType.entries()) {
+        if (!typesSet.has(srcType)) {
+          preservedItems.push(...items);
+        }
+      }
+
+      const newlyProcessedItems = [];
 
       for (const { type, res } of rawResults) {
         const prevSource = sourcesFreshness[type];
-        const prevCount = prevSource?.itemsCount || 0;
+        const prevItems = existingByType.get(type) || [];
+        const prevCount = prevSource?.itemsCount || prevItems.length;
 
         if (res.data) {
           const data = res.data;
@@ -836,7 +888,7 @@ class CacheManager {
           } else {
             normalized = this.normalizeExchangeData(data, type, game, league, currentRates);
           }
-          newlyNormalizedItems.push(...normalized);
+          newlyProcessedItems.push(...normalized);
 
           // 4-tier status taxonomy
           let status = 'empty';
@@ -850,7 +902,8 @@ class CacheManager {
             updatedAt: new Date().toISOString(),
             status,
             itemsCount: normalized.length,
-            latencyMs: res.latencyMs
+            latencyMs: res.latencyMs,
+            isStale: false
           };
 
           this.availabilityMap[game][league][type] = {
@@ -859,42 +912,56 @@ class CacheManager {
             lastChecked: new Date().toISOString()
           };
 
-          const mirrorItem = normalized.find(i => i.key === 'mirror' || i.name.toLowerCase().includes('mirror'));
-          if (mirrorItem) {
-            mirrorRate = mirrorItem.chaosValue || mirrorItem.divineValue;
+          // Protect Mirror rate: Only Currency source can update Mirror of Kalandra rate (exact identity check)
+          if (type === 'Currency') {
+            const mirrorItem = normalized.find(i => 
+              i.name === 'Mirror of Kalandra' || 
+              i.key === 'mirror-of-kalandra' || 
+              i.id === 'currency-mirror-of-kalandra' ||
+              i.key === 'mirror'
+            );
+            if (mirrorItem && (mirrorItem.chaosValue > 0 || mirrorItem.divineValue > 0)) {
+              mirrorRate = mirrorItem.chaosValue || mirrorItem.divineValue;
+            }
           }
         } else {
           // Source returned 404 or error
           let status = 'error';
+          const isTransient = res.httpCode >= 500 || res.httpCode === 429 || res.httpCode === 0 || !res.httpCode;
+          
           if (res.httpCode === 404) {
             status = 'unsupported';
-          } else if (res.httpCode >= 500 || res.httpCode === 0) {
+          } else if (isTransient) {
             status = 'transient_error';
           }
 
-          if (status === 'transient_error' && prevCount > 0) {
+          // Resilient Cache: If transient error and previous valid items exist, PRESERVE them!
+          if (status === 'transient_error' && prevItems.length > 0) {
+            newlyProcessedItems.push(...prevItems);
             status = 'available';
+            console.warn(`[CacheManager] Preserved ${prevItems.length} cached items for ${game}/${league}/${type} during transient error (${res.error || res.httpCode || 'network'})`);
           }
 
           sourcesFreshness[type] = {
-            updatedAt: new Date().toISOString(),
+            updatedAt: prevSource?.updatedAt || new Date().toISOString(),
             status,
-            itemsCount: 0,
+            itemsCount: (status === 'available' && prevItems.length > 0) ? prevItems.length : 0,
             latencyMs: res.latencyMs,
-            error: res.error
+            error: res.error,
+            isStale: status === 'available' && prevItems.length > 0
           };
 
           this.availabilityMap[game][league][type] = {
             status,
-            count: 0,
+            count: (status === 'available' && prevItems.length > 0) ? prevItems.length : 0,
             lastChecked: new Date().toISOString()
           };
         }
       }
 
-      // Merge keptItems and newlyNormalizedItems, deduplicate by item id
+      // Merge preservedItems and newlyProcessedItems, deduplicate by item id
       const uniqueMap = new Map();
-      for (const it of [...keptItems, ...newlyNormalizedItems]) {
+      for (const it of [...preservedItems, ...newlyProcessedItems]) {
         uniqueMap.set(it.id, it);
       }
       const finalItems = Array.from(uniqueMap.values());
@@ -946,7 +1013,7 @@ class CacheManager {
       this.memoryCache[game][league] = updatedEntry;
       this.saveToDisk(game, league, updatedEntry);
 
-      console.log(`[CacheManager] [${game.toUpperCase()} - ${league}] Merged [${typesToFetch.join(', ')}]: ${finalItems.length} items total.`);
+      console.log(`[CacheManager] [${game.toUpperCase()} - ${league}] Merged [${types.join(', ')}]: ${finalItems.length} items total.`);
       return updatedEntry;
     });
   }
@@ -965,68 +1032,123 @@ class CacheManager {
   }
 
   // =========================================================================
-  // True "Refresh All Available"
+  // True "Refresh All Available" (Single-Flight deduplicated)
   // =========================================================================
+  isRefreshRunning(targetGame = null, targetLeague = null) {
+    const specificKey = `${targetGame || 'all'}:${targetLeague || 'all'}`;
+    return this.refreshJobs.has(specificKey) || this.refreshJobs.has('all:all');
+  }
+
   async refreshAllAvailable(targetGame = null, targetLeague = null) {
-    const jobKey = `${targetGame || 'all'}:${targetLeague || 'all'}:${Date.now()}`;
-    this.activeRefreshAll.add(jobKey);
+    const jobKey = `${targetGame || 'all'}:${targetLeague || 'all'}`;
 
-    try {
-      console.log(`[CacheManager] Starting True "Refresh All Available" for ${targetGame || 'all games'}...`);
-      const games = targetGame ? [targetGame] : ['poe1', 'poe2'];
+    if (this.refreshJobs.has(jobKey)) {
+      console.log(`[CacheManager] Full refresh job for "${jobKey}" already running, attaching to existing job...`);
+      return await this.refreshJobs.get(jobKey);
+    }
+    if (this.refreshJobs.has('all:all')) {
+      console.log(`[CacheManager] Global refresh job "all:all" already running, attaching...`);
+      return await this.refreshJobs.get('all:all');
+    }
 
-      for (const game of games) {
-        const leagues = targetLeague ? [targetLeague] : Array.from(this.trackedLeagues[game] || [this.getActiveLeague(game)]);
-        for (const league of leagues) {
-          const available = this.getAvailableCategories(game, league);
-          const types = available.map(c => c.type);
-          if (types.length > 0) {
-            console.log(`[CacheManager] Refreshing all ${types.length} available categories for ${game.toUpperCase()} - ${league}...`);
-            const nonCurrency = types.filter(t => t !== 'Currency');
-            if (types.includes('Currency')) {
-              await this.syncCategoryBatch(game, league, ['Currency']);
-            }
-            for (let i = 0; i < nonCurrency.length; i += 2) {
-              await this.syncCategoryBatch(game, league, nonCurrency.slice(i, i + 2));
-              await this.sleep(200);
+    const jobPromise = (async () => {
+      this.activeRefreshAll.add(jobKey);
+      try {
+        console.log(`[CacheManager] Starting True "Refresh All Available" for ${jobKey}...`);
+        const games = targetGame ? [targetGame] : ['poe1', 'poe2'];
+
+        for (const game of games) {
+          const leagues = targetLeague ? [targetLeague] : Array.from(this.trackedLeagues[game] || [this.getActiveLeague(game)]);
+          for (const league of leagues) {
+            const available = this.getAvailableCategories(game, league);
+            const types = available.map(c => c.type);
+            if (types.length > 0) {
+              console.log(`[CacheManager] Refreshing all ${types.length} available categories for ${game.toUpperCase()} - ${league}...`);
+              const nonCurrency = types.filter(t => t !== 'Currency');
+              if (types.includes('Currency')) {
+                await this.syncCategoryBatch(game, league, ['Currency']);
+              }
+              for (let i = 0; i < nonCurrency.length; i += 2) {
+                await this.syncCategoryBatch(game, league, nonCurrency.slice(i, i + 2));
+                await this.sleep(200);
+              }
             }
           }
         }
+        console.log(`[CacheManager] True "Refresh All Available" completed for ${jobKey}.`);
+        return { success: true, target: jobKey };
+      } finally {
+        this.activeRefreshAll.delete(jobKey);
+        this.refreshJobs.delete(jobKey);
       }
-      console.log('[CacheManager] True "Refresh All Available" completed.');
-    } finally {
-      this.activeRefreshAll.delete(jobKey);
-    }
+    })();
+
+    this.refreshJobs.set(jobKey, jobPromise);
+    return await jobPromise;
   }
 
   // =========================================================================
-  // Dynamic Schedulers with Differentiated Cadence & Clean Lifecycle
+  // Dynamic Schedulers with Non-Overlapping Locks & Clean Lifecycle
   // =========================================================================
+  scheduleNonOverlappingTask(taskName, fn, intervalMs) {
+    let timer = null;
+    let isRunning = false;
+
+    const tick = async () => {
+      if (!this.schedulersActive) return;
+      if (isRunning) {
+        console.warn(`[CacheManager] Scheduler "${taskName}" execution took longer than interval (${intervalMs}ms). Skipping tick to prevent overlap.`);
+        return;
+      }
+      isRunning = true;
+      try {
+        await fn();
+      } catch (err) {
+        console.error(`[CacheManager] Scheduler "${taskName}" error:`, err.message);
+      } finally {
+        isRunning = false;
+        if (this.schedulersActive) {
+          timer = setTimeout(tick, intervalMs);
+        }
+      }
+    };
+
+    timer = setTimeout(tick, intervalMs);
+    return {
+      stop: () => {
+        if (timer) clearTimeout(timer);
+        timer = null;
+      },
+      isRunning: () => isRunning
+    };
+  }
+
   startSchedulers() {
     this.stopSchedulers();
+    this.schedulersActive = true;
 
     // 1. PoE 1 Priority Scheduler (Every 30 minutes)
-    this.poe1PriorityTimer = setInterval(async () => {
+    this.poe1PriorityTimer = this.scheduleNonOverlappingTask('poe1-priority', async () => {
       await this.refreshPriorityForGame('poe1');
     }, POE1_PRIORITY_INTERVAL_MS);
 
     // 2. PoE 1 Rotation Scheduler (Every 5 minutes)
-    this.poe1RotationTimer = setInterval(async () => {
+    this.poe1RotationTimer = this.scheduleNonOverlappingTask('poe1-rotation', async () => {
       await this.stepRotationForGame('poe1');
     }, POE1_ROTATION_INTERVAL_MS);
 
     // 3. PoE 2 Priority Scheduler (Every 30 minutes)
-    this.poe2PriorityTimer = setInterval(async () => {
+    this.poe2PriorityTimer = this.scheduleNonOverlappingTask('poe2-priority', async () => {
       await this.refreshPriorityForGame('poe2');
     }, POE2_PRIORITY_INTERVAL_MS);
 
     // 4. PoE 2 Rotation Scheduler (Every 10 minutes)
-    this.poe2RotationTimer = setInterval(async () => {
+    this.poe2RotationTimer = this.scheduleNonOverlappingTask('poe2-rotation', async () => {
       await this.stepRotationForGame('poe2');
     }, POE2_ROTATION_INTERVAL_MS);
 
     // 5. Periodic League Refresh (Every 1 hour)
-    this.leagueRefreshTimer = setInterval(async () => {
+    this.leagueRefreshTimer = this.scheduleNonOverlappingTask('league-refresh', async () => {
       await this.initDynamicLeagues();
     }, LEAGUE_REFRESH_INTERVAL_MS);
 
@@ -1034,11 +1156,13 @@ class CacheManager {
   }
 
   stopSchedulers() {
-    if (this.poe1PriorityTimer) clearInterval(this.poe1PriorityTimer);
-    if (this.poe1RotationTimer) clearInterval(this.poe1RotationTimer);
-    if (this.poe2PriorityTimer) clearInterval(this.poe2PriorityTimer);
-    if (this.poe2RotationTimer) clearInterval(this.poe2RotationTimer);
-    if (this.leagueRefreshTimer) clearInterval(this.leagueRefreshTimer);
+    this.autoStart = false;
+    this.schedulersActive = false;
+    if (this.poe1PriorityTimer) this.poe1PriorityTimer.stop();
+    if (this.poe1RotationTimer) this.poe1RotationTimer.stop();
+    if (this.poe2PriorityTimer) this.poe2PriorityTimer.stop();
+    if (this.poe2RotationTimer) this.poe2RotationTimer.stop();
+    if (this.leagueRefreshTimer) this.leagueRefreshTimer.stop();
     this.poe1PriorityTimer = null;
     this.poe1RotationTimer = null;
     this.poe2PriorityTimer = null;
@@ -1180,6 +1304,7 @@ class CacheManager {
 
   get isRefreshing() {
     return this.activeFetches.size > 0 || 
+           this.refreshJobs.size > 0 ||
            this.activeMerges.size > 0 || 
            this.activeDiscoveries.size > 0 || 
            this.activeRefreshAll.size > 0;
@@ -1193,7 +1318,8 @@ class CacheManager {
       status: 'ok',
       isRefreshing: this.isRefreshing,
       activeJobs: [
-        ...Array.from(this.activeFetches).map(f => `fetch:${f}`),
+        ...Array.from(this.activeFetches.keys()).map(f => `fetch:${f}`),
+        ...Array.from(this.refreshJobs.keys()).map(j => `refreshJob:${j}`),
         ...Array.from(this.activeMerges).map(m => `merge:${m}`),
         ...Array.from(this.activeDiscoveries).map(d => `discovery:${d}`),
         ...Array.from(this.activeRefreshAll).map(r => `refreshAll:${r}`)

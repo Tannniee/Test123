@@ -1,0 +1,39 @@
+[
+  {
+    "family": "MaximumLife",
+    "template": "+# to maximum Life",
+    "type": "prefix",
+    "tiers": [
+      { "tier": 1, "name": "Exalted", "minLevel": 75, "ranges": [{ "min": 90, "max": 105 }] },
+      { "tier": 2, "name": "Grand", "minLevel": 65, "ranges": [{ "min": 75, "max": 89 }] },
+      { "tier": 3, "name": "Greater", "minLevel": 50, "ranges": [{ "min": 60, "max": 74 }] }
+    ]
+  },
+  {
+    "family": "MaximumSpirit",
+    "template": "+# to maximum Spirit",
+    "type": "prefix",
+    "tiers": [
+      { "tier": 1, "name": "Transcendent", "minLevel": 70, "ranges": [{ "min": 40, "max": 50 }] },
+      { "tier": 2, "name": "Ascendant", "minLevel": 55, "ranges": [{ "min": 25, "max": 39 }] }
+    ]
+  },
+  {
+    "family": "FireResistance",
+    "template": "+#% to Fire Resistance",
+    "type": "suffix",
+    "tiers": [
+      { "tier": 1, "name": "of Scorch", "minLevel": 75, "ranges": [{ "min": 40, "max": 45 }] },
+      { "tier": 2, "name": "of Flame", "minLevel": 60, "ranges": [{ "min": 32, "max": 39 }] }
+    ]
+  },
+  {
+    "family": "AttackSpeed",
+    "template": "#% increased Attack Speed",
+    "type": "suffix",
+    "tiers": [
+      { "tier": 1, "name": "of Fury", "minLevel": 70, "ranges": [{ "min": 20, "max": 25 }] },
+      { "tier": 2, "name": "of Haste", "minLevel": 50, "ranges": [{ "min": 15, "max": 19 }] }
+    ]
+  }
+]

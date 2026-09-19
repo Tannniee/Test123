@@ -9,6 +9,8 @@ import { Search } from './modules/search.js';
 import { Render } from './modules/render.js';
 import { Modals } from './modules/modals.js';
 import { Clipboard } from './modules/clipboard.js';
+import { bridge } from './modules/bridgeClient.js';
+import { itemInspector } from './modules/itemInspector.js';
 
 // DOM Elements Cache
 const dom = {};
@@ -34,6 +36,12 @@ function initDom() {
   dom.btnSettings = document.getElementById('btnSettings');
   dom.btnCompareDrawer = document.getElementById('btnCompareDrawer');
   dom.compareCountBadge = document.getElementById('compareCountBadge');
+  dom.btnOpenItemInspector = document.getElementById('btnOpenItemInspector');
+
+  // Desktop Bridge Status Pill (Phase 4 / 18)
+  dom.bridgeStatusWrap = document.getElementById('bridgeStatusWrap');
+  dom.bridgeStatusPill = document.getElementById('bridgeStatusPill');
+  dom.bridgeStatusText = document.getElementById('bridgeStatusText');
 
   // Search & Views
   dom.searchInput = document.getElementById('searchInput');
@@ -126,6 +134,7 @@ let warmingPollTimer = null;
 // ==========================================================================
 async function init() {
   initDom();
+  itemInspector.init(dom, state);
 
   // Sync initial UI classes from loaded preferences
   dom.btnPoe1.classList.toggle('active', state.currentGame === 'poe1');
@@ -143,8 +152,18 @@ async function init() {
   // 2. Fetch data-driven categories and items
   await loadCategoriesAndData();
 
-  // 3. Setup In-Game Paste scanner
-  Clipboard.initPasteListener((parsed) => {
+  // 3. Setup In-Game Paste scanner (Phase 15 & 17 Smart Routing)
+  Clipboard.initPasteListener(async (parsed) => {
+    const rawText = parsed.rawText || '';
+    const rarity = (parsed.rarity || '').toLowerCase();
+
+    // If it's gear (Rare, Magic, Normal with base, or Unique gear with stats) -> Deep Item Inspector!
+    const isGear = rarity === 'rare' || rarity === 'magic' || (rarity === 'normal' && parsed.baseType) || (rarity === 'unique' && rawText.includes('--------'));
+    if (isGear && rawText) {
+      await itemInspector.inspectRawText(rawText, state.currentGame, state.currentLeague);
+      return;
+    }
+
     dom.searchInput.value = parsed.searchQuery;
     dom.clearSearchBtn.classList.remove('hidden');
     state.searchQuery = parsed.searchQuery;
@@ -166,7 +185,10 @@ async function init() {
   const pDesc = (typeof window !== 'undefined' && window.PoeItemDescriptions) ||
                 (typeof globalThis !== 'undefined' && globalThis.PoeItemDescriptions);
   if (pDesc && typeof pDesc.onPoedbLoaded === 'function') {
-    pDesc.onPoedbLoaded((normalizedName) => {
+    pDesc.onPoedbLoaded((eventOrKey) => {
+      const normalizedName = (typeof eventOrKey === 'object' && eventOrKey !== null)
+        ? (eventOrKey.itemName || '')
+        : String(eventOrKey || '');
       if (currentHoveredItem && (currentHoveredItem.name || '').toLowerCase() === normalizedName.toLowerCase()) {
         if (lastHoverEvent && !isTooltipPinned) {
           showItemTooltip(lastHoverEvent, currentHoveredItem);
@@ -174,6 +196,57 @@ async function init() {
       }
     });
   }
+
+  // 6. Desktop Bridge Real-Time SSE Listener (Phase 4)
+  bridge.onStatusChange((connected) => {
+    if (dom.bridgeStatusPill) {
+      dom.bridgeStatusPill.classList.toggle('online', connected);
+      dom.bridgeStatusPill.classList.toggle('offline', !connected);
+    }
+    if (dom.bridgeStatusText) {
+      dom.bridgeStatusText.textContent = connected ? 'Bridge: Online' : 'Bridge: Offline';
+    }
+  });
+
+  bridge.onInspect(async (inspectData) => {
+    if (!inspectData || !inspectData.rawText) return;
+
+    // Automatic game context switch (Phase 19)
+    if (inspectData.game && (inspectData.game === 'poe1' || inspectData.game === 'poe2') && inspectData.game !== state.currentGame) {
+      await switchGame(inspectData.game);
+    }
+
+    // Direct routing to Deep Item Inspector if analysis or gear model is available
+    if (inspectData.analysis || (inspectData.parsedItem && (inspectData.classification?.isGear || (inspectData.parsedItem.modifiers?.explicits && inspectData.parsedItem.modifiers.explicits.length > 0)))) {
+      Clipboard.showToast(`[Bridge] Soi đồ: ${inspectData.parsedItem?.identity?.name || 'Vật phẩm'}`, 'success');
+      itemInspector.open({
+        item: inspectData.parsedItem,
+        classification: inspectData.classification,
+        analysis: inspectData.analysis,
+        market: inspectData.market,
+        rawText: inspectData.rawText
+      });
+      return;
+    }
+
+    const parsed = Clipboard.parseItemText(inspectData.rawText);
+    if (parsed && parsed.searchQuery) {
+      dom.searchInput.value = parsed.searchQuery;
+      dom.clearSearchBtn?.classList.remove('hidden');
+      state.searchQuery = parsed.searchQuery;
+      filterAndRender();
+
+      const match = state.filteredItems[0];
+      if (match) {
+        Clipboard.showToast(`[Bridge] ${match.name}`, 'success');
+        Modals.openCalculator(match, state, dom);
+      } else {
+        Clipboard.showToast(`[Bridge] Đã nhận: "${parsed.searchQuery}"`, 'info');
+      }
+    }
+  });
+
+  bridge.connect();
 }
 
 async function loadLeagues() {
@@ -563,18 +636,24 @@ function showItemTooltip(e, item) {
 
   if (dom.tooltipPrice) {
     const isPoe2 = state.currentGame === 'poe2';
-    const divChaosRate = state.rates?.divinePriceInChaos || 366;
-    const exRate = state.rates?.rawRates?.exalted || 120;
+    const divChaosRate = typeof state.rates?.divinePriceInChaos === 'number' && state.rates.divinePriceInChaos > 0 ? state.rates.divinePriceInChaos : 0;
+    const exRate = typeof state.rates?.rawRates?.exalted === 'number' && state.rates.rawRates.exalted > 0 ? state.rates.rawRates.exalted : 0;
 
     if (isPoe2) {
       const exVal = typeof item.exaltedValue === 'number' ? item.exaltedValue : 0;
       const divVal = typeof item.divineValue === 'number' ? item.divineValue : 0;
       if (divVal >= 1) {
-        dom.tooltipPrice.textContent = `${divVal} Div (≈ ${(divVal * exRate).toFixed(0)} Ex)`;
+        dom.tooltipPrice.textContent = exRate > 0 
+          ? `${divVal} Div (≈ ${(divVal * exRate).toFixed(0)} Ex)`
+          : `${divVal} Div`;
       } else if (exVal < 1 && exVal > 0) {
         const perEx = Math.round(1 / exVal * 10) / 10;
-        const perDiv = Math.round(exRate / exVal);
-        dom.tooltipPrice.textContent = `1 Ex = ${perEx} • 1 Div = ${perDiv.toLocaleString()} (≈ ${exVal.toFixed(2)} Ex)`;
+        if (exRate > 0) {
+          const perDiv = Math.round(exRate / exVal);
+          dom.tooltipPrice.textContent = `1 Ex = ${perEx} • 1 Div = ${perDiv.toLocaleString()} (≈ ${exVal.toFixed(2)} Ex)`;
+        } else {
+          dom.tooltipPrice.textContent = `1 Ex = ${perEx} (≈ ${exVal.toFixed(2)} Ex)`;
+        }
       } else {
         const perDiv = divVal > 0 ? Math.round(1 / divVal) : 0;
         dom.tooltipPrice.textContent = `${exVal} Ex` + (perDiv > 0 ? ` (1 Div = ${perDiv})` : '');
@@ -583,11 +662,17 @@ function showItemTooltip(e, item) {
       const chaosVal = typeof item.chaosValue === 'number' ? item.chaosValue : 0;
       const divVal = typeof item.divineValue === 'number' ? item.divineValue : 0;
       if (divVal >= 1) {
-        dom.tooltipPrice.textContent = `${divVal} Div (≈ ${Math.round(divVal * divChaosRate).toLocaleString()} C)`;
+        dom.tooltipPrice.textContent = divChaosRate > 0 
+          ? `${divVal} Div (≈ ${Math.round(divVal * divChaosRate).toLocaleString()} C)`
+          : `${divVal} Div`;
       } else if (chaosVal < 1 && chaosVal > 0) {
         const perC = Math.round(1 / chaosVal * 10) / 10;
-        const perDiv = Math.round(divChaosRate / chaosVal);
-        dom.tooltipPrice.textContent = `1 C = ${perC} • 1 Div = ${perDiv.toLocaleString()} (≈ ${chaosVal.toFixed(3).replace(/0+$/, '').replace(/\.$/, '')} C)`;
+        if (divChaosRate > 0) {
+          const perDiv = Math.round(divChaosRate / chaosVal);
+          dom.tooltipPrice.textContent = `1 C = ${perC} • 1 Div = ${perDiv.toLocaleString()} (≈ ${chaosVal.toFixed(3).replace(/0+$/, '').replace(/\.$/, '')} C)`;
+        } else {
+          dom.tooltipPrice.textContent = `1 C = ${perC} (≈ ${chaosVal.toFixed(3).replace(/0+$/, '').replace(/\.$/, '')} C)`;
+        }
       } else {
         const perDiv = divVal > 0 ? Math.round(1 / divVal) : 0;
         dom.tooltipPrice.textContent = `${chaosVal} C` + (perDiv > 0 ? ` (1 Div = ${perDiv})` : '');
@@ -763,6 +848,8 @@ function bindEvents() {
   // League Selector
   dom.leagueSelect.addEventListener('change', (e) => {
     state.currentLeague = e.target.value;
+    state.clearCompare();
+    updateCompareBadge();
     loadCategoriesAndData();
   });
 
@@ -1046,6 +1133,7 @@ function bindEvents() {
   document.getElementById('closeCompareModal')?.addEventListener('click', Modals.closeCompare);
   document.getElementById('btnClearCompare')?.addEventListener('click', () => {
     state.clearCompare();
+    updateCompareBadge();
     Modals.closeCompare();
     renderCurrentView();
   });
@@ -1054,6 +1142,7 @@ function bindEvents() {
     if (!btn) return;
     const id = btn.dataset.id;
     state.compareList.delete(id);
+    updateCompareBadge();
     Modals.openCompare(state, dom);
     renderCurrentView();
   });
@@ -1061,6 +1150,27 @@ function bindEvents() {
   // Price Alerts Modal Trigger
   dom.btnAlerts.addEventListener('click', () => Modals.openAlerts(state));
   document.getElementById('closeAlertsModal')?.addEventListener('click', Modals.closeAlerts);
+
+  // Deep Item Inspector Trigger (Phase 16 & 17)
+  dom.btnOpenItemInspector?.addEventListener('click', async () => {
+    try {
+      if (navigator.clipboard && navigator.clipboard.readText) {
+        const text = await navigator.clipboard.readText();
+        if (itemInspector.isPoeItemText(text)) {
+          Clipboard.showToast('Đang phân tích vật phẩm từ clipboard...', 'info');
+          await itemInspector.inspectRawText(text, state.currentGame, state.currentLeague);
+          return;
+        }
+      }
+    } catch (e) {
+      // Browser clipboard permission denied or not supported, fallback to prompt
+    }
+
+    const pasted = window.prompt('Dán nội dung vật phẩm (Ctrl+C trong game PoE rồi dán vào đây):');
+    if (pasted && pasted.trim()) {
+      await itemInspector.inspectRawText(pasted, state.currentGame, state.currentLeague);
+    }
+  });
   document.getElementById('btnAddAlert')?.addEventListener('click', () => {
     const itemName = document.getElementById('newAlertItemName')?.value.trim();
     const condition = document.getElementById('newAlertCondition')?.value;
@@ -1268,7 +1378,8 @@ async function handleItemAction(e) {
       return;
     }
     const isNowComparing = state.isInCompare(item.id);
-    Clipboard.showToast(isNowComparing ? `⚖️ Đã thêm "${item.name}" vào bảng so sánh (${state.compareList.length}/5)` : `Đã bỏ so sánh "${item.name}"`);
+    updateCompareBadge();
+    Clipboard.showToast(isNowComparing ? `⚖️ Đã thêm "${item.name}" vào bảng so sánh (${state.compareList.size}/5)` : `Đã bỏ so sánh "${item.name}"`);
     renderCurrentView();
   }
 }
@@ -1277,6 +1388,8 @@ async function switchGame(game) {
   if (state.currentGame === game) return;
   state.currentGame = game;
   state.activeCategory = 'Currency';
+  state.clearCompare();
+  updateCompareBadge();
 
   dom.btnPoe1.classList.toggle('active', game === 'poe1');
   dom.btnPoe2.classList.toggle('active', game === 'poe2');

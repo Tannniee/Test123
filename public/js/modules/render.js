@@ -258,7 +258,9 @@ export const Render = {
     if (isPoe2) {
       const divVal = typeof item.divineValue === 'number' ? item.divineValue : 0;
       const exVal = typeof item.exaltedValue === 'number' ? item.exaltedValue : 0;
-      const exRate = (rates && rates.rawRates && rates.rawRates.exalted) || (divVal > 0 && exVal > 0 ? Math.round(exVal / divVal) : 120);
+      const exRate = (rates && rates.rawRates && typeof rates.rawRates.exalted === 'number' && rates.rawRates.exalted > 0)
+        ? rates.rawRates.exalted
+        : (divVal > 0 && exVal > 0 ? Math.round(exVal / divVal) : 0);
 
       // 1. Expensive items (>= 1 Divine)
       if (divVal >= 1) {
@@ -271,7 +273,7 @@ export const Render = {
             <span class="val-base">1.0</span>
             <img src="${this.escapeHtml(itemIcon)}" class="mini-ico" alt="" />
           </div>
-          <div class="val-sub">≈ ${Math.round(divVal * exRate).toLocaleString()} Ex</div>
+          ${exRate > 0 ? `<div class="val-sub">≈ ${Math.round(divVal * exRate).toLocaleString()} Ex</div>` : ''}
         `;
       }
 
@@ -312,7 +314,9 @@ export const Render = {
     // PoE 1
     const chaosVal = typeof item.chaosValue === 'number' ? item.chaosValue : 0;
     const divVal = typeof item.divineValue === 'number' ? item.divineValue : 0;
-    const divChaosRate = (rates && rates.divinePriceInChaos) || (divVal > 0 && chaosVal > 0 ? Math.round(chaosVal / divVal) : 366);
+    const divChaosRate = (rates && typeof rates.divinePriceInChaos === 'number' && rates.divinePriceInChaos > 0)
+      ? rates.divinePriceInChaos
+      : (divVal > 0 && chaosVal > 0 ? Math.round(chaosVal / divVal) : 0);
 
     // 1. Expensive items (>= 1 Divine)
     if (divVal >= 1) {
@@ -325,7 +329,7 @@ export const Render = {
           <span class="val-base">1.0</span>
           <img src="${this.escapeHtml(itemIcon)}" class="mini-ico" alt="" />
         </div>
-        <div class="val-sub">≈ ${Math.round(divVal * divChaosRate).toLocaleString()} C</div>
+        ${divChaosRate > 0 ? `<div class="val-sub">≈ ${Math.round(divVal * divChaosRate).toLocaleString()} C</div>` : ''}
       `;
     }
 

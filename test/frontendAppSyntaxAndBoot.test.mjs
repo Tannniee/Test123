@@ -14,7 +14,8 @@ describe('Frontend App Syntax & Boot Verification Suite', () => {
       'public/js/modules/modals.js',
       'public/js/modules/render.js',
       'public/js/modules/search.js',
-      'public/js/modules/state.js'
+      'public/js/modules/state.js',
+      'public/js/modules/bridgeClient.js'
     ];
 
     for (const relPath of jsFiles) {

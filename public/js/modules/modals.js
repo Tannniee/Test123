@@ -7,6 +7,7 @@ import { Clipboard } from './clipboard.js';
 import { Render } from './render.js';
 
 export const Modals = {
+  _inspectPoedbUnsub: null,
   // -----------------------------------------------------------------
   // 1. POESTASH Item Inspection View
   // -----------------------------------------------------------------
@@ -49,49 +50,77 @@ export const Modals = {
       const divVal = typeof item.divineValue === 'number' ? item.divineValue : 0;
       const exVal = typeof item.exaltedValue === 'number' ? item.exaltedValue : 0;
 
-      const divChaosRate = state.rates?.rawRates?.exalted || (state.rates?.divinePriceInChaos) || 120;
+      const rawExRate = state.rates?.rawRates?.exalted || state.rates?.exalted || 0;
+      const exRate = typeof rawExRate === 'number' && rawExRate > 0 ? rawExRate : 0;
       if (divVal >= 1) {
         elements.inspectMainPrice.textContent = (divVal % 1 === 0 ? divVal.toLocaleString() : divVal.toFixed(1));
         elements.inspectMainCur.textContent = 'Divine';
-        elements.inspectSubPrice.textContent = exVal > 0 ? `≈ ${exVal.toLocaleString()} Exalted` : `≈ ${(divVal * divChaosRate).toFixed(0)} Exalted`;
-        if (elements.inspectRateNote) elements.inspectRateNote.textContent = `Tỷ giá: 1 Div = ${divChaosRate} Ex`;
+        elements.inspectSubPrice.textContent = exVal > 0
+          ? `≈ ${exVal.toLocaleString()} Exalted`
+          : (exRate > 0 ? `≈ ${(divVal * exRate).toFixed(0)} Exalted` : '');
+        if (elements.inspectRateNote) {
+          elements.inspectRateNote.textContent = exRate > 0 ? `Tỷ giá: 1 Div = ${exRate} Ex` : 'Tỷ giá: Đang cập nhật...';
+        }
       } else if (exVal < 1 && exVal > 0) {
         const perEx = Math.round(1 / exVal * 10) / 10;
-        const perDiv = Math.round(divChaosRate / exVal);
         elements.inspectMainPrice.textContent = perEx;
         elements.inspectMainCur.textContent = '/ 1 Ex';
-        elements.inspectSubPrice.textContent = `1 Div = ${perDiv.toLocaleString()} • (Đơn giá: ≈ ${exVal.toFixed(2)} Ex)`;
-        if (elements.inspectRateNote) elements.inspectRateNote.textContent = `Quy đổi: 1 Ex = ${perEx} • 1 Div = ${perDiv.toLocaleString()} (Tỷ giá 1 Div = ${divChaosRate} Ex)`;
+        if (exRate > 0) {
+          const perDiv = Math.round(exRate / exVal);
+          elements.inspectSubPrice.textContent = `1 Div = ${perDiv.toLocaleString()} • (Đơn giá: ≈ ${exVal.toFixed(2)} Ex)`;
+          if (elements.inspectRateNote) elements.inspectRateNote.textContent = `Quy đổi: 1 Ex = ${perEx} • 1 Div = ${perDiv.toLocaleString()} (Tỷ giá 1 Div = ${exRate} Ex)`;
+        } else {
+          elements.inspectSubPrice.textContent = `(Đơn giá: ≈ ${exVal.toFixed(2)} Ex)`;
+          if (elements.inspectRateNote) elements.inspectRateNote.textContent = `Quy đổi: 1 Ex = ${perEx} (Tỷ giá: Đang cập nhật...)`;
+        }
       } else {
         const perDiv = divVal > 0 ? Math.round(1 / divVal) : 0;
         elements.inspectMainPrice.textContent = exVal > 0 ? (exVal % 1 === 0 ? exVal.toLocaleString() : exVal.toFixed(1)) : '0';
         elements.inspectMainCur.textContent = 'Exalted';
         elements.inspectSubPrice.textContent = divVal > 0 ? `≈ ${divVal.toFixed(3)} Divine (1 Div = ${perDiv})` : '';
-        if (elements.inspectRateNote) elements.inspectRateNote.textContent = `Tỷ giá: 1 Div = ${divChaosRate} Ex`;
+        if (elements.inspectRateNote) {
+          elements.inspectRateNote.textContent = exRate > 0 ? `Tỷ giá: 1 Div = ${exRate} Ex` : 'Tỷ giá: Đang cập nhật...';
+        }
       }
     } else {
       const chaosVal = typeof item.chaosValue === 'number' ? item.chaosValue : 0;
       const divVal = typeof item.divineValue === 'number' ? item.divineValue : 0;
-      const divChaosRate = state.rates?.divinePriceInChaos || state.divineChaosPrice || 366;
+      const rawDivChaosRate = state.rates?.divinePriceInChaos || state.divineChaosPrice || 0;
+      const divChaosRate = typeof rawDivChaosRate === 'number' && rawDivChaosRate > 0 ? rawDivChaosRate : 0;
 
       if (divVal >= 1) {
         elements.inspectMainPrice.textContent = (divVal % 1 === 0 ? divVal.toLocaleString() : divVal.toFixed(1));
         elements.inspectMainCur.textContent = 'Divine';
-        elements.inspectSubPrice.textContent = chaosVal > 0 ? `≈ ${chaosVal.toLocaleString()} Chaos` : `≈ ${Math.round(divVal * divChaosRate).toLocaleString()} Chaos`;
-        if (elements.inspectRateNote) elements.inspectRateNote.textContent = `Tỷ giá: 1 Div = ${divChaosRate} C`;
+        elements.inspectSubPrice.textContent = chaosVal > 0
+          ? `≈ ${chaosVal.toLocaleString()} Chaos`
+          : (divChaosRate > 0 ? `≈ ${Math.round(divVal * divChaosRate).toLocaleString()} Chaos` : '');
+        if (elements.inspectRateNote) {
+          elements.inspectRateNote.textContent = divChaosRate > 0 ? `Tỷ giá: 1 Div = ${divChaosRate} C` : 'Tỷ giá: Đang cập nhật...';
+        }
       } else if (chaosVal < 1 && chaosVal > 0) {
         const perC = Math.round(1 / chaosVal * 10) / 10;
-        const perDiv = Math.round(divChaosRate / chaosVal);
         elements.inspectMainPrice.textContent = perC;
         elements.inspectMainCur.textContent = '/ 1 Chaos';
-        elements.inspectSubPrice.textContent = `1 Div = ${perDiv.toLocaleString()} • (Đơn giá: ≈ ${chaosVal.toFixed(3).replace(/0+$/, '').replace(/\.$/, '')} C)`;
-        if (elements.inspectRateNote) elements.inspectRateNote.textContent = `Quy đổi: 1 C = ${perC} • 1 Div = ${perDiv.toLocaleString()} (Tỷ giá 1 Div = ${divChaosRate} C)`;
+        if (divChaosRate > 0) {
+          const perDiv = Math.round(divChaosRate / chaosVal);
+          elements.inspectSubPrice.textContent = `1 Div = ${perDiv.toLocaleString()} • (Đơn giá: ≈ ${chaosVal.toFixed(3).replace(/0+$/, '').replace(/\.$/, '')} C)`;
+          if (elements.inspectRateNote) elements.inspectRateNote.textContent = `Quy đổi: 1 C = ${perC} • 1 Div = ${perDiv.toLocaleString()} (Tỷ giá 1 Div = ${divChaosRate} C)`;
+        } else {
+          elements.inspectSubPrice.textContent = `(Đơn giá: ≈ ${chaosVal.toFixed(3).replace(/0+$/, '').replace(/\.$/, '')} C)`;
+          if (elements.inspectRateNote) elements.inspectRateNote.textContent = `Quy đổi: 1 C = ${perC} (Tỷ giá: Đang cập nhật...)`;
+        }
       } else {
         const perDiv = divVal > 0 ? Math.round(1 / divVal) : 0;
         elements.inspectMainPrice.textContent = (chaosVal % 1 === 0 ? chaosVal.toLocaleString() : chaosVal.toFixed(1));
         elements.inspectMainCur.textContent = 'Chaos';
         elements.inspectSubPrice.textContent = divVal > 0 ? `≈ ${divVal.toFixed(2)} Divine` : '';
-        if (elements.inspectRateNote) elements.inspectRateNote.textContent = perDiv > 0 ? `1 Div = ${perDiv.toLocaleString()} ${item.name} • Tỷ giá 1 Div = ${divChaosRate} C` : `Tỷ giá: 1 Div = ${divChaosRate} C`;
+        if (elements.inspectRateNote) {
+          if (divChaosRate > 0) {
+            elements.inspectRateNote.textContent = perDiv > 0 ? `1 Div = ${perDiv.toLocaleString()} ${item.name} • Tỷ giá 1 Div = ${divChaosRate} C` : `Tỷ giá: 1 Div = ${divChaosRate} C`;
+          } else {
+            elements.inspectRateNote.textContent = perDiv > 0 ? `1 Div = ${perDiv.toLocaleString()} ${item.name}` : 'Tỷ giá: Đang cập nhật...';
+          }
+        }
       }
     }
 
@@ -107,7 +136,7 @@ export const Modals = {
 
     // 5. Authentic PoE Card
     const pDesc = (typeof window !== 'undefined' && window.PoeItemDescriptions) ||
-                  (typeof globalThis !== 'undefined' && globalThis.PoeItemDescriptions);
+      (typeof globalThis !== 'undefined' && globalThis.PoeItemDescriptions);
     const tt = pDesc ? pDesc.getTooltip(item) : null;
 
     if (elements.poeCardName) {
@@ -148,8 +177,15 @@ export const Modals = {
     }
 
     // Subscribe to background PoEDB fetch if description arrives while modal is open
+    if (this._inspectPoedbUnsub) {
+      this._inspectPoedbUnsub();
+      this._inspectPoedbUnsub = null;
+    }
     if (pDesc && typeof pDesc.onPoedbLoaded === 'function') {
-      pDesc.onPoedbLoaded((loadedName) => {
+      this._inspectPoedbUnsub = pDesc.onPoedbLoaded((eventOrKey) => {
+        const loadedName = (typeof eventOrKey === 'object' && eventOrKey !== null)
+          ? (eventOrKey.itemName || '')
+          : String(eventOrKey || '');
         if (state.activeModalItem && (state.activeModalItem.name || '').toLowerCase() === loadedName.toLowerCase()) {
           renderCardBody();
         }
@@ -196,7 +232,7 @@ export const Modals = {
       const related = catItems.filter(i => i.id !== item.id).slice(0, 4);
       if (related.length > 0) {
         elements.inspectRelatedList.innerHTML = related.map(rel => {
-          const relVal = isPoe2 
+          const relVal = isPoe2
             ? (rel.divineValue >= 1 ? `${rel.divineValue} Div` : `${rel.exaltedValue || 0} Ex`)
             : (rel.divineValue >= 1 ? `${rel.divineValue} Div` : `${rel.chaosValue || 0} C`);
           return `
@@ -223,6 +259,10 @@ export const Modals = {
   },
 
   closeItemInspection(elements) {
+    if (this._inspectPoedbUnsub) {
+      this._inspectPoedbUnsub();
+      this._inspectPoedbUnsub = null;
+    }
     if (elements.itemInspectOverlay) {
       elements.itemInspectOverlay.classList.add('hidden');
       elements.itemInspectOverlay.setAttribute('hidden', '');
@@ -277,19 +317,19 @@ export const Modals = {
             <td class="compare-label-cell">Giá quy đổi</td>
             ${items.map(item => `
               <td class="compare-val-cell font-bold">
-                ${state.currentGame === 'poe2' ? 
-                  `${(item.divineValue || 0).toLocaleString()} Div (${(item.exaltedValue || 0).toLocaleString()} Ex)` : 
-                  `${(item.chaosValue || 0).toLocaleString()} C (${(item.divineValue || 0).toLocaleString()} Div)`}
+                ${state.currentGame === 'poe2' ?
+        `${(item.divineValue || 0).toLocaleString()} Div (${(item.exaltedValue || 0).toLocaleString()} Ex)` :
+        `${(item.chaosValue || 0).toLocaleString()} C (${(item.divineValue || 0).toLocaleString()} Div)`}
               </td>
             `).join('')}
           </tr>
           <tr>
             <td class="compare-label-cell">Biến động 7 ngày</td>
             ${items.map(item => {
-              const change = typeof item.change7d === 'number' ? item.change7d : 0;
-              const cl = change > 0 ? 'trend-up' : change < 0 ? 'trend-down' : 'trend-flat';
-              return `<td><span class="trend-pill ${cl}">${change > 0 ? '+' : ''}${change.toFixed(1)}%</span></td>`;
-            }).join('')}
+          const change = typeof item.change7d === 'number' ? item.change7d : 0;
+          const cl = change > 0 ? 'trend-up' : change < 0 ? 'trend-down' : 'trend-flat';
+          return `<td><span class="trend-pill ${cl}">${change > 0 ? '+' : ''}${change.toFixed(1)}%</span></td>`;
+        }).join('')}
           </tr>
           <tr>
             <td class="compare-label-cell">Khối lượng 24h</td>
@@ -376,24 +416,43 @@ export const Modals = {
   checkPriceAlerts(items, state) {
     if (!state.alerts || state.alerts.length === 0 || !items || items.length === 0) return;
 
+    let alertsChanged = false;
     for (const alert of state.alerts) {
-      const match = items.find(i => i.name.toLowerCase() === alert.itemName.toLowerCase());
+      const match = items.find(i => i.name && i.name.toLowerCase() === (alert.itemName || '').toLowerCase());
       if (!match) continue;
 
       let currentPrice = match.chaosValue || 0;
       if (alert.currency === 'div') currentPrice = match.divineValue || 0;
       if (alert.currency === 'ex') currentPrice = match.exaltedValue || 0;
 
-      let triggered = false;
+      let meetsCondition = false;
       if (alert.condition === 'above' && currentPrice > alert.threshold) {
-        triggered = true;
+        meetsCondition = true;
       } else if (alert.condition === 'below' && currentPrice < alert.threshold) {
-        triggered = true;
+        meetsCondition = true;
       }
 
-      if (triggered) {
-        Clipboard.showToast(`🚨 Cảnh báo giá: ${match.name} hiện là ${currentPrice} ${alert.currency.toUpperCase()} (${alert.condition === 'above' ? '>' : '<'} ${alert.threshold})`, 'warning');
+      if (meetsCondition) {
+        if (!alert.isTriggered) {
+          alert.isTriggered = true;
+          alert.lastTriggeredAt = Date.now();
+          alert.lastPrice = currentPrice;
+          alertsChanged = true;
+          Clipboard.showToast(
+            `🚨 Cảnh báo giá: ${match.name} hiện là ${currentPrice} ${alert.currency.toUpperCase()} (${alert.condition === 'above' ? '>' : '<'} ${alert.threshold})`,
+            'warning'
+          );
+        }
+      } else {
+        if (alert.isTriggered) {
+          alert.isTriggered = false;
+          alertsChanged = true;
+        }
       }
+    }
+
+    if (alertsChanged && typeof state.saveAlerts === 'function') {
+      state.saveAlerts();
     }
   },
 

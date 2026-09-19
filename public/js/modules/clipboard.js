@@ -88,6 +88,7 @@ export const Clipboard = {
       if (typeof window.PoeItemParser !== 'undefined') {
         const parsed = window.PoeItemParser.parse(pastedText);
         if (parsed && parsed.searchQuery) {
+          parsed.rawText = pastedText;
           onItemFound(parsed);
         }
       }

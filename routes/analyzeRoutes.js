@@ -1,5 +1,6 @@
 const express = require('express');
 const defaultItemAnalyzerService = require('../services/itemAnalyzer/itemAnalyzerService');
+const { validateItemRawText } = require('../services/itemAnalyzer/itemValidator');
 
 /**
  * Creates routes router for the Item Analyzer API.
@@ -14,17 +15,11 @@ function createAnalyzeRouter(options = {}) {
   router.post('/api/analyze-item', (req, res) => {
     const { rawText, game = 'poe1', league = null, source = 'manual_paste' } = req.body || {};
 
-    if (!rawText || typeof rawText !== 'string' || rawText.trim().length === 0) {
-      return res.status(400).json({
+    const validation = validateItemRawText(rawText, { requirePoeMarkers: false, maxLength: 20000 });
+    if (!validation.isValid) {
+      return res.status(validation.status || 400).json({
         success: false,
-        error: 'Field "rawText" is required and cannot be empty.'
-      });
-    }
-
-    if (rawText.length > 20000) {
-      return res.status(400).json({
-        success: false,
-        error: 'Field "rawText" exceeds maximum allowed length of 20,000 characters.'
+        error: validation.error
       });
     }
 

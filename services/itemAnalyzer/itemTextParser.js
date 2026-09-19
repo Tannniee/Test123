@@ -392,8 +392,17 @@ class ItemTextParser {
   }
 
   static _parseModifiersOrFlavour(lines, modifiers, flavour) {
-    // Check if section is flavour text (often surrounded by quotes or at the bottom of Uniques/Cards)
-    const allQuotes = lines.every(l => l.startsWith('"') || l.endsWith('"') || l.startsWith('—') || l.startsWith('He who') || l.length > 50);
+    // Determine if line or section is flavour text (in PoE, flavour text is wrapped in quotes or follows attribution)
+    const isFlavourLine = (l) =>
+      l.startsWith('"') ||
+      l.endsWith('"') ||
+      l.startsWith('“') ||
+      l.endsWith('”') ||
+      l.startsWith('—') ||
+      l.startsWith('-- ') ||
+      l.startsWith('- ');
+
+    const allAreFlavour = lines.length > 0 && lines.every(l => isFlavourLine(l));
 
     for (const line of lines) {
       if (line.endsWith('(enchant)')) {
@@ -406,7 +415,7 @@ class ItemTextParser {
         modifiers.crafted.push(line.replace(/\s*\(crafted\)$/i, ''));
       } else if (line.endsWith('(scourge)')) {
         modifiers.scourge.push(line.replace(/\s*\(scourge\)$/i, ''));
-      } else if (line.startsWith('"') || (allQuotes && !line.includes('+') && !line.includes('%'))) {
+      } else if (isFlavourLine(line) || allAreFlavour) {
         flavour.push(line);
       } else {
         modifiers.explicits.push(line);

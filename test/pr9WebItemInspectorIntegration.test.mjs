@@ -69,7 +69,7 @@ describe('PR 9 Suite: Web Item Inspector UI & Deep Analysis Integration (Phases 
       assert.equal(res2.affixCapacity.hasUncertainAffixes, true);
     });
 
-    it('marketResolver skips random item name for Rare items and matches baseType', () => {
+    it('marketResolver skips random item name for Rare items and matches baseType with isBaseReference flag', () => {
       const rareItem = {
         identity: {
           rarity: 'Rare',
@@ -83,7 +83,7 @@ describe('PR 9 Suite: Web Item Inspector UI & Deep Analysis Integration (Phases 
         getActiveLeague: () => 'Standard',
         getData: () => ({
           items: [
-            { name: 'Hubris Circlet', baseType: 'Hubris Circlet', chaosValue: 15, divineValue: 0.1, sourceType: 'BaseType' }
+            { name: 'Hubris Circlet', baseType: 'Hubris Circlet', chaosValue: 15, divineValue: 0.1, sourceType: 'BaseType', volume: 42 }
           ]
         })
       };
@@ -96,6 +96,43 @@ describe('PR 9 Suite: Web Item Inspector UI & Deep Analysis Integration (Phases 
       assert.ok(resolved, 'Should resolve market data by baseType');
       assert.equal(resolved.name, 'Hubris Circlet');
       assert.equal(resolved.chaosValue, 15);
+      assert.equal(resolved.isBaseReference, true);
+      assert.equal(resolved.referenceLabel, 'Base item reference');
+      assert.equal(resolved.volume, 42);
+      assert.equal(resolved.count, 42);
+    });
+
+    it('marketResolver disambiguates 6-link variant for Unique body armour', () => {
+      const sixLinkChest = {
+        identity: {
+          rarity: 'Unique',
+          name: 'Belly of the Beast',
+          baseType: 'Full Wyrmscale'
+        },
+        maxLinks: 6,
+        properties: {},
+        flags: {}
+      };
+
+      const mockCacheMgr = {
+        getActiveLeague: () => 'Standard',
+        getData: () => ({
+          items: [
+            { name: 'Belly of the Beast', links: 5, variant: '5L', chaosValue: 10, divineValue: 0.1 },
+            { name: 'Belly of the Beast', links: 6, variant: '6L', chaosValue: 250, divineValue: 1.5 }
+          ]
+        })
+      };
+
+      const resolved = marketResolver.resolve(sixLinkChest, {
+        game: 'poe1',
+        cacheManager: mockCacheMgr
+      });
+
+      assert.ok(resolved);
+      assert.equal(resolved.links, 6);
+      assert.equal(resolved.chaosValue, 250);
+      assert.equal(resolved.isBaseReference, false);
     });
   });
 
@@ -189,6 +226,7 @@ Adds 40 to 80 Physical Damage`;
       assert.ok(html.includes('pDPS'), 'Combat tab should show pDPS');
       assert.ok(html.includes('cDPS'), 'Combat tab should show cDPS');
       assert.ok(html.includes('Blacksmith\'s Whetstone'), 'Combat tab should show Quality projection');
+      assert.ok(html.includes('Estimated 20% Quality DPS'), 'Combat tab should explicitly label 20% quality DPS as estimated');
     });
 
     it('escapes user input preventing XSS injection', () => {

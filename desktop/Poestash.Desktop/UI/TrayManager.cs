@@ -47,7 +47,7 @@ public class TrayManager : IDisposable
         _contextMenu.Items.Clear();
 
         // Header Item (App Title & Status)
-        var titleItem = new ToolStripMenuItem("POESTASH v2.0.0")
+        var titleItem = new ToolStripMenuItem("POESTASH v2.0.1")
         {
             Enabled = false,
             Font = new Font("Segoe UI", 9f, FontStyle.Bold)

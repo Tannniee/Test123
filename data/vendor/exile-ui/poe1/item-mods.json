@@ -15,6 +15,19 @@
     ]
   },
   {
+    "family": "MaximumMana",
+    "template": "+# to maximum Mana",
+    "type": "prefix",
+    "tiers": [
+      { "tier": 1, "name": "Zaffre", "minLevel": 81, "ranges": [{ "min": 70, "max": 75 }] },
+      { "tier": 2, "name": "Cobalt", "minLevel": 69, "ranges": [{ "min": 65, "max": 69 }] },
+      { "tier": 3, "name": "Cerulean", "minLevel": 57, "ranges": [{ "min": 60, "max": 64 }] },
+      { "tier": 4, "name": "Aqua", "minLevel": 45, "ranges": [{ "min": 50, "max": 54 }] },
+      { "tier": 5, "name": "Shimmering", "minLevel": 33, "ranges": [{ "min": 40, "max": 44 }] },
+      { "tier": 6, "name": "Glimmering", "minLevel": 18, "ranges": [{ "min": 25, "max": 34 }] }
+    ]
+  },
+  {
     "family": "FireResistance",
     "template": "+#% to Fire Resistance",
     "type": "suffix",
@@ -65,6 +78,64 @@
     ]
   },
   {
+    "family": "AllElementalResistances",
+    "template": "+#% to all Elemental Resistances",
+    "type": "suffix",
+    "tiers": [
+      { "tier": 1, "name": "of the Rainbow", "minLevel": 78, "ranges": [{ "min": 16, "max": 18 }] },
+      { "tier": 2, "name": "of the Prism", "minLevel": 60, "ranges": [{ "min": 13, "max": 15 }] },
+      { "tier": 3, "name": "of the Kaleidoscope", "minLevel": 42, "ranges": [{ "min": 10, "max": 12 }] },
+      { "tier": 4, "name": "of the Spectrum", "minLevel": 24, "ranges": [{ "min": 7, "max": 9 }] }
+    ]
+  },
+  {
+    "family": "Strength",
+    "template": "+# to Strength",
+    "type": "suffix",
+    "tiers": [
+      { "tier": 1, "name": "of the Titan", "minLevel": 82, "ranges": [{ "min": 51, "max": 55 }] },
+      { "tier": 2, "name": "of the Leviathan", "minLevel": 74, "ranges": [{ "min": 43, "max": 50 }] },
+      { "tier": 3, "name": "of the Colossus", "minLevel": 66, "ranges": [{ "min": 38, "max": 42 }] },
+      { "tier": 4, "name": "of the Gorilla", "minLevel": 55, "ranges": [{ "min": 33, "max": 37 }] },
+      { "tier": 5, "name": "of the Bear", "minLevel": 44, "ranges": [{ "min": 28, "max": 32 }] },
+      { "tier": 6, "name": "of the Lion", "minLevel": 33, "ranges": [{ "min": 23, "max": 27 }] }
+    ]
+  },
+  {
+    "family": "Dexterity",
+    "template": "+# to Dexterity",
+    "type": "suffix",
+    "tiers": [
+      { "tier": 1, "name": "of the Wind", "minLevel": 82, "ranges": [{ "min": 51, "max": 55 }] },
+      { "tier": 2, "name": "of the Falcon", "minLevel": 74, "ranges": [{ "min": 43, "max": 50 }] },
+      { "tier": 3, "name": "of the Leopard", "minLevel": 66, "ranges": [{ "min": 38, "max": 42 }] },
+      { "tier": 4, "name": "of the Fox", "minLevel": 55, "ranges": [{ "min": 33, "max": 37 }] },
+      { "tier": 5, "name": "of the Lynx", "minLevel": 44, "ranges": [{ "min": 28, "max": 32 }] }
+    ]
+  },
+  {
+    "family": "Intelligence",
+    "template": "+# to Intelligence",
+    "type": "suffix",
+    "tiers": [
+      { "tier": 1, "name": "of the Genius", "minLevel": 82, "ranges": [{ "min": 51, "max": 55 }] },
+      { "tier": 2, "name": "of the Polymath", "minLevel": 74, "ranges": [{ "min": 43, "max": 50 }] },
+      { "tier": 3, "name": "of the Savant", "minLevel": 66, "ranges": [{ "min": 38, "max": 42 }] },
+      { "tier": 4, "name": "of the Sage", "minLevel": 55, "ranges": [{ "min": 33, "max": 37 }] },
+      { "tier": 5, "name": "of the Scholar", "minLevel": 44, "ranges": [{ "min": 28, "max": 32 }] }
+    ]
+  },
+  {
+    "family": "AllAttributes",
+    "template": "+# to all Attributes",
+    "type": "suffix",
+    "tiers": [
+      { "tier": 1, "name": "of the God", "minLevel": 80, "ranges": [{ "min": 14, "max": 16 }] },
+      { "tier": 2, "name": "of the Demigod", "minLevel": 60, "ranges": [{ "min": 11, "max": 13 }] },
+      { "tier": 3, "name": "of the Champion", "minLevel": 40, "ranges": [{ "min": 8, "max": 10 }] }
+    ]
+  },
+  {
     "family": "MovementSpeed",
     "template": "#% increased Movement Speed",
     "type": "prefix",
@@ -74,6 +145,17 @@
       { "tier": 3, "name": "Antelope's", "minLevel": 40, "ranges": [{ "min": 25, "max": 25 }] },
       { "tier": 4, "name": "Deer's", "minLevel": 20, "ranges": [{ "min": 20, "max": 20 }] },
       { "tier": 5, "name": "Runner's", "minLevel": 1, "ranges": [{ "min": 10, "max": 15 }] }
+    ]
+  },
+  {
+    "family": "SpellSuppression",
+    "template": "+#% chance to Suppress Spell Damage",
+    "type": "suffix",
+    "tiers": [
+      { "tier": 1, "name": "of Nullification", "minLevel": 85, "ranges": [{ "min": 13, "max": 14 }] },
+      { "tier": 2, "name": "of Damping", "minLevel": 72, "ranges": [{ "min": 11, "max": 12 }] },
+      { "tier": 3, "name": "of Muffling", "minLevel": 58, "ranges": [{ "min": 9, "max": 10 }] },
+      { "tier": 4, "name": "of Softening", "minLevel": 40, "ranges": [{ "min": 6, "max": 8 }] }
     ]
   },
   {
@@ -96,6 +178,47 @@
       { "tier": 2, "name": "Indomitable", "minLevel": 72, "ranges": [{ "min": 92, "max": 100 }] },
       { "tier": 3, "name": "Impregnable", "minLevel": 60, "ranges": [{ "min": 80, "max": 91 }] },
       { "tier": 4, "name": "Sanctified", "minLevel": 44, "ranges": [{ "min": 68, "max": 79 }] }
+    ]
+  },
+  {
+    "family": "FlatArmour",
+    "template": "+# to Armour",
+    "type": "prefix",
+    "tiers": [
+      { "tier": 1, "name": "Girded", "minLevel": 76, "ranges": [{ "min": 320, "max": 400 }] },
+      { "tier": 2, "name": "Plated", "minLevel": 65, "ranges": [{ "min": 240, "max": 319 }] },
+      { "tier": 3, "name": "Reinforced", "minLevel": 50, "ranges": [{ "min": 160, "max": 239 }] },
+      { "tier": 4, "name": "Thickened", "minLevel": 35, "ranges": [{ "min": 80, "max": 159 }] }
+    ]
+  },
+  {
+    "family": "ArmourPercent",
+    "template": "#% increased Armour",
+    "type": "prefix",
+    "tiers": [
+      { "tier": 1, "name": "Impenetrable", "minLevel": 78, "ranges": [{ "min": 101, "max": 110 }] },
+      { "tier": 2, "name": "Bulwark's", "minLevel": 70, "ranges": [{ "min": 92, "max": 100 }] },
+      { "tier": 3, "name": "Shielding", "minLevel": 56, "ranges": [{ "min": 80, "max": 91 }] }
+    ]
+  },
+  {
+    "family": "FlatEvasion",
+    "template": "+# to Evasion Rating",
+    "type": "prefix",
+    "tiers": [
+      { "tier": 1, "name": "Mirage's", "minLevel": 76, "ranges": [{ "min": 320, "max": 400 }] },
+      { "tier": 2, "name": "Phantasm's", "minLevel": 65, "ranges": [{ "min": 240, "max": 319 }] },
+      { "tier": 3, "name": "Shade's", "minLevel": 50, "ranges": [{ "min": 160, "max": 239 }] }
+    ]
+  },
+  {
+    "family": "EvasionPercent",
+    "template": "#% increased Evasion Rating",
+    "type": "prefix",
+    "tiers": [
+      { "tier": 1, "name": "Illusory", "minLevel": 78, "ranges": [{ "min": 101, "max": 110 }] },
+      { "tier": 2, "name": "Elusive", "minLevel": 70, "ranges": [{ "min": 92, "max": 100 }] },
+      { "tier": 3, "name": "Shadowy", "minLevel": 56, "ranges": [{ "min": 80, "max": 91 }] }
     ]
   },
   {
@@ -122,6 +245,49 @@
     ]
   },
   {
+    "family": "FlatFireDamageToAttacks",
+    "template": "Adds # to # Fire Damage to Attacks",
+    "type": "prefix",
+    "tiers": [
+      { "tier": 1, "name": "Cremating", "minLevel": 77, "ranges": [{ "min": 45, "max": 62 }, { "min": 90, "max": 125 }] },
+      { "tier": 2, "name": "Blistering", "minLevel": 65, "ranges": [{ "min": 35, "max": 48 }, { "min": 70, "max": 96 }] },
+      { "tier": 3, "name": "Scorching", "minLevel": 53, "ranges": [{ "min": 26, "max": 36 }, { "min": 53, "max": 73 }] },
+      { "tier": 4, "name": "Burning", "minLevel": 42, "ranges": [{ "min": 18, "max": 25 }, { "min": 37, "max": 51 }] }
+    ]
+  },
+  {
+    "family": "FlatColdDamageToAttacks",
+    "template": "Adds # to # Cold Damage to Attacks",
+    "type": "prefix",
+    "tiers": [
+      { "tier": 1, "name": "Freezing", "minLevel": 77, "ranges": [{ "min": 40, "max": 55 }, { "min": 80, "max": 110 }] },
+      { "tier": 2, "name": "Frostbitten", "minLevel": 65, "ranges": [{ "min": 31, "max": 42 }, { "min": 62, "max": 85 }] },
+      { "tier": 3, "name": "Glaciated", "minLevel": 53, "ranges": [{ "min": 23, "max": 32 }, { "min": 46, "max": 64 }] }
+    ]
+  },
+  {
+    "family": "FlatLightningDamageToAttacks",
+    "template": "Adds # to # Lightning Damage to Attacks",
+    "type": "prefix",
+    "tiers": [
+      { "tier": 1, "name": "Electrocuting", "minLevel": 77, "ranges": [{ "min": 8, "max": 15 }, { "min": 140, "max": 180 }] },
+      { "tier": 2, "name": "Discharging", "minLevel": 65, "ranges": [{ "min": 6, "max": 12 }, { "min": 110, "max": 142 }] },
+      { "tier": 3, "name": "Shocking", "minLevel": 53, "ranges": [{ "min": 4, "max": 9 }, { "min": 82, "max": 105 }] }
+    ]
+  },
+  {
+    "family": "SpellDamage",
+    "template": "#% increased Spell Damage",
+    "type": "prefix",
+    "tiers": [
+      { "tier": 1, "name": "Archmage's", "minLevel": 84, "ranges": [{ "min": 100, "max": 109 }] },
+      { "tier": 2, "name": "Lich's", "minLevel": 72, "ranges": [{ "min": 85, "max": 99 }] },
+      { "tier": 3, "name": "Sorcerer's", "minLevel": 60, "ranges": [{ "min": 70, "max": 84 }] },
+      { "tier": 4, "name": "Wizard's", "minLevel": 46, "ranges": [{ "min": 55, "max": 69 }] },
+      { "tier": 5, "name": "Mage's", "minLevel": 32, "ranges": [{ "min": 40, "max": 54 }] }
+    ]
+  },
+  {
     "family": "AttackSpeed",
     "template": "#% increased Attack Speed",
     "type": "suffix",
@@ -140,6 +306,28 @@
       { "tier": 1, "name": "of Incineration", "minLevel": 73, "ranges": [{ "min": 35, "max": 38 }] },
       { "tier": 2, "name": "of Destruction", "minLevel": 59, "ranges": [{ "min": 30, "max": 34 }] },
       { "tier": 3, "name": "of Ruin", "minLevel": 44, "ranges": [{ "min": 25, "max": 29 }] }
+    ]
+  },
+  {
+    "family": "CriticalStrikeMultiplier",
+    "template": "+#% to Global Critical Strike Multiplier",
+    "type": "suffix",
+    "tiers": [
+      { "tier": 1, "name": "of Destruction", "minLevel": 73, "ranges": [{ "min": 35, "max": 38 }] },
+      { "tier": 2, "name": "of Havoc", "minLevel": 60, "ranges": [{ "min": 30, "max": 34 }] },
+      { "tier": 3, "name": "of Annihilation", "minLevel": 45, "ranges": [{ "min": 25, "max": 29 }] },
+      { "tier": 4, "name": "of Ruin", "minLevel": 30, "ranges": [{ "min": 20, "max": 24 }] }
+    ]
+  },
+  {
+    "family": "ElementalDamageWithAttacks",
+    "template": "#% increased Elemental Damage with Attack Skills",
+    "type": "prefix",
+    "tiers": [
+      { "tier": 1, "name": "Prime", "minLevel": 81, "ranges": [{ "min": 43, "max": 50 }] },
+      { "tier": 2, "name": "Violent", "minLevel": 68, "ranges": [{ "min": 37, "max": 42 }] },
+      { "tier": 3, "name": "Unleashed", "minLevel": 54, "ranges": [{ "min": 31, "max": 36 }] },
+      { "tier": 4, "name": "Raging", "minLevel": 40, "ranges": [{ "min": 25, "max": 30 }] }
     ]
   },
   {

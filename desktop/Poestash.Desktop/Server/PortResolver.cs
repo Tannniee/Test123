@@ -80,13 +80,22 @@ public class PortResolver
     {
         try
         {
-            var ip = IPAddress.Parse(host);
+            IPAddress ip;
+            if (string.Equals(host, "localhost", StringComparison.OrdinalIgnoreCase))
+            {
+                ip = IPAddress.Loopback;
+            }
+            else if (!IPAddress.TryParse(host, out ip!))
+            {
+                ip = IPAddress.Loopback;
+            }
+
             var listener = new TcpListener(ip, port);
             listener.Start();
             listener.Stop();
             return true;
         }
-        catch (SocketException)
+        catch (Exception)
         {
             return false;
         }

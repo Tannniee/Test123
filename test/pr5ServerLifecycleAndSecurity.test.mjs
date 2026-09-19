@@ -83,4 +83,90 @@ test('PR 5 Suite: Server Lifecycle, /api/health Probe & Loopback Security (Phase
       'Server should not accept connections after close'
     );
   });
+
+  await t.test('5. Strict Loopback Enforcement: Rejects non-loopback hosts with SecurityError', async () => {
+    const nonLoopbackHosts = ['0.0.0.0', '192.168.1.100', '::', 'example.com'];
+    for (const badHost of nonLoopbackHosts) {
+      await assert.rejects(
+        async () => {
+          await startServer({
+            port: 0,
+            host: badHost,
+            skipSignalHandlers: true
+          });
+        },
+        /SecurityError.*non-loopback host/i,
+        `Should reject non-loopback host "${badHost}"`
+      );
+    }
+  });
+
+  await t.test('6. Loopback CORS Protection: Permits local origins, forbids external web origins', async () => {
+    const instance = await startServer({
+      port: 0,
+      host: '127.0.0.1',
+      skipSignalHandlers: true
+    });
+
+    try {
+      // Allowed local origin
+      const allowedRes = await fetch(`${instance.url}/api/health`, {
+        headers: { Origin: 'http://localhost:3000' }
+      });
+      assert.equal(allowedRes.status, 200);
+      assert.equal(allowedRes.headers.get('access-control-allow-origin'), 'http://localhost:3000');
+
+      // Disallowed external origin (preflight OPTIONS)
+      const blockedPreflight = await fetch(`${instance.url}/api/health`, {
+        method: 'OPTIONS',
+        headers: {
+          Origin: 'https://evil-site.com',
+          'Access-Control-Request-Method': 'POST'
+        }
+      });
+      assert.equal(blockedPreflight.status, 403, 'External origin preflight must be rejected with 403');
+    } finally {
+      await instance.close();
+    }
+  });
+
+  await t.test('7. SSE Graceful Shutdown: close() cleanly terminates active SSE streams without hanging', async () => {
+    const instance = await startServer({
+      port: 0,
+      host: '127.0.0.1',
+      skipSignalHandlers: true
+    });
+
+    try {
+      // Connect an SSE client to /api/bridge/events
+      const controller = new AbortController();
+      const sseRes = await fetch(`${instance.url}/api/bridge/events`, {
+        signal: controller.signal
+      });
+
+      assert.equal(sseRes.status, 200);
+      assert.equal(sseRes.headers.get('content-type'), 'text/event-stream');
+
+      // Consume reader to confirm connection is active
+      const reader = sseRes.body.getReader();
+      const { value } = await reader.read();
+      const text = new TextDecoder().decode(value);
+      assert.ok(text.includes('event: connected'), 'Must receive connected event');
+
+      // Now call instance.close() - it must terminate all SSE connections and resolve
+      const closePromise = instance.close();
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('instance.close() timed out hanging on SSE connection')), 3000)
+      );
+
+      await Promise.race([closePromise, timeoutPromise]);
+
+      // Assert reader finishes
+      const nextRead = await reader.read();
+      assert.ok(nextRead.done, 'SSE stream reader must be done after close()');
+      controller.abort();
+    } finally {
+      try { await instance.close(); } catch (e) {}
+    }
+  });
 });

@@ -18,6 +18,33 @@ function parseArgs(args = process.argv.slice(2)) {
   return result;
 }
 
+const ALLOWED_LOOPBACK_HOSTS = new Set(['127.0.0.1', '::1', 'localhost', '[::1]']);
+
+/**
+ * Validates and normalizes loopback binding address.
+ * Strictly forbids binding to non-loopback interfaces (0.0.0.0, LAN IPs, etc.).
+ * @param {string} candidate
+ * @returns {string} Normalized loopback host ('127.0.0.1' or '::1')
+ */
+function validateAndNormalizeHost(candidate) {
+  if (!candidate || typeof candidate !== 'string') {
+    return '127.0.0.1';
+  }
+
+  const clean = candidate.trim().toLowerCase();
+  if (clean === 'localhost' || clean === '127.0.0.1') {
+    return '127.0.0.1';
+  }
+  if (clean === '::1' || clean === '[::1]') {
+    return '::1';
+  }
+
+  throw new Error(
+    `SecurityError: Binding to non-loopback host "${candidate}" is strictly forbidden. ` +
+    `POESTASH runs in strict local desktop security mode and only permits loopback addresses (127.0.0.1, ::1, localhost).`
+  );
+}
+
 /**
  * Starts the HTTP server with strict loopback binding (127.0.0.1) and graceful lifecycle management.
  *
@@ -26,7 +53,9 @@ function parseArgs(args = process.argv.slice(2)) {
  */
 function startServer(options = {}) {
   const cliArgs = parseArgs();
-  const host = options.host || cliArgs.host || process.env.HOST || '127.0.0.1';
+  const rawHost = options.host || cliArgs.host || process.env.HOST || '127.0.0.1';
+  const host = validateAndNormalizeHost(rawHost);
+
   const port = options.port !== undefined
     ? options.port
     : (cliArgs.port !== undefined
@@ -45,7 +74,7 @@ function startServer(options = {}) {
       const url = `http://${actualHost}:${actualPort}`;
 
       console.log('=======================================================');
-      console.log('  POESTASH Local Price Companion v2.0.0');
+      console.log('  POESTASH Local Price Companion v2.0.1');
       console.log(`  Loopback Address : http://${actualHost}:${actualPort}`);
       console.log(`  Process ID (PID) : ${process.pid}`);
       console.log(`  Security Mode    : Localhost Loopback Only (${actualHost})`);
@@ -53,12 +82,22 @@ function startServer(options = {}) {
 
       const close = () => {
         return new Promise((resClose) => {
+          // 1. Cleanly terminate all active SSE client streams first so server.close doesn't hang
+          try {
+            const broker = options.broker || require('../services/bridge/quickInspectBroker');
+            if (broker && typeof broker.closeAll === 'function') {
+              broker.closeAll();
+            }
+          } catch (e) {}
+
+          // 2. Stop cache manager background rotation schedulers
           try {
             if (cacheManager && typeof cacheManager.stopSchedulers === 'function') {
               cacheManager.stopSchedulers();
             }
           } catch (e) {}
 
+          // 3. Close the HTTP listener socket
           server.close(() => {
             resClose();
           });
@@ -96,5 +135,7 @@ function startServer(options = {}) {
 
 module.exports = {
   parseArgs,
+  validateAndNormalizeHost,
+  ALLOWED_LOOPBACK_HOSTS,
   startServer
 };

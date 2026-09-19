@@ -9,7 +9,7 @@ const POE1_ROTATION_INTERVAL_MS = 5 * 60 * 1000;  // 5 minutes for PoE 1 Rotatio
 const POE2_PRIORITY_INTERVAL_MS = 30 * 60 * 1000; // 30 minutes for PoE 2 Priority sync
 const POE2_ROTATION_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes for PoE 2 Rotational batches
 const LEAGUE_REFRESH_INTERVAL_MS = 60 * 60 * 1000; // 1 hour for League list refresh
-const USER_AGENT = 'PoE-QuickPriceChecker/2.0.0 (Local desktop tool)';
+const USER_AGENT = 'PoE-QuickPriceChecker/2.0.1 (Local desktop tool)';
 
 class CacheManager {
   constructor(options = {}) {
@@ -888,27 +888,42 @@ class CacheManager {
           } else {
             normalized = this.normalizeExchangeData(data, type, game, league, currentRates);
           }
-          newlyProcessedItems.push(...normalized);
-
-          // 4-tier status taxonomy
+          // 4-tier status taxonomy & resilient empty-200 handling
+          let itemsCount = normalized.length;
+          let isStale = false;
           let status = 'empty';
+
           if (normalized.length > 0) {
+            newlyProcessedItems.push(...normalized);
             status = 'available';
-          } else if (prevCount > 0) {
+            itemsCount = normalized.length;
+          } else if (prevItems.length > 0) {
+            // Category previously had valid items, but upstream 200 response returned 0 items.
+            // Rather than wiping items while falsely claiming 'available' with 0 count,
+            // preserve existing items and flag as stale.
+            newlyProcessedItems.push(...prevItems);
             status = 'available';
+            itemsCount = prevItems.length;
+            isStale = true;
+            console.warn(`[CacheManager] Preserved ${prevItems.length} cached items for ${game}/${league}/${type} due to unexpected zero-result 200 response (marked stale).`);
+          } else {
+            // Truly empty category
+            status = 'empty';
+            itemsCount = 0;
+            isStale = false;
           }
 
           sourcesFreshness[type] = {
             updatedAt: new Date().toISOString(),
             status,
-            itemsCount: normalized.length,
+            itemsCount,
             latencyMs: res.latencyMs,
-            isStale: false
+            isStale
           };
 
           this.availabilityMap[game][league][type] = {
             status,
-            count: normalized.length,
+            count: itemsCount,
             lastChecked: new Date().toISOString()
           };
 
@@ -1011,7 +1026,7 @@ class CacheManager {
 
       if (!this.memoryCache[game]) this.memoryCache[game] = {};
       this.memoryCache[game][league] = updatedEntry;
-      this.saveToDisk(game, league, updatedEntry);
+      await this.saveToDisk(game, league, updatedEntry);
 
       console.log(`[CacheManager] [${game.toUpperCase()} - ${league}] Merged [${types.join(', ')}]: ${finalItems.length} items total.`);
       return updatedEntry;

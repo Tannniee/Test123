@@ -1,6 +1,7 @@
 const express = require('express');
 const defaultBroker = require('../services/bridge/quickInspectBroker');
 const defaultState = require('../services/bridge/bridgeState');
+const { validateItemRawText } = require('../services/itemAnalyzer/itemValidator');
 
 /**
  * Creates bridge routes router.
@@ -16,27 +17,15 @@ function createBridgeRouter(options = {}) {
   router.post('/api/bridge/inspect', (req, res) => {
     const { rawText, game = 'poe1', source = 'clipboard', requestId } = req.body || {};
 
-    if (!rawText || typeof rawText !== 'string' || rawText.trim().length === 0) {
-      return res.status(400).json({
+    const validation = validateItemRawText(rawText, { requirePoeMarkers: true, maxLength: 20000 });
+    if (!validation.isValid) {
+      return res.status(validation.status || 400).json({
         success: false,
-        error: 'Field "rawText" is required and cannot be empty.'
+        error: validation.error
       });
     }
 
-    const trimmed = rawText.trim();
-
-    // Basic PoE item sanity check (must look like PoE clipboard export)
-    const hasPoeMarkers = trimmed.includes('Item Class:') ||
-                          trimmed.includes('Rarity:') ||
-                          trimmed.includes('--------') ||
-                          trimmed.includes('Item Level:');
-
-    if (!hasPoeMarkers && trimmed.length < 5) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid rawText: does not match standard Path of Exile clipboard item format.'
-      });
-    }
+    const trimmed = validation.trimmedText;
 
     let parsedItem = null;
     let classification = null;

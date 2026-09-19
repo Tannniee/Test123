@@ -90,7 +90,7 @@ public class DesktopHostTests
         {
             Status = "ok",
             Service = "poestash-server",
-            Version = "2.0.0",
+            Version = "2.0.1",
             Pid = 12345
         };
 

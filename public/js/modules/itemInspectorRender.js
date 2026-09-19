@@ -413,10 +413,10 @@ export const ItemInspectorRender = {
             ` : ''}
           </div>
 
-          <!-- Quality Projection -->
+          <!-- Quality Projection (Estimated Approximation) -->
           <div class="quality-projection-card">
             <div class="quality-proj-header">
-              <span><i class="fa-solid fa-arrow-trend-up"></i> Tỷ lệ tăng tiến theo Quality (Blacksmith's Whetstone)</span>
+              <span><i class="fa-solid fa-arrow-trend-up"></i> Ước tính tăng tiến theo Quality (Blacksmith's Whetstone · Estimated 20% Quality DPS)</span>
               <span class="current-q">Hiện tại: +${d.quality}% Quality</span>
             </div>
             <div class="quality-proj-row">
@@ -426,9 +426,9 @@ export const ItemInspectorRender = {
               </div>
               <div class="q-arrow"><i class="fa-solid fa-angles-right"></i></div>
               <div class="q-metric">
-                <span class="q-label">Tại 20% Quality:</span>
+                <span class="q-label">Ước tính tại 20% Quality:</span>
                 <strong class="q-val text-emerald">${q.physicalDpsAt20Quality || d.physicalDps} pDPS</strong>
-                <span class="q-sub">(Total: ${q.totalDpsAt20Quality || d.totalDps} DPS)</span>
+                <span class="q-sub">(Total: ~${q.totalDpsAt20Quality || d.totalDps} DPS · ước lượng)</span>
               </div>
             </div>
           </div>
@@ -530,7 +530,18 @@ export const ItemInspectorRender = {
             <span class="price-sub">≈ ${isDivineMajor ? `${market.chaosValue} Chaos` : `${market.divineValue} Divine`}</span>
           </div>
 
-          ${market.count ? `<div class="market-volume-note"><i class="fa-solid fa-box-archive"></i> Số lượng đang niêm yết: <strong>${this.formatNumber(market.count)}</strong></div>` : ''}
+          ${market.isBaseReference ? `
+            <div class="market-reference-banner">
+              <i class="fa-solid fa-circle-info"></i>
+              <span><strong>Tham chiếu giá base item (Base item reference)</strong>: Đây là giá thị trường của base item / phôi đồ trên poe.ninja, không phải định giá toàn bộ thuộc tính affix của trang bị này.</span>
+            </div>
+          ` : ''}
+
+          ${market.variant ? `<div class="market-variant-note"><i class="fa-solid fa-tags"></i> Biến thể (Variant): <strong>${this.escapeHtml(market.variant)}</strong></div>` : ''}
+
+          ${((market.count !== null && market.count !== undefined) || (market.volume !== null && market.volume !== undefined)) ? `
+            <div class="market-volume-note"><i class="fa-solid fa-box-archive"></i> Số lượng / Volume niêm yết: <strong>${this.formatNumber(market.count ?? market.volume)}</strong></div>
+          ` : ''}
         </div>
       </div>
     `;

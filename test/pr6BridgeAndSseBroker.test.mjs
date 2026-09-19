@@ -120,13 +120,20 @@ Randomises the numeric values of the random modifiers on an item
       const jsonBad = await resBad.json();
       assert.equal(jsonBad.success, false);
 
-      // 3b. Rejects gibberish non-PoE text
+      // 3b. Rejects gibberish non-PoE text (both short and long)
       const resGibberish = await fetch(`${baseUrl}/api/bridge/inspect`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ rawText: 'hi' })
       });
       assert.equal(resGibberish.status, 400);
+
+      const resHelloWorld = await fetch(`${baseUrl}/api/bridge/inspect`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rawText: 'hello world from internet without any poe markers' })
+      });
+      assert.equal(resHelloWorld.status, 400, 'Must reject text missing PoE markers even if longer than 5 characters');
 
       // 3c. Accepts valid PoE item clipboard text
       const validPoEItem = `

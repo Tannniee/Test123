@@ -83,7 +83,9 @@ class DpsAnalyzer {
       qualityScaling: {
         physicalDpsAt0Quality: parseFloat(pDpsAt0.toFixed(1)),
         physicalDpsAt20Quality: parseFloat(pDpsAt20.toFixed(1)),
-        totalDpsAt20Quality: parseFloat(totalDpsAt20.toFixed(1))
+        totalDpsAt20Quality: parseFloat(totalDpsAt20.toFixed(1)),
+        isEstimated: true,
+        description: 'Estimated 20% quality DPS (approx)'
       }
     };
   }

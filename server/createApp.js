@@ -1,11 +1,12 @@
 const express = require('express');
-const cors = require('cors');
 const path = require('path');
 const defaultCacheManager = require('../services/cacheManager');
 const defaultCategoryRegistry = require('../services/categoryRegistry');
 const defaultPoedbService = require('../services/poedbService');
 const createBridgeRouter = require('../routes/bridgeRoutes');
 const createAnalyzeRouter = require('../routes/analyzeRoutes');
+
+const LOOPBACK_ORIGIN_PATTERN = /^https?:\/\/(127\.0\.0\.1|localhost|\[::1\])(:\d+)?$/i;
 
 /**
  * Factory that creates and configures the Express application instance without binding to a network port.
@@ -22,7 +23,33 @@ function createApp(options = {}) {
 
   const app = express();
 
-  app.use(cors());
+  // Strict loopback-only CORS & Origin protection:
+  // Blocks malicious external websites on the internet from making cross-origin requests to local APIs.
+  app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    if (!origin) {
+      // Non-browser direct requests (e.g. C# Desktop Host, curl, unit tests) or same-origin navigation
+      return next();
+    }
+
+    if (LOOPBACK_ORIGIN_PATTERN.test(origin)) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+      res.setHeader('Vary', 'Origin');
+    } else {
+      // Reject cross-origin preflight requests from external websites
+      if (req.method === 'OPTIONS') {
+        return res.status(403).json({ error: 'CORS Forbidden: External web origins not permitted.' });
+      }
+    }
+
+    if (req.method === 'OPTIONS') {
+      return res.status(204).end();
+    }
+    next();
+  });
+
   app.use(express.json());
   app.use(express.static(staticDir, {
     setHeaders: (res, filePath) => {
@@ -37,7 +64,7 @@ function createApp(options = {}) {
     res.json({
       status: 'ok',
       service: 'poestash-server',
-      version: '2.0.0',
+      version: '2.0.1',
       pid: process.pid,
       uptime: process.uptime(),
       timestamp: new Date().toISOString()

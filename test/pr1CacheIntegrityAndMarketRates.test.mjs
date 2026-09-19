@@ -233,4 +233,52 @@ test('PR 1 Suite: Cache Integrity, Mirror Protection & Removal of Fake Market Ra
     assert.doesNotMatch(html, /732/, 'Must not compute fake 732 C from hardcoded 366 rate');
     assert.doesNotMatch(html, /val-sub/, 'Must omit secondary conversion line when rate is 0');
   });
+
+  await t.test('6. Empty-200 Semantics: Preserves items as stale if unexpectedly empty; marks truly empty categories', async () => {
+    const cm = new CacheManagerClass({
+      cacheDir: tempCacheDir,
+      autoStart: false
+    });
+
+    const game = 'poe1';
+    const league = 'Standard';
+
+    // 1. Initial state: Essences has 5 items
+    cm.memoryCache[game] = {
+      [league]: {
+        game,
+        league,
+        rates: { divine: 0.005 },
+        sources: {
+          Currency: { status: 'available', itemsCount: 1 },
+          Essence: { status: 'available', itemsCount: 5 }
+        },
+        items: [
+          { id: 'curr-1', name: 'Divine Orb', sourceType: 'Currency', chaosValue: 200 },
+          { id: 'ess-1', name: 'Deafening Essence of Greed', sourceType: 'Essence', chaosValue: 30 }
+        ]
+      }
+    };
+
+    // Mock fetch returning empty 200 for Essence
+    cm.fetchJson = async () => ({
+      data: { lines: [], items: [] },
+      httpCode: 200,
+      latencyMs: 15
+    });
+
+    const result = await cm.syncCategoryBatch(game, league, ['Essence']);
+    
+    // Existing Essence items MUST be preserved rather than wiped
+    const essenceItems = result.items.filter(i => (i.sourceType || i.category) === 'Essence');
+    assert.equal(essenceItems.length, 1, 'Must preserve existing cached items on unexpected 0-item 200 response');
+    assert.equal(result.sources.Essence.status, 'available');
+    assert.equal(result.sources.Essence.isStale, true);
+
+    // 2. Truly empty category (no previous items)
+    const emptyCatResult = await cm.syncCategoryBatch(game, league, ['Scarab']);
+    assert.equal(emptyCatResult.sources.Scarab.status, 'empty');
+    assert.equal(emptyCatResult.sources.Scarab.isStale, false);
+    assert.equal(emptyCatResult.sources.Scarab.itemsCount, 0);
+  });
 });

@@ -79,6 +79,38 @@ describe('PR 8 Suite: Exile-UI Datasets & Deep Item Analysis Engine (Phases 7–
       assert.equal(match.values[0].max, 45);
     });
 
+    it('identifies newly expanded PoE 1 and PoE 2 mod families accurately', () => {
+      // PoE 1: Spell Damage
+      const spellMatch = modMatcher.matchMod('105% increased Spell Damage', { game: 'poe1' });
+      assert.equal(spellMatch.status, 'matched');
+      assert.equal(spellMatch.family, 'SpellDamage');
+      assert.equal(spellMatch.tier, 1);
+
+      // PoE 1: Strength
+      const strMatch = modMatcher.matchMod('+53 to Strength', { game: 'poe1' });
+      assert.equal(strMatch.status, 'matched');
+      assert.equal(strMatch.family, 'Strength');
+      assert.equal(strMatch.tier, 1);
+
+      // PoE 1: Spell Suppression
+      const suppMatch = modMatcher.matchMod('+14% chance to Suppress Spell Damage', { game: 'poe1' });
+      assert.equal(suppMatch.status, 'matched');
+      assert.equal(suppMatch.family, 'SpellSuppression');
+      assert.equal(suppMatch.tier, 1);
+
+      // PoE 2: Cold Resistance
+      const p2ColdMatch = modMatcher.matchMod('+42% to Cold Resistance', { game: 'poe2' });
+      assert.equal(p2ColdMatch.status, 'matched');
+      assert.equal(p2ColdMatch.family, 'ColdResistance');
+      assert.equal(p2ColdMatch.tier, 1);
+
+      // PoE 2: Movement Speed
+      const p2SpeedMatch = modMatcher.matchMod('32% increased Movement Speed', { game: 'poe2' });
+      assert.equal(p2SpeedMatch.status, 'matched');
+      assert.equal(p2SpeedMatch.family, 'MovementSpeed');
+      assert.equal(p2SpeedMatch.tier, 1);
+    });
+
     it('handles unrecognized mods without throwing or guessing', () => {
       const match = modMatcher.matchMod('Socketed Gems are Supported by Level 20 Faster Casting', { game: 'poe1' });
       assert.equal(match.status, 'unrecognized');

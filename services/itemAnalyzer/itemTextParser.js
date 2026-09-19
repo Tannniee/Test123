@@ -86,7 +86,8 @@ class ItemTextParser {
       explicits: [],
       fractured: [],
       crafted: [],
-      scourge: []
+      scourge: [],
+      descriptors: {}
     };
 
     const flags = {
@@ -142,7 +143,7 @@ class ItemTextParser {
       }
 
       // Modifiers or Flavour Text
-      const isFlavour = this._parseModifiersOrFlavour(sec, modifiers, flavourTextLines);
+      const isFlavour = this._parseModifiersOrFlavour(sec, modifiers, flavourTextLines, flags);
     }
 
     return {
@@ -362,38 +363,74 @@ class ItemTextParser {
 
   static _parseFlags(lines, flags) {
     let matched = false;
+    if (!flags.influences) flags.influences = [];
+
     for (const line of lines) {
-      if (line === 'Corrupted') {
+      const trimmed = line.trim();
+      if (trimmed === 'Corrupted') {
         flags.corrupted = true;
         matched = true;
-      } else if (line === 'Mirrored') {
+      } else if (trimmed === 'Mirrored') {
         flags.mirrored = true;
         matched = true;
-      } else if (line === 'Synthesised Item' || line === 'Synthesised') {
+      } else if (trimmed === 'Synthesised Item' || trimmed === 'Synthesised') {
         flags.synthesised = true;
         matched = true;
-      } else if (line === 'Fractured Item' || line === 'Fractured') {
+      } else if (trimmed === 'Fractured Item' || trimmed === 'Fractured') {
         flags.fractured = true;
         matched = true;
-      } else if (line === 'Unidentified') {
+      } else if (trimmed === 'Unidentified') {
         flags.unidentified = true;
         matched = true;
-      } else if (line === 'Veiled') {
+      } else if (trimmed === 'Veiled') {
         flags.veiled = true;
         matched = true;
-      } else if (line === 'Split') {
+      } else if (trimmed === 'Split') {
         flags.split = true;
         matched = true;
-      } else if (line === 'Foil Unique' || line === 'Relic Unique') {
+      } else if (trimmed === 'Foil Unique' || trimmed === 'Relic Unique') {
         flags.relic = true;
+        matched = true;
+      } else if (trimmed === 'Searing Exarch Item') {
+        flags.searingExarch = true;
+        if (!flags.influences.includes('searingExarch')) flags.influences.push('searingExarch');
+        matched = true;
+      } else if (trimmed === 'Eater of Worlds Item') {
+        flags.eaterOfWorlds = true;
+        if (!flags.influences.includes('eaterOfWorlds')) flags.influences.push('eaterOfWorlds');
+        matched = true;
+      } else if (trimmed === 'Shaper Item') {
+        flags.shaper = true;
+        if (!flags.influences.includes('shaper')) flags.influences.push('shaper');
+        matched = true;
+      } else if (trimmed === 'Elder Item') {
+        flags.elder = true;
+        if (!flags.influences.includes('elder')) flags.influences.push('elder');
+        matched = true;
+      } else if (trimmed === 'Crusader Item') {
+        flags.crusader = true;
+        if (!flags.influences.includes('crusader')) flags.influences.push('crusader');
+        matched = true;
+      } else if (trimmed === 'Redeemer Item') {
+        flags.redeemer = true;
+        if (!flags.influences.includes('redeemer')) flags.influences.push('redeemer');
+        matched = true;
+      } else if (trimmed === 'Hunter Item') {
+        flags.hunter = true;
+        if (!flags.influences.includes('hunter')) flags.influences.push('hunter');
+        matched = true;
+      } else if (trimmed === 'Warlord Item') {
+        flags.warlord = true;
+        if (!flags.influences.includes('warlord')) flags.influences.push('warlord');
         matched = true;
       }
     }
     return matched;
   }
 
-  static _parseModifiersOrFlavour(lines, modifiers, flavour) {
-    // Determine if line or section is flavour text (in PoE, flavour text is wrapped in quotes or follows attribution)
+  static _parseModifiersOrFlavour(lines, modifiers, flavour, flags = {}) {
+    let currentDescriptor = null;
+
     const isFlavourLine = (l) =>
       l.startsWith('"') ||
       l.endsWith('"') ||
@@ -405,22 +442,101 @@ class ItemTextParser {
 
     const allAreFlavour = lines.length > 0 && lines.every(l => isFlavourLine(l));
 
-    for (const line of lines) {
-      if (line.endsWith('(enchant)')) {
-        modifiers.enchants.push(line.replace(/\s*\(enchant\)$/i, ''));
-      } else if (line.endsWith('(implicit)')) {
-        modifiers.implicits.push(line.replace(/\s*\(implicit\)$/i, ''));
-      } else if (line.endsWith('(fractured)')) {
-        modifiers.fractured.push(line.replace(/\s*\(fractured\)$/i, ''));
-      } else if (line.endsWith('(crafted)')) {
-        modifiers.crafted.push(line.replace(/\s*\(crafted\)$/i, ''));
-      } else if (line.endsWith('(scourge)')) {
-        modifiers.scourge.push(line.replace(/\s*\(scourge\)$/i, ''));
+    for (let idx = 0; idx < lines.length; idx++) {
+      const line = lines[idx].trim();
+      if (!line) continue;
+
+      // 1. Check for standalone influence flag line
+      if (/^(Searing Exarch|Eater of Worlds|Shaper|Elder|Crusader|Redeemer|Hunter|Warlord)\s+Item$/i.test(line)) {
+        this._parseFlags([line], flags);
+        continue;
+      }
+
+      // 2. Check if line is an advanced affix descriptor: { ... }
+      if (line.startsWith('{') && line.endsWith('}')) {
+        const content = line.slice(1, -1).trim();
+
+        let type = 'explicit';
+        if (/prefix/i.test(content)) type = 'prefix';
+        else if (/suffix/i.test(content)) type = 'suffix';
+        else if (/implicit/i.test(content)) type = 'implicit';
+        else if (/enchant/i.test(content)) type = 'enchant';
+
+        const isFractured = /fractured/i.test(content);
+        const isCrafted = /master\s*crafted|crafted/i.test(content);
+        const isScourge = /scourge/i.test(content);
+
+        const nameMatch = content.match(/"([^"]+)"/);
+        const name = nameMatch ? nameMatch[1] : null;
+
+        let tier = null;
+        const tierMatch = content.match(/\b(?:Tier|Rank):\s*(\d+)/i);
+        if (tierMatch) {
+          tier = parseInt(tierMatch[1], 10);
+        } else {
+          const eldritchTier = content.match(/\b(Lesser|Greater|Grand|Exceptional|Exquisite|Perfect)\b/i);
+          if (eldritchTier) {
+            tier = eldritchTier[1];
+          }
+        }
+
+        let tags = [];
+        const splitDash = content.split(/[—–-]/);
+        if (splitDash.length > 1) {
+          tags = splitDash[splitDash.length - 1].split(',').map(t => t.trim()).filter(Boolean);
+        }
+
+        currentDescriptor = {
+          type,
+          name,
+          tier,
+          tags,
+          isFractured,
+          isCrafted,
+          isScourge,
+          raw: line
+        };
+        // DO NOT add the descriptor line to modifiers list
+        continue;
+      }
+
+      // 3. Mod text processing
+      let cleanText = line
+        .replace(/\s*\(enchant\)$/i, '')
+        .replace(/\s*\(implicit\)$/i, '')
+        .replace(/\s*\(fractured\)$/i, '')
+        .replace(/\s*\(crafted\)$/i, '')
+        .replace(/\s*\(scourge\)$/i, '')
+        .trim();
+
+      // If line is wrapped in parentheses like "(40% of Damage from Suppressed Hits...)", strip outer parens
+      if (cleanText.startsWith('(') && cleanText.endsWith(')') && !/^\(\d+(?:\.\d+)?-\d+(?:\.\d+)?\)$/.test(cleanText)) {
+        cleanText = cleanText.slice(1, -1).trim();
+      }
+
+      if (currentDescriptor) {
+        if (!modifiers.descriptors) modifiers.descriptors = {};
+        modifiers.descriptors[cleanText] = currentDescriptor;
+      }
+
+      if (line.endsWith('(enchant)') || (currentDescriptor && currentDescriptor.type === 'enchant')) {
+        modifiers.enchants.push(cleanText);
+      } else if (line.endsWith('(implicit)') || (currentDescriptor && currentDescriptor.type === 'implicit')) {
+        modifiers.implicits.push(cleanText);
+      } else if (line.endsWith('(fractured)') || (currentDescriptor && currentDescriptor.isFractured)) {
+        modifiers.fractured.push(cleanText);
+      } else if (line.endsWith('(crafted)') || (currentDescriptor && currentDescriptor.isCrafted)) {
+        modifiers.crafted.push(cleanText);
+      } else if (line.endsWith('(scourge)') || (currentDescriptor && currentDescriptor.isScourge)) {
+        modifiers.scourge.push(cleanText);
       } else if (isFlavourLine(line) || allAreFlavour) {
         flavour.push(line);
       } else {
-        modifiers.explicits.push(line);
+        modifiers.explicits.push(cleanText);
       }
+
+      // Reset descriptor once consumed
+      currentDescriptor = null;
     }
 
     return true;

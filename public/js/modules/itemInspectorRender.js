@@ -338,15 +338,20 @@ export const ItemInspectorRender = {
       const scoreClass = pct === 100 ? 'pct-100' : (pct >= 75 ? 'pct-high' : (pct >= 45 ? 'pct-med' : 'pct-low'));
       badgeHtml = `<div class="exile-unique-badge tier-badge ${scoreClass}">${scoreVal}</div>`;
     } else if (group === 'implicit') {
-      badgeHtml = `<div class="exile-tier-badge tier-badge exile-tier-imp">${tier ? `T${tier}` : 'IMP'}</div>`;
+      const impLabel = typeof tier === 'string' ? tier.slice(0, 4).toUpperCase() : (tier ? `T${tier}` : 'IMP');
+      badgeHtml = `<div class="exile-tier-badge tier-badge exile-tier-imp" title="${this.escapeHtml(mod.tierName || 'Implicit')}">${impLabel}</div>`;
     } else if (group === 'crafted') {
       badgeHtml = `<div class="exile-tier-badge tier-badge exile-tier-craft">CRAFT</div>`;
     } else if (group === 'fractured') {
       badgeHtml = `<div class="exile-tier-badge tier-badge exile-tier-1">FRAC</div>`;
     } else if (tier) {
-      const icon = this.getModIcon(mod.family);
-      const tierColorClass = tier === 1 ? 'exile-tier-1' : (tier === 2 ? 'exile-tier-2' : (tier === 3 ? 'exile-tier-3' : (tier === 4 ? 'exile-tier-4' : 'exile-tier-5')));
-      badgeHtml = `<div class="exile-tier-badge tier-badge ${tierColorClass}" title="${mod.tierName || `Tier ${tier}`}">T${tier} ${icon}</div>`;
+      const icon = this.getModIcon(mod.family || (mod.tags && mod.tags.join(' ')));
+      const tierNum = typeof tier === 'number' ? tier : parseInt(tier, 10);
+      const tierColorClass = tierNum === 1 ? 'exile-tier-1' : (tierNum === 2 ? 'exile-tier-2' : (tierNum === 3 ? 'exile-tier-3' : (tierNum === 4 ? 'exile-tier-4' : 'exile-tier-5')));
+      const label = typeof tier === 'number' ? `T${tier}` : tier;
+      badgeHtml = `<div class="exile-tier-badge tier-badge ${tierColorClass}" title="${this.escapeHtml(mod.tierName || `Tier ${tier}`)}">${label} ${icon}</div>`;
+    } else if (mod.tierName === 'Essences' || (mod.tags && mod.tags.includes('Essence')) || (mod.tags && mod.tags.includes('Minion'))) {
+      badgeHtml = `<div class="exile-tier-badge tier-badge exile-tier-craft" title="Essence Mod">ESS</div>`;
     } else {
       badgeHtml = `<div class="exile-tier-badge tier-badge exile-tier-none">-</div>`;
     }

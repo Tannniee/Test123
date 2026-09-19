@@ -23,7 +23,8 @@ class ItemAnalyzerService {
     const matchOpts = {
       itemLevel: canonicalItem.properties ? canonicalItem.properties.itemLevel : 100,
       itemClass: canonicalItem.identity ? canonicalItem.identity.itemClass : null,
-      game
+      game,
+      descriptors: (canonicalItem.modifiers && canonicalItem.modifiers.descriptors) || {}
     };
 
     // Analyze modifiers

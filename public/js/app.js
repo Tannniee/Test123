@@ -222,6 +222,30 @@ async function init() {
     const itemClass = (identity.itemClass || '').toLowerCase();
     const rarity = (identity.rarity || '').toLowerCase();
 
+    // Detect currency, divination cards, fragments, scarabs, maps, waystones, etc.
+    const isCurrencyOrStackable = 
+      rarity === 'currency' || 
+      rarity === 'divination card' ||
+      classification.isCurrency ||
+      classification.isDivinationCard ||
+      classification.isMap ||
+      classification.isFragment ||
+      itemClass.includes('currency') ||
+      itemClass.includes('card') ||
+      itemClass.includes('fragment') ||
+      itemClass.includes('scarab') ||
+      itemClass.includes('fossil') ||
+      itemClass.includes('resonator') ||
+      itemClass.includes('essence') ||
+      itemClass.includes('oil') ||
+      itemClass.includes('incubator') ||
+      itemClass.includes('tincture') ||
+      itemClass.includes('corpse') ||
+      itemClass.includes('allflame') ||
+      itemClass.includes('map') ||
+      itemClass.includes('waystone') ||
+      itemClass.includes('vault key');
+
     // Check whether the item is equipment / gear with stats
     const isGearClass = [
       'weapon', 'bow', 'staff', 'staves', 'wand', 'claw', 'dagger', 'axe', 'sword', 'mace', 'sceptre', 'flail', 'crossbow',
@@ -235,10 +259,16 @@ async function init() {
       item.properties.ward || item.properties.physicalDamage || item.properties.elementalDamage
     );
 
-    const isGear = classification.isGear || isGearClass || hasExplicitMods || (hasDefencesOrDps && rarity !== 'currency');
+    const isGear = !isCurrencyOrStackable && (
+      classification.isGear || 
+      isGearClass || 
+      (hasExplicitMods && rarity !== 'normal') || 
+      hasDefencesOrDps
+    );
 
     // 1. If it's gear: Open the Exile-UI style Stat Inspector
     if (isGear && (inspectData.analysis || item)) {
+      Modals.closeItemInspection(dom);
       Clipboard.showToast(`[Bridge] Soi đồ: ${identity.name || identity.baseType || 'Vật phẩm'}`, 'success');
       itemInspector.open({
         item: inspectData.parsedItem,
@@ -250,7 +280,11 @@ async function init() {
       return;
     }
 
-    // 2. If it's Currency / Stackable / Card / Fragment / Map: Open the Price & Calculator directly
+    // 2. If it's Currency / Stackable / Card / Fragment / Map: Always close gear inspector & Open the Currency Dashboard
+    if (itemInspector && itemInspector.close) {
+      itemInspector.close();
+    }
+
     const itemName = identity.name || identity.baseType || '';
     const cleanSearchQuery = itemName.replace(/^(\d+x\s+)/i, '').trim();
 
@@ -279,16 +313,16 @@ async function init() {
       return;
     }
 
-    // If not in current category list, but market valuation was resolved
-    if (inspectData.market && (inspectData.market.chaosValue > 0 || inspectData.market.divineValue > 0)) {
-      const m = inspectData.market;
+    // If not in current category list, but market valuation was resolved or we have item data
+    if (inspectData.market || cleanSearchQuery) {
+      const m = inspectData.market || {};
       const synthItem = {
         id: `bridge_${Date.now()}`,
-        name: m.name || cleanSearchQuery,
-        chaosValue: m.chaosValue || 0,
-        divineValue: m.divineValue || 0,
+        name: m.name || cleanSearchQuery || 'Currency',
+        chaosValue: typeof m.chaosValue === 'number' ? m.chaosValue : (m.divineValue ? m.divineValue * 150 : 1),
+        divineValue: typeof m.divineValue === 'number' ? m.divineValue : 0,
         sparkline: m.sparkline || null,
-        icon: m.icon || null,
+        icon: m.icon || Render.ICONS.chaos,
         category: classification.displayLabel || 'Currency',
         count: m.count || 0,
         change7d: m.sparkline?.totalChange || 0

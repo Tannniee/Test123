@@ -37,13 +37,18 @@ class ModMatcher {
   }
 
   matchMod(modText, options = {}) {
-    const { itemLevel = 100, itemClass = null, game = 'poe1' } = options;
-    const { template, values } = this.normalizeText(modText);
+    const { itemLevel = 100, itemClass = null, game = 'poe1', descriptors = {} } = options;
+    const actualText = typeof modText === 'object' && modText !== null ? modText.text : modText;
+    const desc = (typeof modText === 'object' && modText !== null && modText.descriptor) 
+      ? modText.descriptor 
+      : (descriptors[actualText] || descriptors[modText] || null);
+
+    const { template, values } = this.normalizeText(actualText);
     const rawNumericValues = values.map(v => (typeof v === 'object' && v !== null ? v.value : v));
 
     if (!template) {
       return {
-        text: modText,
+        text: actualText,
         normalizedTemplate: '',
         family: null,
         type: 'unknown',
@@ -54,18 +59,55 @@ class ModMatcher {
       };
     }
 
+    const valueRanges = values.map(v => {
+      const rawVal = typeof v === 'object' && v !== null ? v.value : v;
+      const explicitMin = typeof v === 'object' && v !== null ? v.min : rawVal;
+      const explicitMax = typeof v === 'object' && v !== null ? v.max : rawVal;
+      return { value: rawVal, min: explicitMin, max: explicitMax };
+    });
+
     const candidates = exileUiDataService.getModCandidates(template, game);
 
-    if (candidates.length === 0) {
-      const valueRanges = values.map(v => {
-        const rawVal = typeof v === 'object' && v !== null ? v.value : v;
-        const explicitMin = typeof v === 'object' && v !== null ? v.min : rawVal;
-        const explicitMax = typeof v === 'object' && v !== null ? v.max : rawVal;
-        return { value: rawVal, min: explicitMin, max: explicitMax };
-      });
+    // Fast-path: If game explicitly provided affix metadata via Ctrl+Alt+C
+    if (desc) {
+      const cand = candidates.find(c => c.type === desc.type) || candidates[0] || null;
+      let matchedTier = desc.tier;
+      let matchedTierName = desc.name;
+
+      if (cand && Array.isArray(cand.tiers) && desc.tier) {
+        const tObj = cand.tiers.find(t => t.tier === desc.tier);
+        if (tObj && Array.isArray(tObj.ranges)) {
+          valueRanges.forEach((vr, idx) => {
+            if (vr.min === vr.value && tObj.ranges[idx]) {
+              vr.min = tObj.ranges[idx].min;
+              vr.max = tObj.ranges[idx].max;
+            }
+          });
+          if (!matchedTierName && tObj.name) matchedTierName = tObj.name;
+        }
+      }
 
       return {
-        text: modText,
+        text: actualText,
+        normalizedTemplate: template,
+        family: cand ? cand.family : (desc.tags && desc.tags[0] ? desc.tags[0].toLowerCase() : null),
+        type: desc.type || (cand ? cand.type : 'explicit'),
+        tier: matchedTier,
+        tierName: matchedTierName,
+        tags: desc.tags || [],
+        isFractured: !!desc.isFractured,
+        isCrafted: !!desc.isCrafted,
+        isScourge: !!desc.isScourge,
+        values: valueRanges,
+        confidence: 1.0,
+        status: 'matched',
+        source: 'descriptor'
+      };
+    }
+
+    if (candidates.length === 0) {
+      return {
+        text: actualText,
         normalizedTemplate: template,
         family: null,
         type: 'unknown',

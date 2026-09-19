@@ -23,6 +23,7 @@ scratch/
 # .NET Build Output
 [Bb]in/
 [Oo]bj/
+dist/
 *.user
 
 # Local reference folders

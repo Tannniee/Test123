@@ -3750,17 +3750,17 @@ select:focus {
   color: #f5c042;
 }
 
-/* Modal Card Inspector Sizing & Glassmorphism */
+/* Modal Card Inspector Sizing & Glassmorphism (Compact Exile-UI Overlay) */
 .modal-card-inspector {
-  max-width: 900px;
+  max-width: 580px;
   width: 95vw;
-  max-height: 90vh;
+  max-height: 92vh;
   padding: 0;
-  border-radius: 12px;
-  background: rgba(12, 15, 23, 0.96);
-  border: 1px solid rgba(200, 155, 60, 0.3);
+  border-radius: 8px;
+  background: rgba(12, 15, 23, 0.98);
+  border: 1px solid rgba(200, 155, 60, 0.35);
   backdrop-filter: blur(20px);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85), 0 0 30px rgba(200, 155, 60, 0.12);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 25px rgba(200, 155, 60, 0.12);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -3937,45 +3937,18 @@ select:focus {
   border-color: rgba(148, 163, 184, 0.2);
 }
 
-/* Nav Tabs */
+/* In Exile-UI style overlay mode: hide bulky tab bar and duplicate metrics ribbon */
 .inspector-nav-tabs {
-  display: flex;
-  gap: 2px;
-  padding: 0 24px;
-  background: rgba(10, 12, 18, 0.95);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  overflow-x: auto;
+  display: none !important;
 }
 
-.inspector-tab-btn {
-  padding: 10px 16px;
-  background: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
-  color: #94a3b8;
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  white-space: nowrap;
-  transition: all 0.2s ease;
-}
-
-.inspector-tab-btn:hover {
-  color: #f1f5f9;
-}
-
-.inspector-tab-btn.active {
-  color: #f5c042;
-  border-bottom-color: #f5c042;
-  background: rgba(245, 192, 66, 0.06);
+.inspector-metrics-ribbon {
+  display: none !important;
 }
 
 /* Tab Body */
 .inspector-tab-body {
-  padding: 20px 24px 28px 24px;
+  padding: 8px 14px 14px 14px;
 }
 
 .inspector-tab-pane {

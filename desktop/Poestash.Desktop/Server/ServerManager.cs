@@ -17,6 +17,7 @@ public class ServerManager : IDisposable
     public ServerManager(HealthClient healthClient)
     {
         _healthClient = healthClient;
+        AppDomain.CurrentDomain.ProcessExit += (_, _) => Dispose();
     }
 
     public static string FindNodeExecutable()
@@ -162,8 +163,12 @@ public class ServerManager : IDisposable
     {
         if (!_isDisposed)
         {
-            StopAsync().GetAwaiter().GetResult();
             _isDisposed = true;
+            try
+            {
+                StopAsync().GetAwaiter().GetResult();
+            }
+            catch {}
         }
         GC.SuppressFinalize(this);
     }

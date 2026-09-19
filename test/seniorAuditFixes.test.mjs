@@ -176,6 +176,39 @@ assert(sacredPopHtml.includes('50') && sacredPopHtml.includes('1.0'), 'Sacred Li
 
 console.log('✓ PASS: Flexible exchange ratios and Most Popular column match poe.ninja perfectly.');
 
+// 8. Verify Authentic Exile-UI Visualized Mod Rolls & Icon Integration
+console.log('\n--- Step 8: Verify Exile-UI Visualized Mod Rolls & Icon System ---');
+const { createRequire } = await import('module');
+const testRequire = createRequire(import.meta.url);
+const modMatcher = testRequire('../services/itemAnalyzer/modMatcher.js');
+const { ItemInspectorRender } = await import('../public/js/modules/itemInspectorRender.js');
+
+assert.strictEqual(modMatcher.resolveExileIcon('+89 to maximum Life'), 'life', 'Life mod must resolve to life icon');
+assert.strictEqual(modMatcher.resolveExileIcon('+45% to Fire Resistance'), 'fire', 'Fire mod must resolve to fire icon');
+assert.strictEqual(modMatcher.resolveExileIcon('+33% to Lightning Resistance'), 'lightning', 'Lightning mod must resolve to lightning icon');
+assert.strictEqual(modMatcher.resolveExileIcon('+38(21-42) to Evasion Rating'), 'evasion', 'Evasion mod must resolve to evasion icon');
+assert.strictEqual(modMatcher.resolveExileIcon('15% increased Movement Speed'), 'speed', 'Speed mod must resolve to speed icon');
+
+const mockLifeMod = {
+  text: '+24(24-28) to Maximum Life',
+  tier: 1,
+  tierName: 'Fecund',
+  icon: 'life',
+  status: 'matched',
+  rollAnalysis: [{ value: 24, min: 24, max: 28, percentile: 0.0 }]
+};
+
+const modBarHtml = ItemInspectorRender.renderExileModBar(mockLifeMod, 'explicit', false);
+assert(modBarHtml.includes('exile-mod-row'), 'Must render exile-mod-row');
+assert(modBarHtml.includes('roll-track'), 'Must render roll-track');
+assert(modBarHtml.includes('roll-bar-fill'), 'Must render roll-bar-fill');
+assert(modBarHtml.includes('exile-tier-box'), 'Must render exile-tier-box');
+assert(modBarHtml.includes('exile-icon-box'), 'Must render exile-icon-box');
+assert(modBarHtml.includes('/img/item-info/life.png'), 'Must include life.png icon');
+assert(modBarHtml.includes('+24(24-28) TO MAXIMUM LIFE'), 'Must display formatted uppercase text with range');
+
+console.log('✓ PASS: Exile-UI Visualized mod-roll bars and icon integration verified with 100% precision.');
+
 console.log('\n====================================================');
 console.log('  All Senior Audit Fixes & Regressions Passed! ✓✓✓');
 console.log('====================================================');

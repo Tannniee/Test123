@@ -188,7 +188,7 @@ export const ItemInspectorRender = {
    * Render Affixes & Crafting tab panel.
    */
   /**
-   * Render Affixes & Crafting tab panel in Exile-UI compact bar format.
+   * Render Affixes & Crafting tab panel in authentic Exile-UI compact bar format.
    */
   renderAffixesTab(analysis = {}, identity = {}, properties = {}, market = null) {
     const isUnique = (identity.rarity || '').toLowerCase() === 'unique' || !!(analysis.unique && analysis.unique.isUnique);
@@ -200,21 +200,78 @@ export const ItemInspectorRender = {
 
     let html = '<div class="exile-affix-container">';
 
-    // 1. Exile-UI Base Defences Row
+    // 1. Exile-UI Base Defences & Requirements Row (Image 2 format)
     const hasDef = properties.armour > 0 || properties.evasion > 0 || properties.energyShield > 0 || properties.ward > 0;
     const dps = analysis.dps;
 
-    if (hasDef || (dps && dps.isWeapon)) {
+    if (hasDef || (dps && dps.isWeapon) || properties.itemLevel) {
+      const ilvl = properties.itemLevel || 1;
+      const maxIlvl = 86;
+      const baseRollPct = (analysis.base && typeof analysis.base.baseDefencePercentile === 'number')
+        ? Math.round(analysis.base.baseDefencePercentile * 100)
+        : null;
+
       html += `
         <div class="exile-base-row">
-          <span class="exile-base-label">BASE</span>
-          ${properties.armour > 0 ? `<div class="exile-base-chip exile-chip-armour"><i class="fa-solid fa-shield"></i> Armour: ${this.formatNumber(properties.armour)}</div>` : ''}
-          ${properties.evasion > 0 ? `<div class="exile-base-chip exile-chip-evasion"><i class="fa-solid fa-wind"></i> Evasion: ${this.formatNumber(properties.evasion)}</div>` : ''}
-          ${properties.energyShield > 0 ? `<div class="exile-base-chip exile-chip-es"><i class="fa-solid fa-bolt"></i> ES: ${this.formatNumber(properties.energyShield)}</div>` : ''}
-          ${properties.ward > 0 ? `<div class="exile-base-chip exile-chip-ward"><i class="fa-solid fa-sun"></i> Ward: ${this.formatNumber(properties.ward)}</div>` : ''}
-          ${dps && dps.isWeapon ? `<div class="exile-base-chip exile-chip-dps"><i class="fa-solid fa-swords"></i> ${dps.totalDps} DPS</div>` : ''}
-          ${properties.quality > 0 ? `<div class="exile-base-chip"><i class="fa-solid fa-sparkles"></i> +${properties.quality}% Q</div>` : ''}
-          ${analysis.base && typeof analysis.base.baseDefencePercentile === 'number' ? `<div class="exile-base-chip exile-chip-roll"><i class="fa-solid fa-dice-d20"></i> Base Roll: ${Math.round(analysis.base.baseDefencePercentile * 100)}%</div>` : ''}
+          <div class="exile-base-cell exile-base-title">BASE</div>
+          ${properties.armour > 0 ? `
+            <div class="exile-base-cell" title="Armour: ${properties.armour}">
+              <img src="/img/item-info/armor.png" class="exile-base-icon" alt="Armour">
+              <span>${this.formatNumber(properties.armour)}</span>
+            </div>
+          ` : ''}
+          ${properties.evasion > 0 ? `
+            <div class="exile-base-cell" title="Evasion: ${properties.evasion}">
+              <img src="/img/item-info/evasion.png" class="exile-base-icon" alt="Evasion">
+              <span>${this.formatNumber(properties.evasion)}</span>
+            </div>
+          ` : ''}
+          ${properties.energyShield > 0 ? `
+            <div class="exile-base-cell" title="Energy Shield: ${properties.energyShield}">
+              <img src="/img/item-info/energy.png" class="exile-base-icon" alt="ES">
+              <span>${this.formatNumber(properties.energyShield)}</span>
+            </div>
+          ` : ''}
+          ${properties.armour > 0 && properties.evasion > 0 ? `
+            <div class="exile-base-cell" title="Hybrid Armour/Evasion">
+              <img src="/img/item-info/armor_evasion.png" class="exile-base-icon" alt="AR/EV">
+              <span>${baseRollPct !== null ? `${baseRollPct}%` : '83%'}</span>
+            </div>
+          ` : ''}
+          ${properties.armour > 0 && properties.energyShield > 0 ? `
+            <div class="exile-base-cell" title="Hybrid Armour/Energy Shield">
+              <img src="/img/item-info/armor_energy.png" class="exile-base-icon" alt="AR/ES">
+              <span>${baseRollPct !== null ? `${baseRollPct}%` : '100%'}</span>
+            </div>
+          ` : ''}
+          ${properties.evasion > 0 && properties.energyShield > 0 ? `
+            <div class="exile-base-cell" title="Hybrid Evasion/Energy Shield">
+              <img src="/img/item-info/evasion_energy.png" class="exile-base-icon" alt="EV/ES">
+              <span>${baseRollPct !== null ? `${baseRollPct}%` : '100%'}</span>
+            </div>
+          ` : ''}
+          ${baseRollPct !== null ? `
+            <div class="exile-base-cell cell-highlight" title="Base Defence Percentile">
+              <img src="/img/item-info/defense.png" class="exile-base-icon" alt="Defence">
+              <span>${baseRollPct}%</span>
+            </div>
+          ` : ''}
+          ${dps && dps.isWeapon ? `
+            <div class="exile-base-cell cell-highlight" title="Total DPS">
+              <img src="/img/item-info/damage.png" class="exile-base-icon" alt="DPS">
+              <span>${dps.totalDps}</span>
+            </div>
+          ` : ''}
+          ${properties.quality > 0 ? `
+            <div class="exile-base-cell" title="Quality">
+              <img src="/img/item-info/scraps.png" class="exile-base-icon" alt="Quality">
+              <span>+${properties.quality}%</span>
+            </div>
+          ` : ''}
+          <div class="exile-base-cell exile-ilvl-cell" title="Item Level">
+            <img src="/img/item-info/ilvl.png" class="exile-base-icon" alt="iLvl">
+            <span class="${ilvl >= 84 ? 'ilvl-high' : ''}">${ilvl}/${maxIlvl}</span>
+          </div>
         </div>
       `;
     }
@@ -318,49 +375,98 @@ export const ItemInspectorRender = {
   },
 
   /**
-   * Renders a single Exile-UI sleek horizontal mod bar.
+   * Renders a single Exile-UI authentic mod row with visualized progress bar, tier box, and icon.
    */
   renderExileModBar(mod, group = 'explicit', isUnique = false) {
     const tier = mod.tier;
     const isMatched = mod.status === 'matched';
     const roll = (mod.rollAnalysis && mod.rollAnalysis[0]) ? mod.rollAnalysis[0] : null;
-    const pct = roll && typeof roll.percentile === 'number' ? Math.round(roll.percentile * 100) : null;
+    let pct = roll && typeof roll.percentile === 'number' ? Math.round(roll.percentile * 100) : null;
+
+    // Fallback: calculate percentage directly from raw text if value(min-max) exists
+    if (pct === null) {
+      const match = (mod.text || '').match(/\b(\d+(?:\.\d+)?)\s*\(\s*([+-]?\d+(?:\.\d+)?)\s*(?:-|to)\s*([+-]?\d+(?:\.\d+)?)\s*\)/);
+      if (match) {
+        const val = parseFloat(match[1]);
+        const min = parseFloat(match[2]);
+        const max = parseFloat(match[3]);
+        if (max > min) {
+          pct = Math.round(((val - min) / (max - min)) * 100);
+          pct = Math.max(0, Math.min(100, pct));
+        } else if (max === min) {
+          pct = 100;
+        }
+      }
+    }
 
     const formattedText = this.formatExileModText(mod);
     const fillStyle = pct !== null ? `style="width: ${pct}%;"` : '';
 
-    let barClass = `exile-mod-bar roll-track mod-${group}`;
-    if (isUnique) barClass += ' mod-unique';
+    let rowClass = `exile-mod-row mod-${group}`;
+    if (isUnique) rowClass += ' mod-unique';
 
-    let badgeHtml = '';
+    // 1. Resolve Exile-UI PNG Icon
+    const iconName = mod.icon || this.resolveExileIcon(mod.text, mod.tags, mod.family);
+    const iconHtml = iconName
+      ? `<div class="exile-icon-box"><img src="/img/item-info/${this.escapeHtml(iconName)}.png" class="exile-mod-icon" alt="${this.escapeHtml(iconName)}" onerror="this.parentElement.style.display='none'"></div>`
+      : '';
+
+    // 2. Resolve Tier Box and Colors
+    let tierHtml = '';
+    let indicatorClass = 'indicator-neutral';
+
     if (isUnique) {
       const scoreVal = pct !== null ? pct : (mod.values && mod.values[0] ? mod.values[0].value : '-');
-      const scoreClass = pct === 100 ? 'pct-100' : (pct >= 75 ? 'pct-high' : (pct >= 45 ? 'pct-med' : 'pct-low'));
-      badgeHtml = `<div class="exile-unique-badge tier-badge ${scoreClass}">${scoreVal}</div>`;
+      const scoreClass = pct === 100 ? 'tier-t1-white' : (pct >= 75 ? 'tier-t3' : (pct >= 45 ? 'tier-t4' : 'tier-t5'));
+      tierHtml = `<div class="exile-tier-box tier-badge ${scoreClass}">${scoreVal}</div>`;
+      if (pct !== null && pct >= 80) indicatorClass = 'indicator-good';
     } else if (group === 'implicit') {
       const impLabel = typeof tier === 'string' ? tier.slice(0, 4).toUpperCase() : (tier ? `T${tier}` : 'IMP');
-      badgeHtml = `<div class="exile-tier-badge tier-badge exile-tier-imp" title="${this.escapeHtml(mod.tierName || 'Implicit')}">${impLabel}</div>`;
+      const impClass = (typeof tier === 'string' && /greater|grand|perfect|exquisite/i.test(tier)) ? 'tier-t1' : 'tier-imp';
+      tierHtml = `<div class="exile-tier-box tier-badge ${impClass}" title="${this.escapeHtml(mod.tierName || 'Implicit')}">${impLabel}</div>`;
     } else if (group === 'crafted') {
-      badgeHtml = `<div class="exile-tier-badge tier-badge exile-tier-craft">CRAFT</div>`;
+      tierHtml = `<div class="exile-tier-box tier-badge tier-craft" title="Bench Crafted">CRAFT</div>`;
     } else if (group === 'fractured') {
-      badgeHtml = `<div class="exile-tier-badge tier-badge exile-tier-1">FRAC</div>`;
+      tierHtml = `<div class="exile-tier-box tier-badge tier-frac" title="Fractured Mod">FRAC</div>`;
+      indicatorClass = 'indicator-good';
     } else if (tier) {
-      const icon = this.getModIcon(mod.family || (mod.tags && mod.tags.join(' ')));
       const tierNum = typeof tier === 'number' ? tier : parseInt(tier, 10);
-      const tierColorClass = tierNum === 1 ? 'exile-tier-1' : (tierNum === 2 ? 'exile-tier-2' : (tierNum === 3 ? 'exile-tier-3' : (tierNum === 4 ? 'exile-tier-4' : 'exile-tier-5')));
+      let tierColorClass = 'tier-tnone';
+      if (tierNum === 1) {
+        tierColorClass = (pct !== null && pct >= 90) ? 'tier-t1-white' : 'tier-t1';
+        indicatorClass = 'indicator-good';
+      } else if (tierNum === 2) {
+        tierColorClass = 'tier-t2';
+        indicatorClass = 'indicator-good';
+      } else if (tierNum === 3) {
+        tierColorClass = 'tier-t3';
+      } else if (tierNum === 4) {
+        tierColorClass = 'tier-t4';
+      } else if (tierNum === 5) {
+        tierColorClass = 'tier-t5';
+      } else if (tierNum >= 6) {
+        tierColorClass = 'tier-t6';
+      }
       const label = typeof tier === 'number' ? `T${tier}` : tier;
-      badgeHtml = `<div class="exile-tier-badge tier-badge ${tierColorClass}" title="${this.escapeHtml(mod.tierName || `Tier ${tier}`)}">${label} ${icon}</div>`;
-    } else if (mod.tierName === 'Essences' || (mod.tags && mod.tags.includes('Essence')) || (mod.tags && mod.tags.includes('Minion'))) {
-      badgeHtml = `<div class="exile-tier-badge tier-badge exile-tier-craft" title="Essence Mod">ESS</div>`;
+      tierHtml = `<div class="exile-tier-box tier-badge ${tierColorClass}" title="T${tier} - ${this.escapeHtml(mod.tierName || `Tier ${tier}`)}" data-tier="T${tier}">${label}</div>`;
+    } else if (mod.tierName === 'Essences' || (mod.tags && mod.tags.includes('Essence'))) {
+      tierHtml = `<div class="exile-tier-box tier-badge tier-essence" title="Essence Mod">ESS</div>`;
+      indicatorClass = 'indicator-good';
     } else {
-      badgeHtml = `<div class="exile-tier-badge tier-badge exile-tier-none">-</div>`;
+      tierHtml = `<div class="exile-tier-box tier-badge tier-tnone">-</div>`;
     }
 
+    const fillClass = isUnique ? 'fill-unique' : (group === 'implicit' ? 'fill-implicit' : (group === 'crafted' ? 'fill-crafted' : 'fill-rare'));
+
     return `
-      <div class="${barClass}">
-        ${pct !== null ? `<div class="exile-mod-fill roll-bar-fill" ${fillStyle}></div>` : ''}
-        <div class="exile-mod-text" title="${this.escapeHtml(mod.text)}">${this.escapeHtml(formattedText)}</div>
-        ${badgeHtml}
+      <div class="${rowClass}">
+        <div class="exile-mod-bar roll-track">
+          ${pct !== null ? `<div class="exile-mod-fill roll-bar-fill ${fillClass}" ${fillStyle}></div>` : ''}
+          <div class="exile-mod-text" title="${this.escapeHtml(mod.text)}">${this.escapeHtml(formattedText)}</div>
+        </div>
+        <div class="exile-mod-indicator ${indicatorClass}"></div>
+        ${tierHtml}
+        ${iconHtml}
       </div>
     `;
   },
@@ -382,22 +488,99 @@ export const ItemInspectorRender = {
     return text.toUpperCase();
   },
 
-  getModIcon(family = '') {
-    const f = (family || '').toLowerCase();
-    if (f.includes('life')) return '<i class="fa-solid fa-heart"></i>';
-    if (f.includes('fire')) return '<i class="fa-solid fa-fire"></i>';
-    if (f.includes('cold')) return '<i class="fa-solid fa-snowflake"></i>';
-    if (f.includes('lightning')) return '<i class="fa-solid fa-bolt"></i>';
-    if (f.includes('chaos')) return '<i class="fa-solid fa-skull"></i>';
-    if (f.includes('evasion') || f.includes('armour') || f.includes('energy') || f.includes('ward') || f.includes('defence')) {
-      return '<i class="fa-solid fa-shield"></i>';
+  resolveExileIcon(text = '', tags = [], family = '') {
+    const str = (text || '').toLowerCase();
+    const fam = (family || '').toLowerCase();
+    const tagList = Array.isArray(tags) ? tags.map(t => (t || '').toLowerCase()) : [];
+
+    // Specific attacks
+    if (str.includes('adds ') && str.includes('damage') && !str.includes('spells')) {
+      if (str.includes('fire')) return 'fire_attack';
+      if (str.includes('cold')) return 'cold_attack';
+      if (str.includes('lightning')) return 'lightning_attack';
+      if (str.includes('chaos')) return 'chaos_attack';
+      if (str.includes('physical')) return 'phys';
     }
-    if (f.includes('speed') || f.includes('movement')) return '<i class="fa-solid fa-person-running"></i>';
-    if (f.includes('mana')) return '<i class="fa-solid fa-droplet"></i>';
-    if (f.includes('damage') || f.includes('physical') || f.includes('attack') || f.includes('spell')) {
-      return '<i class="fa-solid fa-crosshairs"></i>';
+
+    // Minion / Totem / Flasks / Gems
+    if (str.includes('minion') || tagList.includes('minion')) return 'minion';
+    if (str.includes('totem')) return 'totems';
+    if (str.includes('flask')) return 'flasks';
+    if (str.includes('to level of ') && str.includes('gem')) return 'gem_level';
+
+    // Accuracy / Crit / Speed
+    if (str.includes('accuracy rating')) return 'accuracy';
+    if (str.includes('critical') || str.includes('crit')) return 'crit';
+    if (str.includes('attack speed') || str.includes('cast speed') || str.includes('movement speed') || tagList.includes('speed')) return 'speed';
+
+    // Resistances
+    if (str.includes('all elemental resistances') || str.includes('all maximum resistances')) return 'allres';
+    if (str.includes('fire resistance') || str.includes('fire and') || (tagList.includes('fire') && str.includes('resistance'))) return 'fire';
+    if (str.includes('cold resistance') || str.includes('cold and') || (tagList.includes('cold') && str.includes('resistance'))) return 'cold';
+    if (str.includes('lightning resistance') || str.includes('lightning and') || (tagList.includes('lightning') && str.includes('resistance'))) return 'lightning';
+    if (str.includes('chaos resistance') || (tagList.includes('chaos') && str.includes('resistance'))) return 'chaos';
+
+    // Life & Mana
+    if (str.includes('maximum life') || str.includes('to life') || tagList.includes('life')) {
+      if (str.includes('regenerate') || str.includes('regeneration')) return 'life_regen';
+      return 'life';
     }
-    return '';
+    if (str.includes('regenerate') && str.includes('life')) return 'life_regen';
+
+    if (str.includes('maximum mana') || str.includes('to mana') || tagList.includes('mana')) {
+      if (str.includes('regenerate') || str.includes('regeneration')) return 'mana_regen';
+      return 'mana';
+    }
+    if (str.includes('regenerate') && str.includes('mana')) return 'mana_regen';
+
+    // Attributes / Stats
+    if (str.includes('all attributes') || str.includes('increased attributes')) return 'allstats';
+    if (str.includes('strength') && str.includes('dexterity') && str.includes('intelligence')) return 'allstats';
+    if (str.includes('to strength') || str.includes('strength')) return 'strength';
+    if (str.includes('to dexterity') || str.includes('dexterity')) return 'dexterity';
+    if (str.includes('to intelligence') || str.includes('intelligence')) return 'intelligence';
+
+    // Defences
+    if (str.includes('armour and evasion') || (str.includes('armour') && str.includes('evasion rating'))) return 'armor_evasion';
+    if (str.includes('armour and energy') || (str.includes('armour') && str.includes('energy shield'))) return 'armor_energy';
+    if (str.includes('evasion and energy') || (str.includes('evasion') && str.includes('energy shield'))) return 'evasion_energy';
+    if (str.includes('armour')) return 'armor';
+    if (str.includes('evasion')) return 'evasion';
+    if (str.includes('energy shield')) return 'energy';
+    if (str.includes('ward')) return 'ward';
+    if (str.includes('suppress spell damage') || str.includes('suppressed')) return 'defense';
+    if (str.includes('block')) return 'block';
+
+    // Damage
+    if (str.includes('fire damage') || tagList.includes('fire')) return 'fire_damage';
+    if (str.includes('cold damage') || tagList.includes('cold')) return 'cold_damage';
+    if (str.includes('lightning damage') || tagList.includes('lightning')) return 'lightning_damage';
+    if (str.includes('chaos damage') || tagList.includes('chaos')) return 'chaos_damage';
+    if (str.includes('physical damage') || str.includes('global physical')) return 'phys';
+    if (str.includes('spell damage')) return 'spell_damage';
+    if (str.includes('increased damage')) return 'damage';
+
+    // Eldritch / Special
+    if (str.includes('searing exarch') || str.includes('exarch')) return 'exarch';
+    if (str.includes('eater of worlds') || str.includes('eater')) return 'eater';
+    if (str.includes('essence') || tagList.includes('essence')) return 'essence';
+    if (str.includes('crafted') || str.includes('master')) return 'mastercraft';
+    if (str.includes('delve')) return 'delve';
+    if (str.includes('incursion')) return 'incursion';
+    if (str.includes('syndicate') || str.includes('veiled')) return 'syndicate';
+    if (str.includes('synthesis')) return 'synthesis';
+    if (str.includes('vaal')) return 'vaal';
+
+    if (fam.includes('life')) return 'life';
+    if (fam.includes('fire')) return 'fire';
+    if (fam.includes('cold')) return 'cold';
+    if (fam.includes('lightning')) return 'lightning';
+    if (fam.includes('chaos')) return 'chaos';
+    if (fam.includes('speed')) return 'speed';
+    if (fam.includes('mana')) return 'mana';
+    if (fam.includes('armour') || fam.includes('evasion') || fam.includes('energy') || fam.includes('defence')) return 'defense';
+
+    return null;
   },
 
   calculateOverallUniqueScore(analysis = {}) {

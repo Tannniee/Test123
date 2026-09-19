@@ -4585,68 +4585,83 @@ select:focus {
   color: #cbd5e1;
 }
 
-/* 2. Exile-UI Base Defences Row */
+/* 2. Exile-UI Base Defences Row (Authentic Exile-UI Image 2 Layout) */
 .exile-base-row {
   display: flex;
-  align-items: center;
-  gap: 4px;
-  background: #000;
-  border: 1px solid #2d3748;
-  padding: 3px 6px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  flex-wrap: wrap;
+  align-items: stretch;
+  background: #000000;
+  border: 1px solid #2a313d;
+  height: 26px;
+  margin-bottom: 4px;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
-.exile-base-label {
-  background: #2d3748;
-  color: #e2e8f0;
-  padding: 1px 8px;
-  font-size: 0.72rem;
-  letter-spacing: 0.5px;
-  border-radius: 2px;
-}
-
-.exile-base-chip {
+.exile-base-cell {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 4px;
-  background: #1a202c;
-  border: 1px solid #4a5568;
-  padding: 1px 6px;
+  padding: 0 6px;
+  background: #0a0c10;
+  border-right: 1px solid #1f2530;
+  font-size: 0.76rem;
+  font-weight: 700;
   color: #e2e8f0;
-  font-size: 0.75rem;
-  border-radius: 2px;
+  white-space: nowrap;
 }
 
-.exile-base-chip i {
-  font-size: 0.72rem;
+.exile-base-cell.exile-base-title {
+  background: #000000;
+  font-weight: 900;
+  color: #ffffff;
+  padding: 0 8px;
+  letter-spacing: 0.5px;
 }
 
-.exile-chip-armour i { color: #f87171; }
-.exile-chip-evasion i { color: #4ade80; }
-.exile-chip-es i { color: #60a5fa; }
-.exile-chip-ward i { color: #fbbf24; }
-.exile-chip-life i { color: #ef4444; }
-.exile-chip-dps i { color: #fb923c; }
+.exile-base-cell.cell-highlight {
+  color: #4ade80;
+}
 
-/* 3. Exile-UI Affix Row */
+.exile-base-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  display: block;
+}
+
+.exile-ilvl-cell .ilvl-high {
+  color: #facc15;
+  font-weight: 800;
+}
+
+/* 3. Exile-UI Affix List & Rows (Authentic Exile-UI Image 1 & Image 2) */
 .exile-affix-list {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.exile-mod-bar {
-  position: relative;
+.exile-mod-row {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #181c24;
-  border: 1px solid #2a313d;
+  align-items: stretch;
+  background: #000000;
+  border: 1px solid #1e2430;
   height: 28px;
   overflow: hidden;
   box-sizing: border-box;
+}
+
+/* Horizontal Progress Roll Bar */
+.exile-mod-bar {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000000;
+  overflow: hidden;
+  min-width: 0;
 }
 
 .exile-mod-fill {
@@ -4654,107 +4669,175 @@ select:focus {
   top: 0;
   bottom: 0;
   left: 0;
-  background: rgba(34, 197, 94, 0.18);
-  border-right: 2px solid rgba(34, 197, 94, 0.6);
+  z-index: 1;
   pointer-events: none;
   transition: width 0.3s ease;
-  z-index: 1;
 }
 
+/* Authentic Exile-UI Roll Fills:
+   - Unique: #994C00 (Amber/Brown)
+   - Rare / Non-unique: #404040 (Dark Slate Gray)
+   - Implicit: #303060 (Purple-tinted Navy)
+   - Crafted: #1e3a5f (Blue-tinted Navy)
+*/
+.exile-mod-fill.fill-rare {
+  background: #404040 !important;
+}
+
+.exile-mod-fill.fill-unique {
+  background: #994C00 !important;
+}
+
+.exile-mod-fill.fill-implicit {
+  background: #303060 !important;
+}
+
+.exile-mod-fill.fill-crafted {
+  background: #1e3a5f !important;
+}
+
+/* Centered Uppercase Mod Text */
 .exile-mod-text {
   position: relative;
   z-index: 2;
-  font-size: 0.76rem;
-  font-weight: 600;
-  color: #e2e8f0;
-  padding-left: 8px;
-  padding-right: 6px;
+  width: 100%;
+  text-align: center;
+  font-size: 0.77rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95), 0 0 1px rgba(0, 0, 0, 0.9);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   text-transform: uppercase;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.4px;
+  padding: 0 6px;
 }
 
-/* Mod Variant Types */
-.exile-mod-bar.mod-implicit {
-  background: #3b1d6e !important;
-  border-color: #581c87 !important;
-}
-.exile-mod-bar.mod-implicit .exile-mod-fill {
-  background: rgba(139, 92, 246, 0.3) !important;
-  border-color: #a855f7 !important;
-}
-
-.exile-mod-bar.mod-crafted {
-  background: #0f2b46 !important;
-  border-color: #0369a1 !important;
-}
-.exile-mod-bar.mod-crafted .exile-mod-text {
-  color: #7dd3fc !important;
-}
-
-.exile-mod-bar.mod-fractured {
-  border-color: #d97706 !important;
-  box-shadow: inset 0 0 4px rgba(217, 119, 6, 0.3);
-}
-
-.exile-mod-bar.mod-unique {
-  background: #78350f !important;
-  border-color: #92400e !important;
-}
-.exile-mod-bar.mod-unique .exile-mod-fill {
-  background: rgba(245, 158, 11, 0.25) !important;
-  border-color: #f59e0b !important;
-}
-
-/* 4. Right Tier Badge */
-.exile-tier-badge {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  width: 44px;
-  min-width: 44px;
+/* 4. Indicator Accent Strip */
+.exile-mod-indicator {
+  width: 4px;
+  min-width: 4px;
   height: 100%;
-  border-left: 1px solid #2a313d;
-  font-size: 0.74rem;
-  font-weight: 800;
-  text-align: center;
+  border-left: 1px solid #000000;
+  background: #000000;
   box-sizing: border-box;
 }
 
-/* Tier Colors */
-.exile-tier-1 { background: #22c55e !important; color: #000 !important; }
-.exile-tier-2 { background: #10b981 !important; color: #000 !important; }
-.exile-tier-3 { background: #eab308 !important; color: #000 !important; }
-.exile-tier-4 { background: #f97316 !important; color: #000 !important; }
-.exile-tier-5 { background: #ef4444 !important; color: #fff !important; }
-.exile-tier-6 { background: #b91c1c !important; color: #fff !important; }
-.exile-tier-none { background: #334155 !important; color: #cbd5e1 !important; }
-.exile-tier-imp { background: #7c3aed !important; color: #fff !important; }
-.exile-tier-craft { background: #0284c7 !important; color: #fff !important; }
+.exile-mod-indicator.indicator-good {
+  background: #00FF00 !important;
+}
 
-/* Unique Percentile Badge */
-.exile-unique-badge {
-  position: relative;
-  z-index: 2;
+/* 5. Tier Box (26px Square) */
+.exile-tier-box {
+  width: 26px;
+  min-width: 26px;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  min-width: 44px;
-  height: 100%;
-  border-left: 1px solid #92400e;
-  font-size: 0.74rem;
+  font-size: 0.76rem;
   font-weight: 800;
+  border-left: 1px solid #000000;
+  box-sizing: border-box;
 }
-.exile-unique-badge.pct-100 { background: #f8fafc !important; color: #b91c1c !important; }
-.exile-unique-badge.pct-high { background: #f59e0b !important; color: #000 !important; }
-.exile-unique-badge.pct-med { background: #d97706 !important; color: #000 !important; }
-.exile-unique-badge.pct-low { background: #78350f !important; color: #fff !important; }
+
+/* Authentic Exile-UI Tier Colors */
+.exile-tier-box.tier-t1 {
+  background: #00FF00 !important;
+  color: #000000 !important;
+}
+
+.exile-tier-box.tier-t1-white {
+  background: #ffffff !important;
+  color: #dc2626 !important;
+  font-weight: 900;
+}
+
+.exile-tier-box.tier-t2 {
+  background: #006600 !important;
+  color: #ffffff !important;
+}
+
+.exile-tier-box.tier-t3 {
+  background: #FFFF00 !important;
+  color: #000000 !important;
+}
+
+.exile-tier-box.tier-t4 {
+  background: #FF8000 !important;
+  color: #000000 !important;
+}
+
+.exile-tier-box.tier-t5 {
+  background: #FF3333 !important;
+  color: #ffffff !important;
+}
+
+.exile-tier-box.tier-t6 {
+  background: #990000 !important;
+  color: #ffffff !important;
+}
+
+.exile-tier-box.tier-frac {
+  background: #00FFFF !important;
+  color: #000000 !important;
+}
+
+.exile-tier-box.tier-essence {
+  background: #00FFFF !important;
+  color: #000000 !important;
+  font-size: 0.68rem;
+}
+
+.exile-tier-box.tier-craft {
+  background: #3399FF !important;
+  color: #ffffff !important;
+  font-size: 0.65rem;
+}
+
+.exile-tier-box.tier-imp {
+  background: #7c3aed !important;
+  color: #ffffff !important;
+}
+
+.exile-tier-box.tier-tnone {
+  background: #1e2430 !important;
+  color: #94a3b8 !important;
+}
+
+/* 6. Icon Box (26px Square with Exile-UI PNG Icon) */
+.exile-icon-box {
+  width: 26px;
+  min-width: 26px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000000;
+  border-left: 1px solid #111111;
+  box-sizing: border-box;
+}
+
+.exile-mod-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  display: block;
+}
+
+/* Mod Row Variants */
+.exile-mod-row.mod-implicit .exile-mod-bar {
+  background: #120b22;
+}
+
+.exile-mod-row.mod-crafted .exile-mod-text {
+  color: #7dd3fc !important;
+}
+
+.exile-mod-row.mod-fractured {
+  border-color: #d97706 !important;
+}
 
 /* 5. Exile-UI Summary Footer */
 .exile-footer-bar {

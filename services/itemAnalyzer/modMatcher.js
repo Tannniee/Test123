@@ -98,6 +98,7 @@ class ModMatcher {
         isFractured: !!desc.isFractured,
         isCrafted: !!desc.isCrafted,
         isScourge: !!desc.isScourge,
+        icon: this.resolveExileIcon(actualText, desc.tags || [], cand ? cand.family : null),
         values: valueRanges,
         confidence: 1.0,
         status: 'matched',
@@ -112,6 +113,7 @@ class ModMatcher {
         family: null,
         type: 'unknown',
         tier: null,
+        icon: this.resolveExileIcon(actualText),
         values: valueRanges,
         confidence: 0,
         status: 'unrecognized'
@@ -172,6 +174,7 @@ class ModMatcher {
         type: match.type,
         tier: tierObj.tier,
         tierName: tierObj.name,
+        icon: this.resolveExileIcon(actualText, [], match.family),
         values: valueRanges,
         requiredItemLevel: tierObj.minLevel || 1,
         confidence: 1.0,
@@ -194,6 +197,7 @@ class ModMatcher {
         family: null,
         type: 'ambiguous',
         tier: null,
+        icon: this.resolveExileIcon(actualText),
         values: valueRanges,
         confidence: parseFloat((1 / resolvedMatches.length).toFixed(2)),
         status: 'ambiguous',
@@ -215,10 +219,125 @@ class ModMatcher {
       type: primary.type,
       tier: null,
       tierName: null,
+      icon: this.resolveExileIcon(actualText, [], primary.family),
       values: values.map(v => ({ value: v, min: null, max: null })),
       confidence: 0.5,
       status: 'unmatched_tier'
     };
+  }
+
+  resolveExileIcon(string = '', tags = [], family = null) {
+    if (!string || typeof string !== 'string') return null;
+    const str = string.toLowerCase();
+
+    // Specific attacks
+    if (str.includes('adds ') && str.includes('damage') && !str.includes('spells')) {
+      if (str.includes('fire')) return 'fire_attack';
+      if (str.includes('cold')) return 'cold_attack';
+      if (str.includes('lightning')) return 'lightning_attack';
+      if (str.includes('chaos')) return 'chaos_attack';
+      if (str.includes('physical')) return 'phys';
+    }
+
+    // Minion / Totem / Flasks / Gems
+    if (str.includes('minion')) return 'minion';
+    if (str.includes('totem')) return 'totems';
+    if (str.includes('flask')) return 'flasks';
+    if (str.includes('to level of ') && str.includes('gem')) return 'gem_level';
+
+    // Accuracy / Crit / Speed
+    if (str.includes('accuracy rating')) return 'accuracy';
+    if (str.includes('critical')) return 'crit';
+    if (str.includes('attack speed') || str.includes('cast speed') || str.includes('movement speed')) return 'speed';
+
+    // Resistances
+    if (str.includes('all elemental resistances') || str.includes('all maximum resistances')) return 'allres';
+    if (str.includes('fire resistance') || str.includes('fire and')) return 'fire';
+    if (str.includes('cold resistance') || str.includes('cold and')) return 'cold';
+    if (str.includes('lightning resistance') || str.includes('lightning and')) return 'lightning';
+    if (str.includes('chaos resistance')) return 'chaos';
+
+    // Life & Mana
+    if (str.includes('maximum life') || str.includes('to life')) {
+      if (str.includes('regenerate') || str.includes('regeneration')) return 'life_regen';
+      return 'life';
+    }
+    if (str.includes('regenerate') && str.includes('life')) return 'life_regen';
+
+    if (str.includes('maximum mana') || str.includes('to mana')) {
+      if (str.includes('regenerate') || str.includes('regeneration')) return 'mana_regen';
+      return 'mana';
+    }
+    if (str.includes('regenerate') && str.includes('mana')) return 'mana_regen';
+
+    // Attributes / Stats
+    if (str.includes('all attributes') || str.includes('increased attributes')) return 'allstats';
+    if (str.includes('strength') && str.includes('dexterity') && str.includes('intelligence')) return 'allstats';
+    if (str.includes('to strength') || str.includes('strength')) return 'strength';
+    if (str.includes('to dexterity') || str.includes('dexterity')) return 'dexterity';
+    if (str.includes('to intelligence') || str.includes('intelligence')) return 'intelligence';
+
+    // Defences
+    if (str.includes('armour and evasion') || (str.includes('armour') && str.includes('evasion rating'))) return 'armor_evasion';
+    if (str.includes('armour and energy') || (str.includes('armour') && str.includes('energy shield'))) return 'armor_energy';
+    if (str.includes('evasion and energy') || (str.includes('evasion') && str.includes('energy shield'))) return 'evasion_energy';
+    if (str.includes('armour')) return 'armor';
+    if (str.includes('evasion')) return 'evasion';
+    if (str.includes('energy shield')) return 'energy';
+    if (str.includes('ward')) return 'ward';
+    if (str.includes('suppress spell damage') || str.includes('suppressed')) return 'defense';
+    if (str.includes('block')) return 'block';
+
+    // Damage
+    if (str.includes('fire damage')) return 'fire_damage';
+    if (str.includes('cold damage')) return 'cold_damage';
+    if (str.includes('lightning damage')) return 'lightning_damage';
+    if (str.includes('chaos damage')) return 'chaos_damage';
+    if (str.includes('physical damage') || str.includes('global physical')) return 'phys';
+    if (str.includes('spell damage')) return 'spell_damage';
+    if (str.includes('increased damage')) return 'damage';
+
+    // Eldritch / Special
+    if (str.includes('searing exarch') || str.includes('exarch')) return 'exarch';
+    if (str.includes('eater of worlds') || str.includes('eater')) return 'eater';
+    if (str.includes('essence')) return 'essence';
+    if (str.includes('crafted') || str.includes('master')) return 'mastercraft';
+    if (str.includes('delve')) return 'delve';
+    if (str.includes('incursion')) return 'incursion';
+    if (str.includes('syndicate') || str.includes('veiled')) return 'syndicate';
+    if (str.includes('synthesis')) return 'synthesis';
+    if (str.includes('vaal')) return 'vaal';
+
+    // Check tags or family fallback
+    const tagList = Array.isArray(tags) ? tags : [];
+    for (const t of tagList) {
+      const tl = (t || '').toLowerCase();
+      if (tl === 'life') return 'life';
+      if (tl === 'mana') return 'mana';
+      if (tl === 'fire') return 'fire';
+      if (tl === 'cold') return 'cold';
+      if (tl === 'lightning') return 'lightning';
+      if (tl === 'chaos') return 'chaos';
+      if (tl === 'speed') return 'speed';
+      if (tl === 'physical') return 'phys';
+      if (tl === 'defences') return 'defense';
+      if (tl === 'elemental') return 'allres';
+      if (tl === 'minion') return 'minion';
+    }
+
+    if (family) {
+      const fam = family.toLowerCase();
+      if (fam.includes('life')) return 'life';
+      if (fam.includes('fire')) return 'fire';
+      if (fam.includes('cold')) return 'cold';
+      if (fam.includes('lightning')) return 'lightning';
+      if (fam.includes('chaos')) return 'chaos';
+      if (fam.includes('speed')) return 'speed';
+      if (fam.includes('mana')) return 'mana';
+      if (fam.includes('armour') || fam.includes('evasion') || fam.includes('energy') || fam.includes('defence')) return 'defense';
+    }
+
+    return null;
   }
 
   matchAll(modList = [], options = {}) {

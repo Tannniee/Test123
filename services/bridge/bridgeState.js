@@ -22,6 +22,10 @@ class BridgeState {
       game: itemData.game === 'poe2' ? 'poe2' : 'poe1',
       source: itemData.source || 'clipboard',
       rawText: String(itemData.rawText || '').trim(),
+      parsedItem: itemData.parsedItem || null,
+      classification: itemData.classification || null,
+      analysis: itemData.analysis || null,
+      market: itemData.market || null,
       capturedAt: itemData.capturedAt || new Date().toISOString()
     };
 

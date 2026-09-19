@@ -37,27 +37,55 @@ class MarketResolver {
           matchedItem = candidates[0];
         } else if (candidates.length > 1) {
           // Disambiguate by variants:
-          // A. Links (5L, 6L)
-          const targetLinks = canonicalItem.maxLinks >= 5 ? canonicalItem.maxLinks : null;
+          // A. Links (5L, 6L) - support canonicalItem.links (standard) and canonicalItem.maxLinks
+          const rawLinks = canonicalItem.links !== undefined ? canonicalItem.links : canonicalItem.maxLinks;
+          const targetLinks = (typeof rawLinks === 'number' && rawLinks >= 5) ? rawLinks : null;
+
           // B. Map Tier
           const targetMapTier = properties.mapTier || null;
-          // C. Gem Level & Corrupted
+
+          // C. Gem Level & Quality
           const targetGemLevel = properties.gemLevel || null;
+          const targetQuality = properties.quality || 0;
+
+          // D. Corrupted Flag
           const isCorrupted = !!flags.corrupted;
 
           matchedItem = candidates.find(it => {
-            if (targetLinks && it.links !== targetLinks && !it.variant?.includes(`${targetLinks}L`)) {
+            // 1. Links constraint
+            if (targetLinks) {
+              const matchesLinks = it.links === targetLinks || it.variant?.includes(`${targetLinks}L`);
+              if (!matchesLinks) return false;
+            }
+
+            // 2. Map tier constraint
+            if (targetMapTier) {
+              const matchesTier = it.mapTier === targetMapTier || it.subCategory === `Tier ${targetMapTier}`;
+              if (!matchesTier) return false;
+            }
+
+            // 3. Gem level constraint
+            if (targetGemLevel) {
+              const matchesGemLevel = it.gemLevel === targetGemLevel || 
+                                     (it.variant && (it.variant.startsWith(`${targetGemLevel}/`) || it.variant === String(targetGemLevel)));
+              if (!matchesGemLevel) return false;
+            }
+
+            // 4. Gem quality constraint
+            if (targetQuality > 0 && (it.gemQuality || it.variant?.includes('/'))) {
+              const matchesQuality = it.gemQuality === targetQuality || it.variant?.endsWith(`/${targetQuality}`);
+              if (!matchesQuality) return false;
+            }
+
+            // 5. Corrupted state constraint
+            const candidateIsCorrupted = !!(it.corrupted || it.detailsId?.includes('-corrupted') || it.variant?.toLowerCase().includes('corrupted'));
+            if (isCorrupted && !candidateIsCorrupted) {
               return false;
             }
-            if (targetMapTier && it.mapTier !== targetMapTier && it.subCategory !== `Tier ${targetMapTier}`) {
+            if (!isCorrupted && candidateIsCorrupted) {
               return false;
             }
-            if (targetGemLevel && it.variant && !it.variant.startsWith(String(targetGemLevel))) {
-              return false;
-            }
-            if (isCorrupted && it.corrupted === false) {
-              return false;
-            }
+
             return true;
           }) || candidates[0];
         }
@@ -102,6 +130,9 @@ class MarketResolver {
         variant: matchedItem.variant || null,
         links: matchedItem.links || null,
         mapTier: matchedItem.mapTier || null,
+        gemLevel: matchedItem.gemLevel || null,
+        gemQuality: matchedItem.gemQuality || null,
+        corrupted: matchedItem.corrupted ?? null,
         isBaseReference,
         referenceLabel: isBaseReference ? 'Base item reference' : null
       };

@@ -13,6 +13,7 @@ const createApp = require('../server/createApp.js');
 const baseAnalyzer = require('../services/itemAnalyzer/baseAnalyzer.js');
 const dpsAnalyzer = require('../services/itemAnalyzer/dpsAnalyzer.js');
 const marketResolver = require('../services/itemAnalyzer/marketResolver.js');
+const itemTextParser = require('../services/itemAnalyzer/itemTextParser.js');
 const itemAnalyzerService = require('../services/itemAnalyzer/itemAnalyzerService.js');
 const { ItemInspectorRender } = await import('../public/js/modules/itemInspectorRender.js');
 
@@ -102,17 +103,26 @@ describe('PR 9 Suite: Web Item Inspector UI & Deep Analysis Integration (Phases 
       assert.equal(resolved.count, 42);
     });
 
-    it('marketResolver disambiguates 6-link variant for Unique body armour', () => {
-      const sixLinkChest = {
-        identity: {
-          rarity: 'Unique',
-          name: 'Belly of the Beast',
-          baseType: 'Full Wyrmscale'
-        },
-        maxLinks: 6,
-        properties: {},
-        flags: {}
-      };
+    it('marketResolver disambiguates 6-link variant for Unique body armour parsed directly from raw item', () => {
+      const raw6LinkItem = [
+        'Item Class: Body Armours',
+        'Rarity: Unique',
+        'Belly of the Beast',
+        'Full Wyrmscale',
+        '--------',
+        'Armour: 500',
+        'Evasion Rating: 200',
+        '--------',
+        'Sockets: R-R-R-R-R-R',
+        '--------',
+        'Item Level: 84',
+        '--------',
+        '150% increased Armour and Evasion Rating',
+        '35% increased maximum Life'
+      ].join('\n');
+
+      const parsedItem = itemTextParser.parse(raw6LinkItem);
+      assert.equal(parsedItem.links, 6);
 
       const mockCacheMgr = {
         getActiveLeague: () => 'Standard',
@@ -124,7 +134,7 @@ describe('PR 9 Suite: Web Item Inspector UI & Deep Analysis Integration (Phases 
         })
       };
 
-      const resolved = marketResolver.resolve(sixLinkChest, {
+      const resolved = marketResolver.resolve(parsedItem, {
         game: 'poe1',
         cacheManager: mockCacheMgr
       });
@@ -133,6 +143,43 @@ describe('PR 9 Suite: Web Item Inspector UI & Deep Analysis Integration (Phases 
       assert.equal(resolved.links, 6);
       assert.equal(resolved.chaosValue, 250);
       assert.equal(resolved.isBaseReference, false);
+    });
+
+    it('marketResolver matches gem variant with level, quality, and corrupted flag', () => {
+      const rawGem = [
+        'Item Class: Skill Gems',
+        'Rarity: Gem',
+        'Empower Support',
+        '--------',
+        'Level: 4 (Max)',
+        'Quality: +20%',
+        '--------',
+        'Corrupted'
+      ].join('\n');
+
+      const parsedGem = itemTextParser.parse(rawGem);
+      assert.equal(parsedGem.properties.gemLevel, 4);
+      assert.equal(parsedGem.properties.quality, 20);
+      assert.equal(parsedGem.flags.corrupted, true);
+
+      const mockCacheMgr = {
+        getActiveLeague: () => 'Standard',
+        getData: () => ({
+          items: [
+            { name: 'Empower Support', gemLevel: 3, gemQuality: 20, corrupted: false, variant: '3/20', chaosValue: 100 },
+            { name: 'Empower Support', gemLevel: 4, gemQuality: 20, corrupted: true, variant: '4/20c', chaosValue: 1200 }
+          ]
+        })
+      };
+
+      const resolved = marketResolver.resolve(parsedGem, {
+        game: 'poe1',
+        cacheManager: mockCacheMgr
+      });
+
+      assert.ok(resolved);
+      assert.equal(resolved.gemLevel, 4);
+      assert.equal(resolved.chaosValue, 1200);
     });
   });
 

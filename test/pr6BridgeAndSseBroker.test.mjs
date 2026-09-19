@@ -169,6 +169,9 @@ Magic Utility Flask Effects cannot be gained from Flasks
       assert.ok(jsonValid.requestId);
       assert.equal(jsonValid.item.game, 'poe1');
       assert.ok(jsonValid.item.rawText.includes('Mageblood'));
+      assert.ok(jsonValid.item.analysis, 'Broadcasted item must preserve analysis');
+      assert.ok(jsonValid.item.parsedItem, 'Broadcasted item must preserve parsedItem');
+      assert.ok(jsonValid.item.classification, 'Broadcasted item must preserve classification');
 
       // 3d. Cold-start recovery endpoint (/api/bridge/latest)
       const resLatest = await fetch(`${baseUrl}/api/bridge/latest`);
@@ -176,6 +179,9 @@ Magic Utility Flask Effects cannot be gained from Flasks
       const jsonLatest = await resLatest.json();
       assert.equal(jsonLatest.success, true);
       assert.ok(jsonLatest.item.rawText.includes('Mageblood'));
+      assert.ok(jsonLatest.item.analysis, 'Cold-start recovery item must preserve analysis');
+      assert.ok(jsonLatest.item.parsedItem, 'Cold-start recovery item must preserve parsedItem');
+      assert.ok(jsonLatest.item.classification, 'Cold-start recovery item must preserve classification');
 
       // 3e. Bridge status endpoint (/api/bridge/status)
       const resStatus = await fetch(`${baseUrl}/api/bridge/status`);

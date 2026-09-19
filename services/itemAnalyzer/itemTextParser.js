@@ -152,6 +152,7 @@ class ItemTextParser {
       requirements,
       sockets,
       links: maxLinks,
+      maxLinks: maxLinks,
       modifiers,
       flags,
       flavourText: flavourTextLines.join('\n').trim(),

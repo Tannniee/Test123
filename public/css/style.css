@@ -4542,4 +4542,298 @@ select:focus {
   font-size: 0.88rem;
 }
 
+/* ==========================================================================
+   Exile-UI Style Compact Stat Inspector
+   ========================================================================== */
+
+.modal-card-inspector {
+  max-width: 620px !important;
+  width: 95vw !important;
+  background: #0d1117 !important;
+  border: 1px solid #30363d !important;
+  border-radius: 4px !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.9) !important;
+  padding: 10px 14px !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
+.exile-inspector-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* 1. Exile-UI Header */
+.exile-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 6px;
+  margin-bottom: 4px;
+}
+
+.exile-item-title-group {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.exile-item-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.exile-item-name.rarity-rare { color: #f5c042; }
+.exile-item-name.rarity-unique { color: #d97706; }
+.exile-item-name.rarity-magic { color: #60a5fa; }
+.exile-item-name.rarity-normal { color: #e2e8f0; }
+
+.exile-item-basetype {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.exile-header-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.exile-pill-ilvl, .exile-pill-game {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+}
+
+/* 2. Exile-UI Base Defences Row */
+.exile-base-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #000;
+  border: 1px solid #2d3748;
+  padding: 3px 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  flex-wrap: wrap;
+}
+
+.exile-base-label {
+  background: #2d3748;
+  color: #e2e8f0;
+  padding: 1px 8px;
+  font-size: 0.72rem;
+  letter-spacing: 0.5px;
+  border-radius: 2px;
+}
+
+.exile-base-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #1a202c;
+  border: 1px solid #4a5568;
+  padding: 1px 6px;
+  color: #e2e8f0;
+  font-size: 0.75rem;
+  border-radius: 2px;
+}
+
+.exile-base-chip i {
+  font-size: 0.72rem;
+}
+
+.exile-chip-armour i { color: #f87171; }
+.exile-chip-evasion i { color: #4ade80; }
+.exile-chip-es i { color: #60a5fa; }
+.exile-chip-ward i { color: #fbbf24; }
+.exile-chip-life i { color: #ef4444; }
+.exile-chip-dps i { color: #fb923c; }
+
+/* 3. Exile-UI Affix Row */
+.exile-affix-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.exile-mod-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #181c24;
+  border: 1px solid #2a313d;
+  height: 28px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.exile-mod-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: rgba(34, 197, 94, 0.18);
+  border-right: 2px solid rgba(34, 197, 94, 0.6);
+  pointer-events: none;
+  transition: width 0.3s ease;
+  z-index: 1;
+}
+
+.exile-mod-text {
+  position: relative;
+  z-index: 2;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  padding-left: 8px;
+  padding-right: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* Mod Variant Types */
+.exile-mod-bar.mod-implicit {
+  background: #3b1d6e !important;
+  border-color: #581c87 !important;
+}
+.exile-mod-bar.mod-implicit .exile-mod-fill {
+  background: rgba(139, 92, 246, 0.3) !important;
+  border-color: #a855f7 !important;
+}
+
+.exile-mod-bar.mod-crafted {
+  background: #0f2b46 !important;
+  border-color: #0369a1 !important;
+}
+.exile-mod-bar.mod-crafted .exile-mod-text {
+  color: #7dd3fc !important;
+}
+
+.exile-mod-bar.mod-fractured {
+  border-color: #d97706 !important;
+  box-shadow: inset 0 0 4px rgba(217, 119, 6, 0.3);
+}
+
+.exile-mod-bar.mod-unique {
+  background: #78350f !important;
+  border-color: #92400e !important;
+}
+.exile-mod-bar.mod-unique .exile-mod-fill {
+  background: rgba(245, 158, 11, 0.25) !important;
+  border-color: #f59e0b !important;
+}
+
+/* 4. Right Tier Badge */
+.exile-tier-badge {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 44px;
+  min-width: 44px;
+  height: 100%;
+  border-left: 1px solid #2a313d;
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+/* Tier Colors */
+.exile-tier-1 { background: #22c55e !important; color: #000 !important; }
+.exile-tier-2 { background: #10b981 !important; color: #000 !important; }
+.exile-tier-3 { background: #eab308 !important; color: #000 !important; }
+.exile-tier-4 { background: #f97316 !important; color: #000 !important; }
+.exile-tier-5 { background: #ef4444 !important; color: #fff !important; }
+.exile-tier-6 { background: #b91c1c !important; color: #fff !important; }
+.exile-tier-none { background: #334155 !important; color: #cbd5e1 !important; }
+.exile-tier-imp { background: #7c3aed !important; color: #fff !important; }
+.exile-tier-craft { background: #0284c7 !important; color: #fff !important; }
+
+/* Unique Percentile Badge */
+.exile-unique-badge {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  min-width: 44px;
+  height: 100%;
+  border-left: 1px solid #92400e;
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+.exile-unique-badge.pct-100 { background: #f8fafc !important; color: #b91c1c !important; }
+.exile-unique-badge.pct-high { background: #f59e0b !important; color: #000 !important; }
+.exile-unique-badge.pct-med { background: #d97706 !important; color: #000 !important; }
+.exile-unique-badge.pct-low { background: #78350f !important; color: #fff !important; }
+
+/* 5. Exile-UI Summary Footer */
+.exile-footer-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #000;
+  border: 1px solid #2d3748;
+  padding: 3px 6px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+.exile-footer-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.exile-footer-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.exile-drop-tier-pill {
+  padding: 1px 8px;
+  border-radius: 2px;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+.exile-drop-tier-pill.tier-0 { background: #ef4444; color: #fff; }
+.exile-drop-tier-pill.tier-1 { background: #16a34a; color: #fff; }
+.exile-drop-tier-pill.tier-2 { background: #eab308; color: #000; }
+.exile-drop-tier-pill.tier-3 { background: #f97316; color: #000; }
+.exile-drop-tier-pill.tier-4 { background: #ea580c; color: #fff; }
+
+.exile-market-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(245, 192, 66, 0.08);
+  border: 1px solid rgba(245, 192, 66, 0.3);
+  padding: 4px 10px;
+  border-radius: 3px;
+  font-size: 0.78rem;
+}
+
+.exile-market-val strong {
+  color: #f5c042;
+  font-size: 0.86rem;
+}
+
 

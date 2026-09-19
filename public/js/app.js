@@ -216,9 +216,30 @@ async function init() {
       await switchGame(inspectData.game);
     }
 
-    // Direct routing to Deep Item Inspector if analysis or gear model is available
-    if (inspectData.analysis || (inspectData.parsedItem && (inspectData.classification?.isGear || (inspectData.parsedItem.modifiers?.explicits && inspectData.parsedItem.modifiers.explicits.length > 0)))) {
-      Clipboard.showToast(`[Bridge] Soi đồ: ${inspectData.parsedItem?.identity?.name || 'Vật phẩm'}`, 'success');
+    const item = inspectData.parsedItem;
+    const classification = inspectData.classification || {};
+    const identity = item?.identity || {};
+    const itemClass = (identity.itemClass || '').toLowerCase();
+    const rarity = (identity.rarity || '').toLowerCase();
+
+    // Check whether the item is equipment / gear with stats
+    const isGearClass = [
+      'weapon', 'bow', 'staff', 'staves', 'wand', 'claw', 'dagger', 'axe', 'sword', 'mace', 'sceptre', 'flail', 'crossbow',
+      'armour', 'body armour', 'helmet', 'boots', 'gloves', 'shield', 'quiver', 'focus',
+      'ring', 'amulet', 'belt', 'jewel'
+    ].some(g => itemClass.includes(g));
+
+    const hasExplicitMods = item?.modifiers?.explicits && item.modifiers.explicits.length > 0;
+    const hasDefencesOrDps = item?.properties && (
+      item.properties.armour || item.properties.evasion || item.properties.energyShield || 
+      item.properties.ward || item.properties.physicalDamage || item.properties.elementalDamage
+    );
+
+    const isGear = classification.isGear || isGearClass || hasExplicitMods || (hasDefencesOrDps && rarity !== 'currency');
+
+    // 1. If it's gear: Open the Exile-UI style Stat Inspector
+    if (isGear && (inspectData.analysis || item)) {
+      Clipboard.showToast(`[Bridge] Soi đồ: ${identity.name || identity.baseType || 'Vật phẩm'}`, 'success');
       itemInspector.open({
         item: inspectData.parsedItem,
         classification: inspectData.classification,
@@ -229,20 +250,60 @@ async function init() {
       return;
     }
 
-    const parsed = Clipboard.parseItemText(inspectData.rawText);
-    if (parsed && parsed.searchQuery) {
-      dom.searchInput.value = parsed.searchQuery;
+    // 2. If it's Currency / Stackable / Card / Fragment / Map: Open the Price & Calculator directly
+    const itemName = identity.name || identity.baseType || '';
+    const cleanSearchQuery = itemName.replace(/^(\d+x\s+)/i, '').trim();
+
+    // Try finding in current league cached items
+    const lowerQuery = cleanSearchQuery.toLowerCase();
+    let match = state.items.find(i => i.name && i.name.toLowerCase() === lowerQuery);
+
+    if (!match && cleanSearchQuery) {
+      match = state.items.find(i => i.name && i.name.toLowerCase().includes(lowerQuery));
+    }
+
+    if (match) {
+      const isPoe2 = state.currentGame === 'poe2';
+      const priceText = isPoe2
+        ? (match.divineValue >= 1 ? `${match.divineValue} Div` : `${match.exaltedValue || 0} Ex`)
+        : (match.divineValue >= 1 ? `${match.divineValue} Div` : `${match.chaosValue || 0} C`);
+
+      Clipboard.showToast(`[Bridge] ${match.name}: ${priceText}`, 'success');
+
+      dom.searchInput.value = match.name;
       dom.clearSearchBtn?.classList.remove('hidden');
-      state.searchQuery = parsed.searchQuery;
+      state.searchQuery = match.name;
       filterAndRender();
 
-      const match = state.filteredItems[0];
-      if (match) {
-        Clipboard.showToast(`[Bridge] ${match.name}`, 'success');
-        Modals.openCalculator(match, state, dom);
-      } else {
-        Clipboard.showToast(`[Bridge] Đã nhận: "${parsed.searchQuery}"`, 'info');
-      }
+      Modals.openCalculator(match, state, dom);
+      return;
+    }
+
+    // If not in current category list, but market valuation was resolved
+    if (inspectData.market && (inspectData.market.chaosValue > 0 || inspectData.market.divineValue > 0)) {
+      const m = inspectData.market;
+      const synthItem = {
+        id: `bridge_${Date.now()}`,
+        name: m.name || cleanSearchQuery,
+        chaosValue: m.chaosValue || 0,
+        divineValue: m.divineValue || 0,
+        sparkline: m.sparkline || null,
+        icon: m.icon || null,
+        category: classification.displayLabel || 'Currency',
+        count: m.count || 0
+      };
+      Clipboard.showToast(`[Bridge] ${synthItem.name}: ${synthItem.divineValue >= 1 ? `${synthItem.divineValue} Div` : `${synthItem.chaosValue} C`}`, 'success');
+      Modals.openCalculator(synthItem, state, dom);
+      return;
+    }
+
+    // Fallback search
+    if (cleanSearchQuery) {
+      dom.searchInput.value = cleanSearchQuery;
+      dom.clearSearchBtn?.classList.remove('hidden');
+      state.searchQuery = cleanSearchQuery;
+      filterAndRender();
+      Clipboard.showToast(`[Bridge] Đã nhận: "${cleanSearchQuery}"`, 'info');
     }
   });
 

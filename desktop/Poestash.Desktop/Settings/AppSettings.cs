@@ -17,7 +17,10 @@ public class AppSettings
     public bool AutoOpenBrowserOnLaunch { get; set; } = true;
 
     [JsonPropertyName("quickInspectHotkey")]
-    public string QuickInspectHotkey { get; set; } = "Ctrl+Shift+A";
+    public string QuickInspectHotkey { get; set; } = "Ctrl+D";
+
+    [JsonPropertyName("autoClipboardMonitoring")]
+    public bool AutoClipboardMonitoring { get; set; } = true;
 
     [JsonPropertyName("startWithWindows")]
     public bool StartWithWindows { get; set; } = false;

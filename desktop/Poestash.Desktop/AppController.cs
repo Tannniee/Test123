@@ -22,6 +22,7 @@ public class AppController : IDisposable
     private readonly PoeDetector _poeDetector;
     private readonly ClipboardService _clipboardService;
     private readonly HotkeyManager _hotkeyManager;
+    private readonly ClipboardMonitor _clipboardMonitor;
 
     private AppSettings? _settings;
     private TrayManager? _trayManager;
@@ -40,6 +41,8 @@ public class AppController : IDisposable
         _poeDetector = new PoeDetector();
         _clipboardService = new ClipboardService();
         _hotkeyManager = new HotkeyManager();
+        _clipboardMonitor = new ClipboardMonitor(_poeDetector);
+        _clipboardMonitor.PoeItemDetected += OnPassivePoeItemDetected;
     }
 
     public async Task<bool> InitializeAsync()
@@ -191,6 +194,33 @@ public class AppController : IDisposable
     }
 
     /// <summary>
+    /// Handles passive clipboard detection when Path of Exile copies an item (e.g. via native Ctrl+Alt+C or Ctrl+C).
+    /// </summary>
+    private async void OnPassivePoeItemDetected(string rawText)
+    {
+        if (_settings?.AutoClipboardMonitoring == false)
+        {
+            return;
+        }
+
+        try
+        {
+            var poeInfo = _poeDetector.GetForegroundPoeWindow();
+            var gameVersion = poeInfo.GameVersion;
+
+            var response = await SendInspectAsync(rawText, gameVersion).ConfigureAwait(false);
+            if (response.Success)
+            {
+                Debug.WriteLine($"[AppController] In-game clipboard item broadcasted to Web UI ({gameVersion})");
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[AppController] Error during passive clipboard inspect: {ex.Message}");
+        }
+    }
+
+    /// <summary>
     /// Sends an item payload to the local Node.js bridge server to broadcast via SSE to connected web companions.
     /// </summary>
     public async Task<BridgeInspectResponse> SendInspectAsync(
@@ -219,6 +249,7 @@ public class AppController : IDisposable
     {
         if (!_isDisposed)
         {
+            _clipboardMonitor.Dispose();
             _hotkeyManager.Dispose();
             _trayManager?.Dispose();
             _trayManager = null;

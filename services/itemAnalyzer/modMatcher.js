@@ -6,12 +6,27 @@ class ModMatcher {
       return { template: '', values: [] };
     }
 
-    const trimmed = modText.trim();
+    let trimmed = modText.trim();
     const values = [];
     
-    // Extract numbers while preserving surrounding text structure
+    // 1. First, check for explicit roll ranges in parentheses: value(min-max) or value(min to max)
+    // e.g. "+38(21-42) to Evasion Rating" -> "+# to Evasion Rating"
+    trimmed = trimmed.replace(/\b(\d+(?:\.\d+)?)\s*\(\s*([+-]?\d+(?:\.\d+)?)\s*(?:-|to)\s*([+-]?\d+(?:\.\d+)?)\s*\)/g, (match, v, min, max) => {
+      values.push({
+        value: parseFloat(v),
+        min: parseFloat(min),
+        max: parseFloat(max)
+      });
+      return '#';
+    });
+
+    // 2. Extract remaining bare numbers while preserving surrounding text structure
     const template = trimmed.replace(/\b\d+(\.\d+)?\b/g, (match) => {
-      values.push(parseFloat(match));
+      values.push({
+        value: parseFloat(match),
+        min: null,
+        max: null
+      });
       return '#';
     });
 
@@ -24,6 +39,7 @@ class ModMatcher {
   matchMod(modText, options = {}) {
     const { itemLevel = 100, itemClass = null, game = 'poe1' } = options;
     const { template, values } = this.normalizeText(modText);
+    const rawNumericValues = values.map(v => (typeof v === 'object' && v !== null ? v.value : v));
 
     if (!template) {
       return {
@@ -41,13 +57,20 @@ class ModMatcher {
     const candidates = exileUiDataService.getModCandidates(template, game);
 
     if (candidates.length === 0) {
+      const valueRanges = values.map(v => {
+        const rawVal = typeof v === 'object' && v !== null ? v.value : v;
+        const explicitMin = typeof v === 'object' && v !== null ? v.min : rawVal;
+        const explicitMax = typeof v === 'object' && v !== null ? v.max : rawVal;
+        return { value: rawVal, min: explicitMin, max: explicitMax };
+      });
+
       return {
         text: modText,
         normalizedTemplate: template,
         family: null,
         type: 'unknown',
         tier: null,
-        values: values.map(v => ({ value: v, min: v, max: v })),
+        values: valueRanges,
         confidence: 0,
         status: 'unrecognized'
       };
@@ -62,8 +85,8 @@ class ModMatcher {
       if (Array.isArray(cand.tiers)) {
         for (const tierObj of cand.tiers) {
           const ranges = tierObj.ranges || [];
-          if (ranges.length === values.length) {
-            const allInRange = values.every((v, idx) => {
+          if (ranges.length === rawNumericValues.length) {
+            const allInRange = rawNumericValues.every((v, idx) => {
               const r = ranges[idx];
               return v >= r.min && v <= r.max;
             });
@@ -89,11 +112,14 @@ class ModMatcher {
       const match = resolvedMatches[0];
       const tierObj = match.tierObj;
       const valueRanges = values.map((val, idx) => {
-        const r = tierObj.ranges[idx] || { min: val, max: val };
+        const rawVal = typeof val === 'object' && val !== null ? val.value : val;
+        const explicitMin = typeof val === 'object' && val !== null ? val.min : null;
+        const explicitMax = typeof val === 'object' && val !== null ? val.max : null;
+        const r = tierObj.ranges[idx] || { min: rawVal, max: rawVal };
         return {
-          value: val,
-          min: r.min,
-          max: r.max
+          value: rawVal,
+          min: explicitMin !== null ? explicitMin : r.min,
+          max: explicitMax !== null ? explicitMax : r.max
         };
       });
 
@@ -113,13 +139,20 @@ class ModMatcher {
 
     if (resolvedMatches.length > 1) {
       // Ambiguous case: multiple candidates match the values
+      const valueRanges = values.map(v => {
+        const rawVal = typeof v === 'object' && v !== null ? v.value : v;
+        const explicitMin = typeof v === 'object' && v !== null ? v.min : null;
+        const explicitMax = typeof v === 'object' && v !== null ? v.max : null;
+        return { value: rawVal, min: explicitMin, max: explicitMax };
+      });
+
       return {
         text: modText,
         normalizedTemplate: template,
         family: null,
         type: 'ambiguous',
         tier: null,
-        values: values.map(v => ({ value: v, min: null, max: null })),
+        values: valueRanges,
         confidence: parseFloat((1 / resolvedMatches.length).toFixed(2)),
         status: 'ambiguous',
         candidates: resolvedMatches.map(c => ({

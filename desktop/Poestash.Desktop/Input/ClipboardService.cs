@@ -12,24 +12,46 @@ public class ClipboardService
     }
 
     /// <summary>
-    /// Captures the hovered item from the active PoE window by sending Ctrl+C and reading the clipboard.
+    /// Checks if the clipboard currently contains a valid Path of Exile item.
+    /// </summary>
+    public static async Task<string?> GetExistingPoeItemFromClipboardAsync()
+    {
+        var existing = await GetClipboardTextSafeAsync().ConfigureAwait(false);
+        if (!string.IsNullOrWhiteSpace(existing) && IsPoeItemText(existing))
+        {
+            return existing.Trim();
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// Captures the hovered item from the active PoE window.
+    /// If the clipboard already contains a valid PoE item (e.g. from Ctrl+Alt+C), uses it directly.
+    /// Otherwise sends Ctrl+C and reads the clipboard.
     /// </summary>
     public async Task<string?> CaptureItemFromPoeAsync(CancellationToken ct = default)
     {
-        // 1. Clear clipboard before sending copy
+        // 1. Fast path: If the user already pressed Ctrl+Alt+C in game, clipboard already has the item!
+        var existing = await GetExistingPoeItemFromClipboardAsync().ConfigureAwait(false);
+        if (!string.IsNullOrWhiteSpace(existing))
+        {
+            return existing;
+        }
+
+        // 2. Clear clipboard before sending copy
         await ClearClipboardSafeAsync().ConfigureAwait(false);
 
-        // 2. Small delay to ensure clean state before copy input
+        // 3. Small delay to ensure clean state before copy input
         await Task.Delay(20, ct).ConfigureAwait(false);
 
-        // 3. Send Ctrl+C
+        // 4. Send Ctrl+C
         var sent = InputSender.SendCtrlC();
         if (!sent)
         {
             return null;
         }
 
-        // 4. Poll for clipboard text arrival
+        // 5. Poll for clipboard text arrival
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
         while (stopwatch.Elapsed < _defaultTimeout && !ct.IsCancellationRequested)
         {

@@ -103,7 +103,7 @@ export const ItemInspectorRender = {
         <!-- 3. Tab Content Panels -->
         <div class="inspector-tab-body">
           <div class="inspector-tab-pane ${activeTab === 'affixes' ? 'active' : ''}" id="pane-affixes">
-            ${this.renderAffixesTab(analysis, identity)}
+            ${this.renderAffixesTab(analysis, identity, properties, market)}
           </div>
           <div class="inspector-tab-pane ${activeTab === 'combat' ? 'active' : ''}" id="pane-combat">
             ${this.renderCombatTab(analysis, properties, identity)}
@@ -187,121 +187,209 @@ export const ItemInspectorRender = {
   /**
    * Render Affixes & Crafting tab panel.
    */
-  renderAffixesTab(analysis = {}, identity = {}) {
+  /**
+   * Render Affixes & Crafting tab panel in Exile-UI compact bar format.
+   */
+  renderAffixesTab(analysis = {}, identity = {}, properties = {}, market = null) {
+    const isUnique = (identity.rarity || '').toLowerCase() === 'unique' || !!(analysis.unique && analysis.unique.isUnique);
     const explicits = analysis.mods || [];
     const implicits = analysis.implicits || [];
     const fractured = analysis.fractured || [];
     const crafted = analysis.crafted || [];
     const capacity = analysis.affixCapacity || null;
 
-    // Filter prefixes and suffixes
-    const prefixes = explicits.filter(m => m.type === 'prefix');
-    const suffixes = explicits.filter(m => m.type === 'suffix');
-    const unknownMods = explicits.filter(m => m.type !== 'prefix' && m.type !== 'suffix');
+    let html = '<div class="exile-affix-container">';
 
-    let html = '';
+    // 1. Exile-UI Base Defences Row
+    const hasDef = properties.armour > 0 || properties.evasion > 0 || properties.energyShield > 0 || properties.ward > 0;
+    const dps = analysis.dps;
+
+    if (hasDef || (dps && dps.isWeapon)) {
+      html += `
+        <div class="exile-base-row">
+          <span class="exile-base-label">BASE</span>
+          ${properties.armour > 0 ? `<div class="exile-base-chip exile-chip-armour"><i class="fa-solid fa-shield"></i> Armour: ${this.formatNumber(properties.armour)}</div>` : ''}
+          ${properties.evasion > 0 ? `<div class="exile-base-chip exile-chip-evasion"><i class="fa-solid fa-wind"></i> Evasion: ${this.formatNumber(properties.evasion)}</div>` : ''}
+          ${properties.energyShield > 0 ? `<div class="exile-base-chip exile-chip-es"><i class="fa-solid fa-bolt"></i> ES: ${this.formatNumber(properties.energyShield)}</div>` : ''}
+          ${properties.ward > 0 ? `<div class="exile-base-chip exile-chip-ward"><i class="fa-solid fa-sun"></i> Ward: ${this.formatNumber(properties.ward)}</div>` : ''}
+          ${dps && dps.isWeapon ? `<div class="exile-base-chip exile-chip-dps"><i class="fa-solid fa-swords"></i> ${dps.totalDps} DPS</div>` : ''}
+          ${properties.quality > 0 ? `<div class="exile-base-chip"><i class="fa-solid fa-sparkles"></i> +${properties.quality}% Q</div>` : ''}
+        </div>
+      `;
+    }
+
+    // 2. Exile-UI Mod Bars List
+    html += '<div class="exile-affix-list">';
 
     // Implicits
-    if (implicits.length > 0) {
+    for (const m of implicits) {
+      html += this.renderExileModBar(m, 'implicit', isUnique);
+    }
+
+    // Fractured
+    for (const m of fractured) {
+      html += this.renderExileModBar(m, 'fractured', isUnique);
+    }
+
+    // Explicits
+    for (const m of explicits) {
+      html += this.renderExileModBar(m, 'explicit', isUnique);
+    }
+
+    // Crafted
+    for (const m of crafted) {
+      html += this.renderExileModBar(m, 'crafted', isUnique);
+    }
+
+    html += '</div>';
+
+    // 3. Exile-UI Bottom Summary Bar
+    if (isUnique) {
+      const dropTier = analysis.unique?.tier ?? '?';
+      const overallScore = this.calculateOverallUniqueScore(analysis);
+      const tierClass = dropTier === '0' ? 'tier-0' : dropTier === '1' ? 'tier-1' : dropTier === '2' ? 'tier-2' : dropTier === '3' ? 'tier-3' : 'tier-4';
       html += `
-        <div class="affix-section implicits-section">
-          <div class="affix-section-header">
-            <span class="section-tag implicit-tag"><i class="fa-solid fa-sparkles"></i> Dòng ẩn (Implicit Mods)</span>
-            <span class="section-count">${implicits.length} dòng</span>
+        <div class="exile-footer-bar">
+          <div class="exile-footer-left">
+            <span class="exile-drop-tier-pill ${tierClass}">T${dropTier} UNIQUE</span>
           </div>
-          <div class="affix-list">
-            ${implicits.map(m => this.renderModRow(m, 'implicit')).join('')}
+          <div class="exile-footer-right">
+            <span>ROLL SCORE:</span>
+            <span class="exile-unique-badge pct-${overallScore >= 80 ? 'high' : overallScore >= 50 ? 'med' : 'low'}">${overallScore}%</span>
+          </div>
+        </div>
+      `;
+    } else if (capacity && capacity.canCraft) {
+      const { openPrefixes, openSuffixes, maxPrefixes, maxSuffixes, prefixesCount, suffixesCount } = capacity;
+      html += `
+        <div class="exile-footer-bar crafting-summary-banner">
+          <div class="exile-footer-left">
+            <span>CRAFTING:</span>
+            <span class="text-emerald font-bold">P: ${prefixesCount}/${maxPrefixes} (${openPrefixes} Trống) · S: ${suffixesCount}/${maxSuffixes} (${openSuffixes} Trống)</span>
+          </div>
+          <div class="exile-footer-right">
+            <span>${openPrefixes > 0 || openSuffixes > 0 ? 'Có thể Bench Craft' : 'Đầy slot'}</span>
           </div>
         </div>
       `;
     }
 
-    // Crafting Slot Capacity Banner
-    if (capacity && capacity.canCraft) {
-      html += this.renderCraftingCapacityBanner(capacity);
-    }
-
-    // Prefixes Section
-    const maxP = capacity ? capacity.maxPrefixes : 3;
-    const countP = prefixes.length;
-    html += `
-      <div class="affix-section prefixes-section">
-        <div class="affix-section-header">
-          <div class="affix-section-title">
-            <span class="section-tag prefix-tag">Tiền tố (Prefixes)</span>
-            <span class="affix-slot-counter ${countP >= maxP ? 'counter-full' : ''}">${countP} / ${maxP}</span>
-          </div>
-          ${capacity && capacity.openPrefixes > 0 ? `<span class="slot-badge open-badge"><i class="fa-solid fa-hammer"></i> Trống ${capacity.openPrefixes} Prefix</span>` : '<span class="slot-badge full-badge">Đầy Prefix</span>'}
-        </div>
-        <div class="affix-list">
-          ${prefixes.length > 0 ? prefixes.map(m => this.renderModRow(m, 'prefix')).join('') : '<div class="empty-mod-slot">Chưa có dòng Prefix nào</div>'}
-        </div>
-      </div>
-    `;
-
-    // Suffixes Section
-    const maxS = capacity ? capacity.maxSuffixes : 3;
-    const countS = suffixes.length;
-    html += `
-      <div class="affix-section suffixes-section">
-        <div class="affix-section-header">
-          <div class="affix-section-title">
-            <span class="section-tag suffix-tag">Hậu tố (Suffixes)</span>
-            <span class="affix-slot-counter ${countS >= maxS ? 'counter-full' : ''}">${countS} / ${maxS}</span>
-          </div>
-          ${capacity && capacity.openSuffixes > 0 ? `<span class="slot-badge open-badge"><i class="fa-solid fa-hammer"></i> Trống ${capacity.openSuffixes} Suffix</span>` : '<span class="slot-badge full-badge">Đầy Suffix</span>'}
-        </div>
-        <div class="affix-list">
-          ${suffixes.length > 0 ? suffixes.map(m => this.renderModRow(m, 'suffix')).join('') : '<div class="empty-mod-slot">Chưa có dòng Suffix nào</div>'}
-        </div>
-      </div>
-    `;
-
-    // Fractured & Crafted Sections
-    if (fractured.length > 0) {
+    // 4. Market Reference Strip
+    if (market) {
       html += `
-        <div class="affix-section fractured-section">
-          <div class="affix-section-header">
-            <span class="section-tag fractured-tag"><i class="fa-solid fa-lock"></i> Fractured Mods (Khóa cố định)</span>
-            <span class="section-count">${fractured.length} dòng</span>
+        <div class="exile-market-strip">
+          <div class="exile-market-val">
+            <span>Thị trường (${this.escapeHtml(market.league || 'Standard')}):</span>
+            <strong>${market.divineValue >= 1 ? `${market.divineValue} Divine` : `${market.chaosValue} Chaos`}</strong>
+            ${market.variant ? `<span class="text-muted">(${this.escapeHtml(market.variant)})</span>` : ''}
           </div>
-          <div class="affix-list">
-            ${fractured.map(m => this.renderModRow(m, 'fractured')).join('')}
+          <div class="exile-market-links">
+            ${market.sparkline ? `<span class="sparkline-pill">7d Trend: ${market.sparkline.totalChange || 0}%</span>` : ''}
           </div>
         </div>
       `;
     }
 
-    if (crafted.length > 0) {
-      html += `
-        <div class="affix-section crafted-section">
-          <div class="affix-section-header">
-            <span class="section-tag crafted-tag"><i class="fa-solid fa-hammer"></i> Crafted Mods (Bàn ép)</span>
-            <span class="section-count">${crafted.length} dòng</span>
-          </div>
-          <div class="affix-list">
-            ${crafted.map(m => this.renderModRow(m, 'crafted')).join('')}
-          </div>
-        </div>
-      `;
-    }
-
-    // Other/Unrecognized Mods
-    if (unknownMods.length > 0) {
-      html += `
-        <div class="affix-section unknown-section">
-          <div class="affix-section-header">
-            <span class="section-tag unknown-tag"><i class="fa-solid fa-circle-question"></i> Dòng khác / Đặc biệt</span>
-            <span class="section-count">${unknownMods.length} dòng</span>
-          </div>
-          <div class="affix-list">
-            ${unknownMods.map(m => this.renderModRow(m, 'unknown')).join('')}
-          </div>
-        </div>
-      `;
-    }
-
+    html += '</div>';
     return html;
+  },
+
+  /**
+   * Renders a single Exile-UI sleek horizontal mod bar.
+   */
+  renderExileModBar(mod, group = 'explicit', isUnique = false) {
+    const tier = mod.tier;
+    const isMatched = mod.status === 'matched';
+    const roll = (mod.rollAnalysis && mod.rollAnalysis[0]) ? mod.rollAnalysis[0] : null;
+    const pct = roll && typeof roll.percentile === 'number' ? Math.round(roll.percentile * 100) : null;
+
+    const formattedText = this.formatExileModText(mod);
+    const fillStyle = pct !== null ? `style="width: ${pct}%;"` : '';
+
+    let barClass = `exile-mod-bar roll-track mod-${group}`;
+    if (isUnique) barClass += ' mod-unique';
+
+    let badgeHtml = '';
+    if (isUnique) {
+      const scoreVal = pct !== null ? pct : (mod.values && mod.values[0] ? mod.values[0].value : '-');
+      const scoreClass = pct === 100 ? 'pct-100' : (pct >= 75 ? 'pct-high' : (pct >= 45 ? 'pct-med' : 'pct-low'));
+      badgeHtml = `<div class="exile-unique-badge tier-badge ${scoreClass}">${scoreVal}</div>`;
+    } else if (group === 'implicit') {
+      badgeHtml = `<div class="exile-tier-badge tier-badge exile-tier-imp">${tier ? `T${tier}` : 'IMP'}</div>`;
+    } else if (group === 'crafted') {
+      badgeHtml = `<div class="exile-tier-badge tier-badge exile-tier-craft">CRAFT</div>`;
+    } else if (group === 'fractured') {
+      badgeHtml = `<div class="exile-tier-badge tier-badge exile-tier-1">FRAC</div>`;
+    } else if (tier) {
+      const icon = this.getModIcon(mod.family);
+      const tierColorClass = tier === 1 ? 'exile-tier-1' : (tier === 2 ? 'exile-tier-2' : (tier === 3 ? 'exile-tier-3' : (tier === 4 ? 'exile-tier-4' : 'exile-tier-5')));
+      badgeHtml = `<div class="exile-tier-badge tier-badge ${tierColorClass}" title="${mod.tierName || `Tier ${tier}`}">T${tier} ${icon}</div>`;
+    } else {
+      badgeHtml = `<div class="exile-tier-badge tier-badge exile-tier-none">-</div>`;
+    }
+
+    return `
+      <div class="${barClass}">
+        ${pct !== null ? `<div class="exile-mod-fill roll-bar-fill" ${fillStyle}></div>` : ''}
+        <div class="exile-mod-text" title="${this.escapeHtml(mod.text)}">${this.escapeHtml(formattedText)}</div>
+        ${badgeHtml}
+      </div>
+    `;
+  },
+
+  formatExileModText(mod) {
+    let text = (mod.text || '').trim();
+    if (/\(\d+(?:\.\d+)?-\d+(?:\.\d+)?\)/.test(text)) {
+      return text.toUpperCase();
+    }
+    const rolls = mod.rollAnalysis || [];
+    if (rolls.length > 0) {
+      for (const r of rolls) {
+        if (r.value !== null && r.min !== null && r.max !== null && r.min !== r.max) {
+          const valRegex = new RegExp(`(?<![\\(\\d])\\b${r.value}\\b(?![\\)\\d])`);
+          text = text.replace(valRegex, `${r.value}(${r.min}-${r.max})`);
+        }
+      }
+    }
+    return text.toUpperCase();
+  },
+
+  getModIcon(family = '') {
+    const f = (family || '').toLowerCase();
+    if (f.includes('life')) return '<i class="fa-solid fa-heart"></i>';
+    if (f.includes('fire')) return '<i class="fa-solid fa-fire"></i>';
+    if (f.includes('cold')) return '<i class="fa-solid fa-snowflake"></i>';
+    if (f.includes('lightning')) return '<i class="fa-solid fa-bolt"></i>';
+    if (f.includes('chaos')) return '<i class="fa-solid fa-skull"></i>';
+    if (f.includes('evasion') || f.includes('armour') || f.includes('energy') || f.includes('ward') || f.includes('defence')) {
+      return '<i class="fa-solid fa-shield"></i>';
+    }
+    if (f.includes('speed') || f.includes('movement')) return '<i class="fa-solid fa-person-running"></i>';
+    if (f.includes('mana')) return '<i class="fa-solid fa-droplet"></i>';
+    if (f.includes('damage') || f.includes('physical') || f.includes('attack') || f.includes('spell')) {
+      return '<i class="fa-solid fa-crosshairs"></i>';
+    }
+    return '';
+  },
+
+  calculateOverallUniqueScore(analysis = {}) {
+    const mods = [
+      ...(analysis.implicits || []),
+      ...(analysis.mods || [])
+    ];
+    const validRolls = [];
+    for (const m of mods) {
+      if (m.rollAnalysis) {
+        for (const r of m.rollAnalysis) {
+          if (typeof r.percentile === 'number') {
+            validRolls.push(r.percentile);
+          }
+        }
+      }
+    }
+    if (validRolls.length === 0) return 50;
+    const avg = validRolls.reduce((a, b) => a + b, 0) / validRolls.length;
+    return Math.round(avg * 100);
   },
 
   /**

@@ -111,6 +111,16 @@ describe('PR 8 Suite: Exile-UI Datasets & Deep Item Analysis Engine (Phases 7–
       assert.equal(p2SpeedMatch.tier, 1);
     });
 
+    it('identifies explicit in-game roll ranges value(min-max) from Ctrl+Alt+C', () => {
+      const match = modMatcher.matchMod('+85(80-89) to maximum Life', { game: 'poe1' });
+      assert.equal(match.status, 'matched');
+      assert.equal(match.family, 'MaximumLife');
+      assert.equal(match.tier, 1);
+      assert.equal(match.values[0].value, 85);
+      assert.equal(match.values[0].min, 80);
+      assert.equal(match.values[0].max, 89);
+    });
+
     it('handles unrecognized mods without throwing or guessing', () => {
       const match = modMatcher.matchMod('Socketed Gems are Supported by Level 20 Faster Casting', { game: 'poe1' });
       assert.equal(match.status, 'unrecognized');

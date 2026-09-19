@@ -20,7 +20,8 @@ public class DesktopHostTests
         Assert.AreEqual("127.0.0.1", settings.Host);
         Assert.AreEqual(10, settings.PortScanRange);
         Assert.IsTrue(settings.AutoOpenBrowserOnLaunch);
-        Assert.AreEqual("Ctrl+Shift+A", settings.QuickInspectHotkey);
+        Assert.AreEqual("Ctrl+D", settings.QuickInspectHotkey);
+        Assert.IsTrue(settings.AutoClipboardMonitoring);
         Assert.IsFalse(settings.StartWithWindows);
 
         var json = JsonSerializer.Serialize(settings);
